@@ -108,12 +108,6 @@ for p in "$@"; do
   "-logs") LOGS=1 ;;
   "-r" | "-repeat") __REPEAT__=1 ;;
   "-debug") __ARG_MODE_DEBUG__=1 ;;
-  "-dry")
-    func_nothing() {
-      :
-    }
-    ENGINE_DOCKER=func_nothing
-    ;;
   "-h" | "-help") ARG_HELP=1 ;;
   *)
     ERR=1
@@ -176,48 +170,22 @@ fi
 
 case "$OPER" in
 "api-portal")
-  CMD="dlv debug /debugging/cmd/api_clients/main.go --headless --listen=:40000 --api-version=2 --accept-multiclient --output /tmp/__debug_bin"
-  [ -z "$__ARG_MODE_DEBUG__" ] && CMD="$(func_run_cmd "go run /debugging/cmd/api_clients/main.go")"
+  CMD="dlv debug /debugging/cmd/api/main.go --headless --listen=:40000 --api-version=2 --accept-multiclient --output /tmp/__debug_bin"
+  [ -z "$__ARG_MODE_DEBUG__" ] && CMD="$(func_run_cmd "go run /debugging/cmd/api/main.go")"
 
-  $ENGINE_DOCKER run -it --rm \
-    --name "capi" \
-    --hostname "api-clients" \
+  docker run -it --rm \
+    --name "api-portal" \
+    --hostname "api-portal" \
     --network "$__NET__" \
-    -p "${__API_CLIENTS_REST_PORT_EXPOSE__}:${__API_CLIENTS_REST_PORT_EXPOSE__}" \
-    -p "${__API_CLIENTS_GRPC_PORT_EXPOSE__}:${__API_CLIENTS_GRPC_PORT_EXPOSE__}" \
-    -p "${__API_CLIENTS_DEBUGGING_PORT_EXPOSE__}:40000" \
+    -p "${__API_PORTAL_REST_PORT_EXPOSE__}:8080" \
+    -p "${__API_PORTAL_GRPC_PORT_EXPOSE__}:9090" \
+    -p "${__API_PORTAL_DEBUGGING_PORT_EXPOSE__}:40000" \
     -w "/debugging" \
-    -v "${REPO_DIR}:/debugging:ro" \
-    --env-file "${REPO_DIR}/deployments/envs/dev01.env" \
-    -e "CENSOR_GRPC_HOST=censor:9090" \
-    -e "__CLI_MODE__=1" \
-    \
-    -e "HTTP_PATH=http://localhost:${__API_CLIENTS_REST_PORT_EXPOSE__}" \
-    -e "HTTP_PORT=${__API_CLIENTS_REST_PORT_EXPOSE__}" \
-    -e "GRPC_PORT=${__API_CLIENTS_GRPC_PORT_EXPOSE__}" \
-    -e "CONSUL_ENABLED=false" \
-    -e "DB_MIGRATIONS_DIR=./migrations" \
-    -e "JWT_ACCESS_SECRET=${__OVERRIDE_JWT_ACCESS_SECRET__}" \
-    -e "JWT_REFRESH_SECRET=${__OVERRIDE_JWT_REFRESH_SECRET__}" \
-    \
-    -e "S3_API_URL=${__DB_S3_API_URL__}" \
-    -e "S3_ACCESS_KEY=${__DB_S3_ACCESS_KEY__}" \
-    -e "S3_SECRET_KEY=${__DB_S3_SECRET_KEY__}" \
-    -e "S3_BUCKET_NAME=${__DB_S3_BUCKET_NAME__}" \
-    \
-    -e "DB_HOST=${__DB_CORE_HOST__}" \
-    -e "DB_PORT=${__DB_CORE_PORT__}" \
-    -e "DB_NAME=${__DB_CORE_NAME__}" \
-    -e "DB_USER=${__DB_CORE_USER__}" \
-    -e "DB_PASSWORD=${__DB_CORE_PASSWORD__}" \
-    -e "REDIS_SERVERS=${__OVERRIDE_REDIS_SERVERS__}" \
-    -e "REDIS_HOST=${__DB_RAM_HOST__}" \
-    -e "REDIS_PASSWORD=${__DB_RAM_PASSWORD__}" \
-    -e "REDIS_DB=${__DB_RAM_NAME__}" \
+    -v "${ROOT}/../../:/debugging:ro" \
+    --env-file "${ROOT}/../../deployments/local.env" \
     "$(func_get_work_image)" bash -c "$CMD"
   ;;
 
-\
   "curl")
   HAS=$(docker images --filter=reference="$__DOCKER_CURL_IMAGE__" -q) || exit 1
   if [ -z "$HAS" ]; then
