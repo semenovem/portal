@@ -1,0 +1,12 @@
+{
+  "connections": [
+    {
+      "label": "local",
+      "dbIndex": 0,
+      "password": "",
+      "optional": true,
+      "host": "db-ram",
+      "port": 6379
+    }
+  ]
+}

@@ -1,0 +1,123 @@
+version: '3'
+
+networks:
+  dev-net-portal:
+    external: true
+
+x-service: &net
+  networks:
+    - dev-net-portal
+  restart: on-failure
+
+volumes:
+  postgres:
+  redis:
+  s3cloud:
+
+
+services:
+  postgres:
+    <<: *net
+    image: postgres:14.6-alpine
+    #    image: postgres:15.3
+    hostname: db-core
+    volumes:
+      - postgres:/var/lib/postgresql/data:rw
+      - ./cfg/pg-initdb:/docker-entrypoint-initdb.d:ro
+    environment:
+      POSTGRES_DB: ${__DB_CORE_NAME__}
+      POSTGRES_USER: ${__DB_CORE_USER__}
+      POSTGRES_PASSWORD: ${__DB_CORE_PASSWORD__}
+      POSTGRES_INITDB_ARGS: '--encoding=UTF8 --locale=ru_RU.UTF-8'
+      POSTGRES_HOST_AUTH_METHOD: trust
+      # TODO явно установить порт БД
+      TZ: UTC
+    ports:
+      - ${__DB_CORE_PORT_EXPOSE__}:5432
+
+
+  redis:
+    <<: *net
+    #     docker pull redis:7.0.12
+    image: redis:6.2-alpine
+    hostname: db-ram
+    ports:
+      - ${__DB_RAM_PORT_EXPOSE__}:6379
+    volumes:
+      - redis:/data:rw
+    environment:
+      TZ: UTC
+    entrypoint: redis-server --appendonly yes
+
+
+  redis-commander:
+    <<: *net
+    container_name: redis-commander
+    hostname: redis-commander
+    command: /usr/bin/dumb-init -- /redis-commander/docker/entrypoint.sh -p ${__DB_RAM_GUI_PORT_EXPOSE__}
+    image: rediscommander/redis-commander:latest
+    restart: always
+    environment:
+      - NO_SAVE=true
+      - NO_LOG_DATA=true
+    ports:
+      - "${__DB_RAM_GUI_PORT_EXPOSE__}:${__DB_RAM_GUI_PORT_EXPOSE__}"
+    volumes:
+      - ./cfg/redis-config.json:/redis-commander/config/local.json:ro
+    deploy:
+      replicas: 1
+
+
+#  s3cloud:
+#    <<: *net
+#    image: quay.io/minio/minio:latest
+#    hostname: s3cloud
+#    command: server /data --console-address :9001 --certs-dir /certs
+#    ports:
+#      - ${__DB_S3_GUI_PORT_EXPOSE__}:9001
+#    environment:
+#      MINIO_ROOT_USER: ${__DB_S3_ACCESS_KEY__}
+#      MINIO_ROOT_PASSWORD: ${__DB_S3_SECRET_KEY__}
+#      MINIO_VOLUMES: /data
+#    volumes:
+#      - s3cloud:/data
+#      - ./cfg/s3cloud/private.key:/certs/private.key:ro
+#      - ./cfg/s3cloud/public.crt:/certs/public.crt:ro
+#    deploy:
+#      replicas: 0
+#
+#
+#  s3-mc:
+#    <<: *net
+#    image: ${__DOCKER_S3_MC_IMAGE__}
+#    command: /bin/sh /home/minio/create-bucket.sh
+#    environment:
+#      S3_API_URL: ${__DB_S3_API_URL__}
+#      S3_ACCESS_KEY: ${__DB_S3_ACCESS_KEY__}
+#      S3_SECRET_KEY: ${__DB_S3_SECRET_KEY__}
+#      S3_BUCKET_NAME: ${__DB_S3_BUCKET_NAME__}
+#    volumes:
+#      - ./cfg/s3cloud/create-bucket.sh:/home/minio/create-bucket.sh:ro
+#    depends_on:
+#      - s3cloud
+#    deploy:
+#      replicas: 0
+
+
+
+  swagger:
+    <<: *net
+    #    docker pull swaggerapi/swagger-ui:v5.3.1
+    image: swaggerapi/swagger-ui:v4.12.0
+    ports:
+      - ${__SWAGGER_PORT_EXPOSE__}:8080
+    environment:
+      URLS: '[{url: "/api-portal.yaml", name: "api-portal"}]'
+      DOC_EXPANSION: none
+    volumes:
+      - ../../docs/swagger.yaml:/usr/share/nginx/html/api-portal.yaml:ro
+    logging:
+      driver: none
+    deploy:
+      replicas: 1
+
