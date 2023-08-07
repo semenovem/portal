@@ -1,4 +1,49 @@
 basePath: /[v1]/
+definitions:
+  failing.Response:
+    properties:
+      additional_fields:
+        additionalProperties: true
+        type: object
+      code:
+        type: integer
+      message:
+        type: string
+      validation_errors:
+        items:
+          $ref: '#/definitions/failing.ValidationError'
+        type: array
+    type: object
+  failing.ValidationError:
+    properties:
+      message:
+        type: string
+      path:
+        type: string
+    type: object
+  vehiclecontroller.ListResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/view.VehicleShort'
+        type: array
+      total:
+        type: integer
+    type: object
+  view.Vehicle:
+    properties:
+      id:
+        type: integer
+      name:
+        type: integer
+    type: object
+  view.VehicleShort:
+    properties:
+      id:
+        type: integer
+      name:
+        type: integer
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -11,7 +56,75 @@ info:
   termsOfService: http://swagger.io/terms/
   title: portal API
   version: "1.0"
-paths: {}
+paths:
+  /vehicles:
+    get:
+      parameters:
+      - in: query
+        name: end_time
+        type: string
+      - in: query
+        maximum: 100
+        name: limit
+        type: integer
+      - in: query
+        name: offset
+        type: integer
+      - collectionFormat: csv
+        in: query
+        items:
+          type: string
+        name: slug[]
+        type: array
+      - in: query
+        name: start_time
+        type: string
+      - collectionFormat: csv
+        in: query
+        items:
+          type: string
+        name: user_id[]
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/vehiclecontroller.ListResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/failing.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Поиск автомобилей
+      tags:
+      - vehicles
+  /vehicles/:vehicle_id:
+    get:
+      parameters:
+      - description: ID автомобиля
+        in: path
+        name: vehicle_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/view.Vehicle'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/failing.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Данные автомобиля по ID
+      tags:
+      - vehicles
 securityDefinitions:
   ApiKeyAuth:
     description: Description for what is this security definition being used
