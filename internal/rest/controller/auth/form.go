@@ -7,8 +7,10 @@ import (
 )
 
 type LoginForm struct {
-	Login    string `query:"start_time" binding:"datetime=2006-01-02T15:04:05Z07:00" validate:"omitempty"`
-	Password string
+	Login          string `validate:"required"`
+	Password       string `validate:"required"`
+	RememberDevice bool   `validate:"omitempty"`
+	DeviceID       bool   `validate:"omitempty"`
 }
 
 type SearchForm struct {

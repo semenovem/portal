@@ -25,6 +25,47 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/auth/login": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Авторизация пользователя",
+                "parameters": [
+                    {
+                        "description": "Логин/пароль",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.LoginForm"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/auth.LoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/vehicles": {
             "get": {
                 "security": [
@@ -38,7 +79,7 @@ const docTemplate = `{
                 "tags": [
                     "vehicles"
                 ],
-                "summary": "Поиск автомобилей",
+                "summary": "Ищет автомобили по фильтру",
                 "parameters": [
                     {
                         "type": "string",
@@ -84,13 +125,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/vehiclecontroller.ListResponse"
+                            "$ref": "#/definitions/internal_rest_controller_vehicle.ListResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/failing.Response"
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
                         }
                     }
                 }
@@ -109,7 +150,7 @@ const docTemplate = `{
                 "tags": [
                     "vehicles"
                 ],
-                "summary": "Данные автомобиля по ID",
+                "summary": "Получает данные автомобиля по ID",
                 "parameters": [
                     {
                         "type": "integer",
@@ -123,13 +164,84 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/view.Vehicle"
+                            "$ref": "#/definitions/github_com_semenovem_portal_internal_view.Vehicle"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/failing.Response"
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "vehicles"
+                ],
+                "summary": "Обновляет данные автомобиля",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID автомобиля",
+                        "name": "vehicle_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_semenovem_portal_internal_view.Vehicle"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "vehicles"
+                ],
+                "summary": "Удаляет автомобиля",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID автомобиля",
+                        "name": "vehicle_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "no content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
                         }
                     }
                 }
@@ -137,7 +249,64 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "failing.Response": {
+        "auth.LoginForm": {
+            "type": "object",
+            "required": [
+                "login",
+                "password"
+            ],
+            "properties": {
+                "deviceID": {
+                    "type": "boolean"
+                },
+                "login": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "rememberDevice": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "auth.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_semenovem_portal_internal_view.VehicleShort"
+                    }
+                }
+            }
+        },
+        "github_com_semenovem_portal_internal_view.Vehicle": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_semenovem_portal_internal_view.VehicleShort": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_semenovem_portal_pkg_failing.Response": {
             "type": "object",
             "properties": {
                 "additional_fields": {
@@ -153,12 +322,12 @@ const docTemplate = `{
                 "validation_errors": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/failing.ValidationError"
+                        "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.ValidationError"
                     }
                 }
             }
         },
-        "failing.ValidationError": {
+        "github_com_semenovem_portal_pkg_failing.ValidationError": {
             "type": "object",
             "properties": {
                 "message": {
@@ -169,38 +338,16 @@ const docTemplate = `{
                 }
             }
         },
-        "vehiclecontroller.ListResponse": {
+        "internal_rest_controller_vehicle.ListResponse": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/view.VehicleShort"
+                        "$ref": "#/definitions/github_com_semenovem_portal_internal_view.VehicleShort"
                     }
                 },
                 "total": {
-                    "type": "integer"
-                }
-            }
-        },
-        "view.Vehicle": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "integer"
-                }
-            }
-        },
-        "view.VehicleShort": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
                     "type": "integer"
                 }
             }

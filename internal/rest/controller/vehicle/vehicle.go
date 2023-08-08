@@ -2,6 +2,9 @@ package vehicle
 
 import (
 	"github.com/labstack/echo/v4"
+
+	_ "github.com/semenovem/portal/internal/view"
+	_ "github.com/semenovem/portal/pkg/failing"
 )
 
 // Search docs
@@ -66,10 +69,10 @@ func (ct *Controller) Create(c echo.Context) error {
 
 // Del   docs
 //
-//	@Summary	Удаляет автомобиля
+//	@Summary	Удаляет автомобиль
 //	@Description
 //	@Produce	json
-//	@Param		vehicle_id	path		uint32	true	"ID автомобиля"
+//	@Param		vehicle_id	path	uint32	true	"ID автомобиля"
 //	@Success	204			"no content"
 //	@Failure	400			{object}	failing.Response
 //	@Router		/vehicles/:vehicle_id [POST]

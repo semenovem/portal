@@ -1,6 +1,43 @@
 basePath: /[v1]/
 definitions:
-  failing.Response:
+  auth.LoginForm:
+    properties:
+      deviceID:
+        type: boolean
+      login:
+        type: string
+      password:
+        type: string
+      rememberDevice:
+        type: boolean
+    required:
+    - login
+    - password
+    type: object
+  auth.LoginResponse:
+    properties:
+      access_token:
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/github_com_semenovem_portal_internal_view.VehicleShort'
+        type: array
+    type: object
+  github_com_semenovem_portal_internal_view.Vehicle:
+    properties:
+      id:
+        type: integer
+      name:
+        type: integer
+    type: object
+  github_com_semenovem_portal_internal_view.VehicleShort:
+    properties:
+      id:
+        type: integer
+      name:
+        type: integer
+    type: object
+  github_com_semenovem_portal_pkg_failing.Response:
     properties:
       additional_fields:
         additionalProperties: true
@@ -11,37 +48,23 @@ definitions:
         type: string
       validation_errors:
         items:
-          $ref: '#/definitions/failing.ValidationError'
+          $ref: '#/definitions/github_com_semenovem_portal_pkg_failing.ValidationError'
         type: array
     type: object
-  failing.ValidationError:
+  github_com_semenovem_portal_pkg_failing.ValidationError:
     properties:
       message:
         type: string
       path:
         type: string
     type: object
-  vehiclecontroller.ListResponse:
+  internal_rest_controller_vehicle.ListResponse:
     properties:
       items:
         items:
-          $ref: '#/definitions/view.VehicleShort'
+          $ref: '#/definitions/github_com_semenovem_portal_internal_view.VehicleShort'
         type: array
       total:
-        type: integer
-    type: object
-  view.Vehicle:
-    properties:
-      id:
-        type: integer
-      name:
-        type: integer
-    type: object
-  view.VehicleShort:
-    properties:
-      id:
-        type: integer
-      name:
         type: integer
     type: object
 host: localhost:8080
@@ -57,6 +80,31 @@ info:
   title: portal API
   version: "1.0"
 paths:
+  /auth/login:
+    post:
+      parameters:
+      - description: Логин/пароль
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/auth.LoginForm'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_semenovem_portal_pkg_failing.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Авторизация пользователя
+      tags:
+      - auth
   /vehicles:
     get:
       parameters:
@@ -91,14 +139,14 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/vehiclecontroller.ListResponse'
+            $ref: '#/definitions/internal_rest_controller_vehicle.ListResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/failing.Response'
+            $ref: '#/definitions/github_com_semenovem_portal_pkg_failing.Response'
       security:
       - ApiKeyAuth: []
-      summary: Поиск автомобилей
+      summary: Ищет автомобили по фильтру
       tags:
       - vehicles
   /vehicles/:vehicle_id:
@@ -115,14 +163,58 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/view.Vehicle'
+            $ref: '#/definitions/github_com_semenovem_portal_internal_view.Vehicle'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/failing.Response'
+            $ref: '#/definitions/github_com_semenovem_portal_pkg_failing.Response'
       security:
       - ApiKeyAuth: []
-      summary: Данные автомобиля по ID
+      summary: Получает данные автомобиля по ID
+      tags:
+      - vehicles
+    post:
+      parameters:
+      - description: ID автомобиля
+        in: path
+        name: vehicle_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: no content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_semenovem_portal_pkg_failing.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Удаляет автомобиля
+      tags:
+      - vehicles
+    put:
+      parameters:
+      - description: ID автомобиля
+        in: path
+        name: vehicle_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_semenovem_portal_internal_view.Vehicle'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_semenovem_portal_pkg_failing.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Обновляет данные автомобиля
       tags:
       - vehicles
 securityDefinitions:
