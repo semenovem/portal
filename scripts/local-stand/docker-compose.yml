@@ -18,9 +18,10 @@ volumes:
 services:
   postgres:
     <<: *net
-    image: postgres:14.6-alpine
-    #    image: postgres:15.3
+    # собрать в dockers
+    image: postgres:15.3.ru
     hostname: db-core
+    command: -p 5432
     volumes:
       - postgres:/var/lib/postgresql/data:rw
       - ./cfg/pg-initdb:/docker-entrypoint-initdb.d:ro
@@ -28,7 +29,7 @@ services:
       POSTGRES_DB: ${__DB_CORE_NAME__}
       POSTGRES_USER: ${__DB_CORE_USER__}
       POSTGRES_PASSWORD: ${__DB_CORE_PASSWORD__}
-      POSTGRES_INITDB_ARGS: '--encoding=UTF8 --locale=ru_RU.UTF-8'
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums --locale=ru_RU.UTF-8"
       POSTGRES_HOST_AUTH_METHOD: trust
       # TODO явно установить порт БД
       TZ: UTC
@@ -38,9 +39,9 @@ services:
 
   redis:
     <<: *net
-    #     docker pull redis:7.0.12
-    image: redis:6.2-alpine
+    image: redis:7.0.12
     hostname: db-ram
+    command: --port 6379
     ports:
       - ${__DB_RAM_PORT_EXPOSE__}:6379
     volumes:
@@ -107,8 +108,7 @@ services:
 
   swagger:
     <<: *net
-    #    docker pull swaggerapi/swagger-ui:v5.3.1
-    image: swaggerapi/swagger-ui:v4.12.0
+    image: swaggerapi/swagger-ui:v5.3.1
     ports:
       - ${__SWAGGER_PORT_EXPOSE__}:8080
     environment:
