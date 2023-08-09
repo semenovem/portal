@@ -3,7 +3,7 @@ package vehicle
 import (
 	"github.com/labstack/echo/v4"
 
-	_ "github.com/semenovem/portal/internal/view"
+	_ "github.com/semenovem/portal/internal/rest/view"
 	_ "github.com/semenovem/portal/pkg/failing"
 )
 

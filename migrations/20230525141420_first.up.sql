@@ -35,18 +35,19 @@ CREATE TABLE IF NOT EXISTS core.vehicle_images
 
 -- ------------------------------------------------------------------------
 -- Сотрудники
-CREATE TABLE IF NOT EXISTS core.employees
+CREATE TABLE IF NOT EXISTS core.users
 (
   id              serial PRIMARY KEY   NOT NULL,
-  firstname       varchar              NOT NULL,         -- Имя
-  surname         varchar              NOT NULL,         -- Фамилия
-  email           varchar              NOT NULL,
-  passwd_hash     varchar(64)          NOT NULL,         -- хэш пароля
-  created_at      timestamp default now(),               -- дата создания записи
-  updated_at      timestamp            NOT NULL,         -- обновление данных
-  deleted_at      timestamp            NULL,             -- обновление данных
-  created_user_id serial REFERENCES core.employees (id), -- кто создал запись
-  note            text      default '' NOT NULL,         -- примечание
+  firstname       varchar              NOT NULL, -- Имя
+  surname         varchar              NOT NULL, -- Фамилия
+  login           varchar UNIQUE       NOT NULL,
+  email           varchar UNIQUE       NOT NULL,
+  passwd_hash     varchar(64)          NOT NULL, -- хэш пароля
+  created_at      timestamp default now(),       -- дата создания записи
+  updated_at      timestamp            NOT NULL, -- обновление данных
+  deleted_at      timestamp            NULL,     -- обновление данных
+  created_user_id serial REFERENCES core.users,  -- кто создал запись
+  note            text      default '' NOT NULL, -- примечание
   avatar          varchar   default '' NOT NULL,
   position        varchar   default ''
 );
@@ -60,7 +61,7 @@ CREATE TABLE IF NOT EXISTS core.contractors
   created_at      timestamp default now(),       -- дата создания записи
   updated_at      timestamp            NOT NULL, -- обновление данных
   deleted_at      timestamp            NULL,     -- запись удалена
-  created_user_id serial REFERENCES core.employees (id)
+  created_user_id serial REFERENCES core.users
 );
 
 
@@ -72,34 +73,34 @@ CREATE TABLE IF NOT EXISTS core.contractors
 CREATE TABLE IF NOT EXISTS core.vehicles
 (
   id              serial PRIMARY KEY   NOT NULL,
-  brand           varchar              NOT NULL,        -- бренд
-  model           varchar              NOT NULL,        -- модель
-  date_of_issue   date                 NOT NULL,        -- дата выпуска
-  date_start_use  date                 NOT NULL,        -- дата начала эксплуатации
-  date_end_use    date                 NULL,            -- дата завершения эксплуатации
+  brand           varchar              NOT NULL, -- бренд
+  model           varchar              NOT NULL, -- модель
+  date_of_issue   date                 NOT NULL, -- дата выпуска
+  date_start_use  date                 NOT NULL, -- дата начала эксплуатации
+  date_end_use    date                 NULL,     -- дата завершения эксплуатации
 -- todo использовать enum
-  status          varchar(10)          NOT NULL,        -- статус
-  note            text      default '' NOT NULL,        -- примечание
-  number          varchar              NOT NULL,        -- гос.номер автомобиля
-  vin             varchar              NOT NULL,        -- VIN номер автомобиля
-  tonnage         smallint             NOT NULL,        -- грузоподъемность в килограммах
-  created_at      timestamp default now(),              -- дата создания записи
-  updated_at      timestamp,                            -- обновление данных
-  created_user_id serial references core.employees (id) -- кто создал запись
+  status          varchar(10)          NOT NULL, -- статус
+  note            text      default '' NOT NULL, -- примечание
+  number          varchar              NOT NULL, -- гос.номер автомобиля
+  vin             varchar              NOT NULL, -- VIN номер автомобиля
+  tonnage         smallint             NOT NULL, -- грузоподъемность в килограммах
+  created_at      timestamp default now(),       -- дата создания записи
+  updated_at      timestamp,                     -- обновление данных
+  created_user_id serial references core.users   -- кто создал запись
 );
 
 
 -- Техническое обслуживание (в сервисе или нашими силами)
 CREATE TABLE IF NOT EXISTS core.maintenances
 (
-  id                 serial PRIMARY KEY                       NOT NULL,
-  created_at         timestamp default now(),                           -- дата создания записи
-  note               text      default ''                     NOT NULL, -- примечание
-  contractor_id      integer REFERENCES core.contractors (id) NULL,
-  employee_id        integer REFERENCES core.employees (id)   NOT NULL,
-  start_date         timestamp,                                         -- дата начала работ по обслуживанию
-  end_date           timestamp,                                         -- дата завершения работ по обслуживанию
-  employee_master_id serial REFERENCES core.employees (id)              -- ответственный за обслуживание сотрудник
+  id             serial PRIMARY KEY                       NOT NULL,
+  created_at     timestamp default now(),                           -- дата создания записи
+  note           text      default ''                     NOT NULL, -- примечание
+  contractor_id  integer REFERENCES core.contractors (id) NULL,
+  user_id        integer REFERENCES core.users            NOT NULL,
+  start_date     timestamp,                                         -- дата начала работ по обслуживанию
+  end_date       timestamp,                                         -- дата завершения работ по обслуживанию
+  user_master_id serial REFERENCES core.users                       -- ответственный за обслуживание сотрудник
 );
 
 

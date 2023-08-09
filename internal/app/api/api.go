@@ -66,13 +66,18 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 	}
 
 	// Router
-	app.router = router.New(&router.Config{
+	app.router, err = router.New(&router.Config{
 		Ctx:    ctx,
 		Logger: logger,
 		DB:     app.db,
 		Redis:  app.redis,
 		Global: &cfg,
 	})
+
+	if err != nil {
+		ll.Named("router.New").Nested(err.Error())
+		return err
+	}
 
 	go app.router.Start()
 

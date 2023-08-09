@@ -117,6 +117,6 @@ func_check_and_create_override_props() {
     echo "# переменные для переопределения"
     echo ""
     grep -Eio '^([^=]+=|^\s*#+.*)' "$PROPS_FILE" |
-      grep -Ei '_REPLICAS__|_PORT_EXPOSE__|_REPO_DIR__|__OVERRIDE_|__DION_REPOSITORIES__|^\s*#+'
+      grep -Ei '_REPLICAS__|_PORT_EXPOSE__|_REPO_DIR__|__OVERRIDE_|^\s*#+'
   } >"$LOCAL_OVERRIDE_PROPS_FILE"
 }

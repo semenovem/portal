@@ -11,8 +11,6 @@ import (
 type Config struct {
 	IsDevMode             bool // Режим разработки
 	Logger                logger
-	TranslatorDefault     ut.Translator
-	Translators           map[string]ut.Translator
 	Messages              map[string]*Message
 	ValidationMessageMap  map[string]string
 	HTTPStatuses          map[int]*Message
@@ -33,7 +31,6 @@ type Service struct {
 
 func New(c *Config) *Service {
 	s := &Service{
-		translatorDefault:     c.TranslatorDefault,
 		isDev:                 c.IsDevMode,
 		messages:              c.Messages,
 		validationMessageMap:  c.ValidationMessageMap,

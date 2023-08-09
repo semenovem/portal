@@ -17,7 +17,17 @@ import (
 //	@Router		/auth/login [POST]
 //	@Tags		auth
 //	@Security	ApiKeyAuth
-func (ct *Controller) Login(c echo.Context) error {
+func (cnt *Controller) Login(c echo.Context) error {
+	var (
+		ll   = cnt.logger.Named("Login")
+		form = new(LoginForm)
+	)
+
+	if nested := cnt.act.ExtractFormFromRequest(c, form); nested != nil {
+		ll.Named("ExtractFormFromRequest").Nested(nested.Message())
+		return cnt.failing.SendNested(c, "", nested)
+	}
+
 	f := failing.Response{
 		Code:             0,
 		Message:          "",

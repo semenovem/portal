@@ -46,7 +46,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth.LoginForm"
+                            "$ref": "#/definitions/internal_rest_controller_auth.LoginForm"
                         }
                     }
                 ],
@@ -54,7 +54,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/auth.LoginResponse"
+                            "$ref": "#/definitions/internal_rest_controller_auth.LoginResponse"
                         }
                     },
                     "400": {
@@ -164,7 +164,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_semenovem_portal_internal_view.Vehicle"
+                            "$ref": "#/definitions/github_com_semenovem_portal_internal_rest_view.Vehicle"
                         }
                     },
                     "400": {
@@ -201,7 +201,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_semenovem_portal_internal_view.Vehicle"
+                            "$ref": "#/definitions/github_com_semenovem_portal_internal_rest_view.Vehicle"
                         }
                     },
                     "400": {
@@ -224,7 +224,7 @@ const docTemplate = `{
                 "tags": [
                     "vehicles"
                 ],
-                "summary": "Удаляет автомобиля",
+                "summary": "Удаляет автомобиль",
                 "parameters": [
                     {
                         "type": "integer",
@@ -249,42 +249,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "auth.LoginForm": {
-            "type": "object",
-            "required": [
-                "login",
-                "password"
-            ],
-            "properties": {
-                "deviceID": {
-                    "type": "boolean"
-                },
-                "login": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                },
-                "rememberDevice": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "auth.LoginResponse": {
-            "type": "object",
-            "properties": {
-                "access_token": {
-                    "type": "string"
-                },
-                "items": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/github_com_semenovem_portal_internal_view.VehicleShort"
-                    }
-                }
-            }
-        },
-        "github_com_semenovem_portal_internal_view.Vehicle": {
+        "github_com_semenovem_portal_internal_rest_view.Vehicle": {
             "type": "object",
             "properties": {
                 "id": {
@@ -295,7 +260,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_semenovem_portal_internal_view.VehicleShort": {
+        "github_com_semenovem_portal_internal_rest_view.VehicleShort": {
             "type": "object",
             "properties": {
                 "id": {
@@ -338,13 +303,42 @@ const docTemplate = `{
                 }
             }
         },
+        "internal_rest_controller_auth.LoginForm": {
+            "type": "object",
+            "required": [
+                "login",
+                "password"
+            ],
+            "properties": {
+                "device_id": {
+                    "type": "string"
+                },
+                "login": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_rest_controller_auth.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "internal_rest_controller_vehicle.ListResponse": {
             "type": "object",
             "properties": {
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_semenovem_portal_internal_view.VehicleShort"
+                        "$ref": "#/definitions/github_com_semenovem_portal_internal_rest_view.VehicleShort"
                     }
                 },
                 "total": {

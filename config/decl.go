@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/semenovem/portal/internal/zoo/conn"
+	"strings"
 	"time"
 )
 
@@ -9,6 +10,10 @@ type Base struct {
 	Env      string `env:"ENV,required"`
 	CliMode  bool   `env:"CLI_MODE,required"`
 	LogLevel int8   `env:"LOG_LEVEL,required"`
+}
+
+func (b *Base) IsDev() bool {
+	return strings.EqualFold(b.Env, "DEV")
 }
 
 type RedisConn struct {

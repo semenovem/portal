@@ -1,7 +1,7 @@
 package config
 
 type API struct {
-	Base Base
+	Base
 
 	RestPort string `env:"REST_PORT,required"`
 

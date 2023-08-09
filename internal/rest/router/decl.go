@@ -8,9 +8,11 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/semenovem/portal/config"
 	"github.com/semenovem/portal/internal/rest/controller"
-	"github.com/semenovem/portal/internal/rest/controller/vehicle"
+	authCnt "github.com/semenovem/portal/internal/rest/controller/auth"
+	vehicleCnt "github.com/semenovem/portal/internal/rest/controller/vehicle"
 	"github.com/semenovem/portal/pkg"
 	"github.com/semenovem/portal/pkg/failing"
+	"github.com/semenovem/portal/pkg/txt"
 	"net/http"
 )
 
@@ -23,19 +25,27 @@ type Config struct {
 }
 
 type Router struct {
-	ctx                  context.Context
-	logger               pkg.Logger
-	server               *echo.Echo
-	addr                 string
-	nonAuth, auth, admin *echo.Group
-	vehicleCnt           *vehicle.Controller
+	ctx                 context.Context
+	logger              pkg.Logger
+	server              *echo.Echo
+	addr                string
+	unauth, auth, admin *echo.Group
+	vehicleCnt          *vehicleCnt.Controller
+	authCnt             *authCnt.Controller
 }
 
-func New(cfg *Config) *Router {
+func New(cfg *Config) (*Router, error) {
 	var (
 		ll = cfg.Logger.Named("router")
 		e  = echo.New()
 	)
+
+	echo.NotFoundHandler = func(c echo.Context) error {
+		return c.JSON(http.StatusNotFound, panicMessage{
+			Code:    http.StatusNotFound,
+			Message: "method didn't exists",
+		})
+	}
 
 	corsConfig := middleware.CORSConfig{
 		Skipper:          middleware.DefaultSkipper,
@@ -68,29 +78,28 @@ func New(cfg *Config) *Router {
 		middleware.CORSWithConfig(corsConfig),
 	)
 
-	echo.NotFoundHandler = func(c echo.Context) error {
-		return c.JSON(http.StatusNotFound, panicMessage{
-			Code:    http.StatusNotFound,
-			Message: "method didn't exists",
-		})
+	var err error
+
+	if e.Validator, err = newValidation(); err != nil {
+		ll.Named("newValidation").Error(err.Error())
+		return nil, err
 	}
 
 	failure := failing.New(&failing.Config{
-		IsDevMode:             false,
-		Logger:                ll,
-		TranslatorDefault:     nil,
-		Translators:           nil,
-		Messages:              nil,
-		ValidationMessageMap:  nil,
-		HTTPStatuses:          nil,
-		UnknownMessage:        failing.Message{},
-		InvalidRequestMessage: failing.Message{},
+		IsDevMode:             cfg.Global.IsDev(),
+		Logger:                cfg.Logger,
+		Messages:              txt.GetMessages(),
+		ValidationMessageMap:  validators,
+		HTTPStatuses:          txt.GetHTTPStatuses(),
+		UnknownMessage:        unknownFailing,
+		InvalidRequestMessage: invalidFailing,
 	})
 
 	// REST контроллеры
 	arg := controller.CntArgs{
 		Logger:  cfg.Logger,
 		Failing: failure,
+		Act:     controller.NewAction(cfg.Logger, failure),
 	}
 
 	r := &Router{
@@ -98,16 +107,17 @@ func New(cfg *Config) *Router {
 		logger:     cfg.Logger.Named("router"),
 		server:     e,
 		addr:       cfg.Global.RestPort,
-		vehicleCnt: vehicle.New(&arg),
+		vehicleCnt: vehicleCnt.New(&arg),
+		authCnt:    authCnt.New(&arg),
 	}
 
 	g := e.Group("v1")
 
-	r.nonAuth = g
+	r.unauth = g
 	r.auth = g
 	r.admin = g
 
 	r.addRoutes()
 
-	return r
+	return r, nil
 }

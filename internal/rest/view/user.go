@@ -1,6 +1,6 @@
 package view
 
-type Employee struct {
+type User struct {
 	ID   uint32
 	Name string
 }

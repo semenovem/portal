@@ -1,6 +1,8 @@
 package vehicle
 
-import "github.com/semenovem/portal/internal/view"
+import (
+	"github.com/semenovem/portal/internal/rest/view"
+)
 
 type ListResponse struct {
 	Total uint32               `json:"total"`

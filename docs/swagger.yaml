@@ -1,36 +1,13 @@
 basePath: /[v1]/
 definitions:
-  auth.LoginForm:
-    properties:
-      deviceID:
-        type: boolean
-      login:
-        type: string
-      password:
-        type: string
-      rememberDevice:
-        type: boolean
-    required:
-    - login
-    - password
-    type: object
-  auth.LoginResponse:
-    properties:
-      access_token:
-        type: string
-      items:
-        items:
-          $ref: '#/definitions/github_com_semenovem_portal_internal_view.VehicleShort'
-        type: array
-    type: object
-  github_com_semenovem_portal_internal_view.Vehicle:
+  github_com_semenovem_portal_internal_rest_view.Vehicle:
     properties:
       id:
         type: integer
       name:
         type: integer
     type: object
-  github_com_semenovem_portal_internal_view.VehicleShort:
+  github_com_semenovem_portal_internal_rest_view.VehicleShort:
     properties:
       id:
         type: integer
@@ -58,11 +35,30 @@ definitions:
       path:
         type: string
     type: object
+  internal_rest_controller_auth.LoginForm:
+    properties:
+      device_id:
+        type: string
+      login:
+        type: string
+      password:
+        type: string
+    required:
+    - login
+    - password
+    type: object
+  internal_rest_controller_auth.LoginResponse:
+    properties:
+      access_token:
+        type: string
+      user_id:
+        type: integer
+    type: object
   internal_rest_controller_vehicle.ListResponse:
     properties:
       items:
         items:
-          $ref: '#/definitions/github_com_semenovem_portal_internal_view.VehicleShort'
+          $ref: '#/definitions/github_com_semenovem_portal_internal_rest_view.VehicleShort'
         type: array
       total:
         type: integer
@@ -88,14 +84,14 @@ paths:
         name: payload
         required: true
         schema:
-          $ref: '#/definitions/auth.LoginForm'
+          $ref: '#/definitions/internal_rest_controller_auth.LoginForm'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/auth.LoginResponse'
+            $ref: '#/definitions/internal_rest_controller_auth.LoginResponse'
         "400":
           description: Bad Request
           schema:
@@ -163,7 +159,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_semenovem_portal_internal_view.Vehicle'
+            $ref: '#/definitions/github_com_semenovem_portal_internal_rest_view.Vehicle'
         "400":
           description: Bad Request
           schema:
@@ -191,7 +187,7 @@ paths:
             $ref: '#/definitions/github_com_semenovem_portal_pkg_failing.Response'
       security:
       - ApiKeyAuth: []
-      summary: Удаляет автомобиля
+      summary: Удаляет автомобиль
       tags:
       - vehicles
     put:
@@ -207,7 +203,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_semenovem_portal_internal_view.Vehicle'
+            $ref: '#/definitions/github_com_semenovem_portal_internal_rest_view.Vehicle'
         "400":
           description: Bad Request
           schema:

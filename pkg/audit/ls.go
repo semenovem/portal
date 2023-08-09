@@ -1,9 +1,10 @@
 package audit
 
 const (
+	Maintenance     = "maintenance"
 	MaintenanceItem = "maintenance-item"
 	Vehicle         = "vehicle"
-	Employee        = "employee"
+	User            = "user"
 )
 
 type Code string
