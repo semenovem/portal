@@ -1,11 +1,28 @@
 package entity
 
 import (
+	"regexp"
 	"unicode"
 	"unicode/utf8"
 )
 
+var (
+	regValidateUserLogin = regexp.MustCompile(``)
+)
+
 func ValidateUserLogin(login string) error {
+	l := utf8.RuneCountInString(login)
+	if l > minUserLoginLen {
+		return ErrValidShort
+	}
+
+	if l > maxUserLoginLen {
+		return ErrValidLong
+	}
+
+	if interValidator.Var(login, "ascii") != nil {
+		return ErrValidIllegalChar
+	}
 
 	return nil
 }
@@ -52,7 +69,15 @@ func ValidateUserPassword(password string) error {
 	return nil
 }
 
-func ValidateUserEmail(login string) error {
+func ValidateUserEmail(email string) error {
+	l := utf8.RuneCountInString(email)
+	if l > maxUserEmailLen {
+		return ErrValidLong
+	}
+
+	if interValidator.Var(email, "email,ascii") != nil {
+		return ErrValidIllegalChar
+	}
 
 	return nil
 }
