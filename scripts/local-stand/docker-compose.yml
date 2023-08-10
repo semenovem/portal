@@ -24,7 +24,7 @@ services:
     command: -p 5432
     volumes:
       - postgres:/var/lib/postgresql/data:rw
-      - ./cfg/pg-initdb:/docker-entrypoint-initdb.d:ro
+      - ./configs/pg-initdb:/docker-entrypoint-initdb.d:ro
     environment:
       POSTGRES_DB: ${__DB_CORE_NAME__}
       POSTGRES_USER: ${__DB_CORE_USER__}
@@ -64,7 +64,7 @@ services:
     ports:
       - "${__DB_RAM_GUI_PORT_EXPOSE__}:${__DB_RAM_GUI_PORT_EXPOSE__}"
     volumes:
-      - ./cfg/redis-config.json:/redis-commander/config/local.json:ro
+      - ./configs/redis-config.json:/redis-commander/config/local.json:ro
     deploy:
       replicas: 1
 
@@ -82,8 +82,8 @@ services:
 #      MINIO_VOLUMES: /data
 #    volumes:
 #      - s3cloud:/data
-#      - ./cfg/s3cloud/private.key:/certs/private.key:ro
-#      - ./cfg/s3cloud/public.crt:/certs/public.crt:ro
+#      - ./configs/s3cloud/private.key:/certs/private.key:ro
+#      - ./configs/s3cloud/public.crt:/certs/public.crt:ro
 #    deploy:
 #      replicas: 0
 #
@@ -98,7 +98,7 @@ services:
 #      S3_SECRET_KEY: ${__DB_S3_SECRET_KEY__}
 #      S3_BUCKET_NAME: ${__DB_S3_BUCKET_NAME__}
 #    volumes:
-#      - ./cfg/s3cloud/create-bucket.sh:/home/minio/create-bucket.sh:ro
+#      - ./configs/s3cloud/create-bucket.sh:/home/minio/create-bucket.sh:ro
 #    depends_on:
 #      - s3cloud
 #    deploy:

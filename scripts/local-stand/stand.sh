@@ -30,6 +30,11 @@ help() {
   info "    ports                     - show exposed ports"
   info "    redis-adm                 - start redis admin gui, if not yet"
   info "    pg-adm                    - start postgres admin gui, if not yet"
+  info ""
+  info "    elk-up    - start elk stack"
+  info "    elk-down  - stop elk stack"
+  info ""
+  info ""
   info "options:"
   info "    -debug        - golang application debug mode. Work for api_clients, api_admins etc"
   info "    -clear        - cleaning up the database (work with up)"
@@ -70,6 +75,9 @@ for p in "$@"; do
   "up") STAND_OPER="up" ;;
   "down") STAND_OPER="down" ;;
   "ps") STAND_OPER="ps" ;;
+
+  "elk-up") OPER="elk-up" ;;
+  "elk-down") OPER="elk-down" ;;
 
     # service operations
   "papi" | "api-portal") OPER="api-portal" ;;
@@ -185,6 +193,26 @@ case "$OPER" in
     --env-file "${ROOT}/../../deployments/local.env" \
     "$(func_get_work_image)" bash -c "$CMD"
   ;;
+
+  "elk-up")
+    docker compose \
+      -p elk-st \
+      --project-directory "$ROOT" \
+      -f "${ROOT}/docker-elk.yml" \
+      up
+  ;;
+
+  "elk-down")
+#    has=$(docker compose ls "--filter=name=${__STAND_NAME__}" -q) || return 1
+#    [ -z "$has" ] && return 0
+
+    docker compose \
+      -p elk-st \
+      --project-directory "$ROOT" \
+      -f "${ROOT}/docker-elk.yml" \
+      down
+  ;;
+
 
   "curl")
   HAS=$(docker images --filter=reference="$__DOCKER_CURL_IMAGE__" -q) || exit 1
