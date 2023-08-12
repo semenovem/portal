@@ -12,5 +12,14 @@ const (
 )
 
 type User struct {
-	ID uint32
+	ID     uint32
+	Status UserStatus
+	Roles  []UserRole
+}
+
+// LoggingUser входящий пользователь
+type LoggingUser struct {
+	User
+	PasswordHash string
+	Login        string
 }

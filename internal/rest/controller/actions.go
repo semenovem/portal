@@ -1,21 +1,37 @@
 package controller
 
 import (
+	"context"
 	"github.com/labstack/echo/v4"
+	"github.com/semenovem/portal/internal/provider"
+	authprovider "github.com/semenovem/portal/internal/provider/auth"
+	peopleprovider "github.com/semenovem/portal/internal/provider/people"
 	"github.com/semenovem/portal/pkg"
+	"github.com/semenovem/portal/pkg/entity"
 	"github.com/semenovem/portal/pkg/failing"
 	"net/http"
 )
 
-type Action struct {
-	logger  pkg.Logger
-	failing *failing.Service
+type ActionConfig struct {
+	Logger         pkg.Logger
+	Failing        *failing.Service
+	PeopleProvider *peopleprovider.Provider
+	AuthProvider   *authprovider.Provider
 }
 
-func NewAction(logger pkg.Logger, failure *failing.Service) *Action {
+type Action struct {
+	logger         pkg.Logger
+	failing        *failing.Service
+	peopleProvider *peopleprovider.Provider
+	authProvider   *authprovider.Provider
+}
+
+func NewAction(c *ActionConfig) *Action {
 	return &Action{
-		logger:  logger,
-		failing: failure,
+		logger:         c.Logger.Named("Action"),
+		failing:        c.Failing,
+		peopleProvider: c.PeopleProvider,
+		authProvider:   c.AuthProvider,
 	}
 }
 
@@ -32,4 +48,22 @@ func (a *Action) ExtractFormFromRequest(c echo.Context, form interface{}) failin
 	}
 
 	return nil
+}
+
+// GetUserByLogin получить пользователя по email
+func (a *Action) GetUserByLogin(ctx context.Context, login string) (*entity.LoggingUser, failing.Nested) {
+	user, err := a.peopleProvider.GetUserByLogin(ctx, login)
+	if err != nil {
+		ll := a.logger.Named("GetUserByLogin").With("login", login)
+
+		if provider.IsNoRows(err) {
+			ll.Named("CLIENT").Info("no found user by login")
+			return nil, failing.NewNested(http.StatusNotFound, err)
+		}
+
+		ll.Named("DATABASE").Error(err.Error())
+		return nil, failing.NewNested(http.StatusInternalServerError, err)
+	}
+
+	return user, nil
 }

@@ -6,11 +6,10 @@ CREATE TYPE people.additional_field_kind_enum AS ENUM ('email', 'tel', 'note');
 CREATE TABLE IF NOT EXISTS people.positions
 (
   id          serial PRIMARY KEY,
-  title       varchar UNIQUE                                NOT NULL, -- название должности
-  description varchar                                       NOT NULL, -- Описание
-  parent_id   int REFERENCES people.positions default NULL  NULL,     -- руководитель
-  created_at  timestamp                       default now() NOT NULL,
-  deleted_at  timestamp                       default NULL  NULL
+  title       varchar UNIQUE                               NOT NULL, -- название должности
+  description varchar                                      NOT NULL, -- Описание
+  parent_id   int REFERENCES people.positions default NULL NULL,     -- руководитель
+  deleted     timestamp                       default NULL NULL
 );
 
 -- Пользователи
@@ -19,43 +18,39 @@ CREATE TABLE IF NOT EXISTS people.users
   id          serial PRIMARY KEY,
   firstname   varchar                            NOT NULL, -- Имя
   surname     varchar                            NOT NULL, -- Фамилия
-  created_at  timestamp            default now() NOT NULL, -- дата создания записи
-  updated_at  timestamp            default now() NOT NULL, -- обновление данных
-  deleted_at  timestamp            default NULL  NULL,
+  deleted     bool                 default false NOT NULL,
   note        text                 default ''    NOT NULL, -- примечание
   position_id int REFERENCES people.positions    NOT NULL,
   status      people.statuses_enum default 'inactive',
-  roles       people.roles_enum[]  default NULL  NULL
+  roles       people.roles_enum[]  default NULL  NULL,
+  start_at    timestamp            default now() NOT NULL, -- дата начала работы
+  fired_at    timestamp            default NULL  NULL      -- дата увольнения (последний день работы)
 );
 
 -- Имеют дополнительные поля
-CREATE TABLE IF NOT EXISTS people.ext_users
+CREATE TABLE IF NOT EXISTS people.logged_users
 (
   login       varchar UNIQUE                                 NOT NULL,
-  email       varchar                           default NULL NULL,
+--   email       varchar                           default NULL NULL,
   passwd_hash varchar(64)                       default NULL NULL, -- хэш пароля
   avatar      int REFERENCES media.avatars (id) default NULL NULL
 ) INHERITS (people.users);
 
 
--- дополнительные поля пользователя
+-- Дополнительные поля пользователя
 CREATE TABLE IF NOT EXISTS people.user_additional_fields
 (
   id         serial PRIMARY KEY,
-  user_id    int REFERENCES people.users NOT NULL,
-  value      varchar   default ''        NOT NULL,
-  kind       people.additional_field_kind_enum  NOT NULL, -- тип поля
-  sort       smallint  default 0         NOT NULL,
-  deleted_at timestamp default NULL      NULL
+  user_id    int REFERENCES people.users       NOT NULL,
+  value      varchar   default ''              NOT NULL,
+  kind       people.additional_field_kind_enum NOT NULL, -- тип поля
+  sort       smallint  default 0               NOT NULL,
+  deleted_at timestamp default NULL            NULL
 );
 
--- --------------------------------
--- --------------------------------
--- --------------------------------
+-- ----------------------------------------------------------------
 -- test data
--- --------------------------------
--- --------------------------------
--- --------------------------------
+-- ----------------------------------------------------------------
 
 
 insert into people.positions (title, description)
@@ -64,7 +59,7 @@ values ('должность 1', 'описание должности 1'),
 on conflict do nothing;
 
 
-insert into people.ext_users
+insert into people.logged_users
   (firstname, surname, note, position_id, login)
 values ('ivan', 'ivanov', 'note для пользователя', 1, 'login1'),
        ('oleg', 'olegovich', 'note2 для пользователя', 1, 'login2')

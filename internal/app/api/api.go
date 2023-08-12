@@ -6,6 +6,8 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/semenovem/portal/config"
+	authprovider "github.com/semenovem/portal/internal/provider/auth"
+	peopleprovider "github.com/semenovem/portal/internal/provider/people"
 	"github.com/semenovem/portal/internal/rest/router"
 	"github.com/semenovem/portal/internal/zoo/conn"
 	"github.com/semenovem/portal/pkg"
@@ -65,13 +67,19 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 		return err
 	}
 
+	var (
+		peopleProvider = peopleprovider.New(app.db, logger)
+		authProvider   = authprovider.New(app.db, logger)
+	)
+
 	// Router
 	app.router, err = router.New(&router.Config{
-		Ctx:    ctx,
-		Logger: logger,
-		DB:     app.db,
-		Redis:  app.redis,
-		Global: &cfg,
+		Ctx:            ctx,
+		Logger:         logger,
+		Redis:          app.redis,
+		Global:         &cfg,
+		PeopleProvider: peopleProvider,
+		AuthProvider:   authProvider,
 	})
 
 	if err != nil {

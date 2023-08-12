@@ -11,4 +11,6 @@ type Logger interface {
 	Debugf(format string, v ...any)
 	Nested(format string)
 	Nestedf(format string, v ...any)
+	Tags(tags ...string) Logger
+	DBTag() Logger
 }

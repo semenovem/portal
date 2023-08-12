@@ -7,20 +7,17 @@ import (
 )
 
 var (
-	regValidateUserLogin = regexp.MustCompile(``)
+	regValidateUserLogin = regexp.MustCompile(`(?i)^[a-z]+[\w_-]*[^_-]$`)
 )
 
 func ValidateUserLogin(login string) error {
-	l := utf8.RuneCountInString(login)
-	if l > minUserLoginLen {
+	if l := utf8.RuneCountInString(login); l < minUserLoginLen {
 		return ErrValidShort
-	}
-
-	if l > maxUserLoginLen {
+	} else if l > maxUserLoginLen {
 		return ErrValidLong
 	}
 
-	if interValidator.Var(login, "ascii") != nil {
+	if !regValidateUserLogin.MatchString(login) {
 		return ErrValidIllegalChar
 	}
 
@@ -34,15 +31,12 @@ func ValidateUserPassword(password string) error {
 	}
 
 	var (
-		l                                      = utf8.RuneCountInString(password)
 		hasNum, hasLower, hasUpper, hasSpecial bool
 	)
 
-	if l < minUserPasswordLen {
+	if l := utf8.RuneCountInString(password); l < minUserPasswordLen {
 		return ErrValidShort
-	}
-
-	if l > maxUserPasswordLen {
+	} else if l > maxUserPasswordLen {
 		return ErrValidLong
 	}
 

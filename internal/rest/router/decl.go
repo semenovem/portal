@@ -3,10 +3,11 @@ package router
 import (
 	"context"
 	"github.com/go-redis/redis/v8"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/semenovem/portal/config"
+	authprovider "github.com/semenovem/portal/internal/provider/auth"
+	peopleprovider "github.com/semenovem/portal/internal/provider/people"
 	"github.com/semenovem/portal/internal/rest/controller"
 	authCnt "github.com/semenovem/portal/internal/rest/controller/auth"
 	vehicleCnt "github.com/semenovem/portal/internal/rest/controller/vehicle"
@@ -17,11 +18,12 @@ import (
 )
 
 type Config struct {
-	Ctx    context.Context
-	Logger pkg.Logger
-	DB     *pgxpool.Pool
-	Redis  *redis.Client
-	Global *config.API
+	Ctx            context.Context
+	Logger         pkg.Logger
+	Redis          *redis.Client
+	Global         *config.API
+	PeopleProvider *peopleprovider.Provider
+	AuthProvider   *authprovider.Provider
 }
 
 type Router struct {
@@ -99,7 +101,12 @@ func New(cfg *Config) (*Router, error) {
 	arg := controller.CntArgs{
 		Logger:  cfg.Logger,
 		Failing: failure,
-		Act:     controller.NewAction(cfg.Logger, failure),
+		Act: controller.NewAction(&controller.ActionConfig{
+			Logger:         cfg.Logger,
+			Failing:        failure,
+			PeopleProvider: cfg.PeopleProvider,
+			AuthProvider:   cfg.AuthProvider,
+		}),
 	}
 
 	r := &Router{

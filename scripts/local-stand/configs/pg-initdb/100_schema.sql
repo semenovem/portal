@@ -37,3 +37,9 @@ CREATE SCHEMA media;
 ALTER SCHEMA media OWNER TO adm_db;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA media TO adm_db;
 
+
+-- audit - для временного хранения данных аудита до момента их отправки в систему хранения
+CREATE SCHEMA audit;
+ALTER SCHEMA audit OWNER TO adm_db;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA audit TO adm_db;
+

@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/semenovem/portal/pkg/failing"
 	"net/http"
@@ -21,12 +22,23 @@ func (cnt *Controller) Login(c echo.Context) error {
 	var (
 		ll   = cnt.logger.Named("Login")
 		form = new(LoginForm)
+		ctx  = c.Request().Context()
 	)
 
 	if nested := cnt.act.ExtractFormFromRequest(c, form); nested != nil {
 		ll.Named("ExtractFormFromRequest").Nested(nested.Message())
 		return cnt.failing.SendNested(c, "", nested)
 	}
+
+	fmt.Println(">>>>>>>>>> ", form)
+
+	user, nested := cnt.act.GetUserByLogin(ctx, form.Login)
+	if nested != nil {
+		ll.Named("GetUserByLogin").Nested(nested.Message())
+		return cnt.failing.SendNested(c, "", nested)
+	}
+
+	fmt.Println(">˘˘˘˘˘˘˘˘˘˘˘˘˘˘˘ ", user)
 
 	f := failing.Response{
 		Code:             0,

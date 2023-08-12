@@ -23,3 +23,10 @@ const (
 )
 
 type Level int8
+
+type Tag string
+
+const (
+	DatabaseTag = "DATABASE"
+	ClientTag   = "CLIENT"
+)
