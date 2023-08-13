@@ -1,10 +1,11 @@
 package audit
 
-const (
-	Maintenance     = "maintenance"
-	MaintenanceItem = "maintenance-item"
-	Vehicle         = "vehicle"
-	User            = "user"
-)
-
 type Code string
+
+const (
+	UserLoginDeny Code = "user-login-deny" // Авторизация по логопасс - запрет
+	UserLogin     Code = "user-login"      // Авторизация по логопасс - успешно
+
+	AuthSessionDeny Code = "auth-session-deny" // Создана новая авторизованная сессия
+	AuthSession     Code = "auth-session"      // Создана новая авторизованная сессия
+)

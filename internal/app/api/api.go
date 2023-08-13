@@ -6,11 +6,12 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/semenovem/portal/config"
-	authprovider "github.com/semenovem/portal/internal/provider/auth"
-	peopleprovider "github.com/semenovem/portal/internal/provider/people"
+	"github.com/semenovem/portal/internal/action"
+	"github.com/semenovem/portal/internal/provider"
 	"github.com/semenovem/portal/internal/rest/router"
 	"github.com/semenovem/portal/internal/zoo/conn"
 	"github.com/semenovem/portal/pkg"
+	"github.com/semenovem/portal/pkg/it"
 )
 
 type appAPI struct {
@@ -23,7 +24,7 @@ type appAPI struct {
 
 func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 	var (
-		ll  = logger.Named("appAPI.New")
+		ll  = logger.Named("appAPI.NewPeoplePvd")
 		app = appAPI{
 			ctx:    ctx,
 			logger: logger,
@@ -31,8 +32,7 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 		err error
 	)
 
-	app.db, err = conn.ConnectDBPostgres(ctx, cfg.DBCoreConn.ConvTo())
-	if err != nil {
+	if app.db, err = conn.ConnectDBPostgres(ctx, cfg.DBCoreConn.ConvTo()); err != nil {
 		ll.Named("ConnectDBPostgres").Error(err.Error())
 		return err
 	}
@@ -67,23 +67,33 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 		return err
 	}
 
+	// Провайдеры данных
 	var (
-		peopleProvider = peopleprovider.New(app.db, logger)
-		authProvider   = authprovider.New(app.db, logger)
+		audit     = provider.NewAudit(app.db, logger)
+		authPvd   = provider.NewAuthPvd(app.db, logger)
+		peoplePvd = provider.NewPeoplePvd(app.db, logger)
+	)
+
+	// Экшены
+	authAct := action.NewAuth(
+		logger,
+		it.NewUserPasswdAuth(cfg.PasswdSalt),
+		audit,
+		authPvd,
+		peoplePvd,
 	)
 
 	// Router
-	app.router, err = router.New(&router.Config{
-		Ctx:            ctx,
-		Logger:         logger,
-		Redis:          app.redis,
-		Global:         &cfg,
-		PeopleProvider: peopleProvider,
-		AuthProvider:   authProvider,
-	})
-
-	if err != nil {
-		ll.Named("router.New").Nested(err.Error())
+	if app.router, err = router.New(
+		ctx,
+		logger,
+		cfg,
+		app.redis,
+		authPvd,
+		peoplePvd,
+		authAct,
+	); err != nil {
+		ll.Named("router").Nested(err.Error())
 		return err
 	}
 

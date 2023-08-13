@@ -1,5 +1,7 @@
 DROP SCHEMA public;
 
+ALTER DATABASE portal SET timezone TO 'Europe/Moscow';
+
 -- тестовая БД
 CREATE USER adm_db WITH PASSWORD 'airohZ9o';
 CREATE SCHEMA core;

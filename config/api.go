@@ -9,4 +9,5 @@ type API struct {
 	RedisConn  RedisConn
 
 	DBMigrationsDir string `env:"DB_MIGRATIONS_DIR,required"`
+	PasswdSalt      string `env:"PASSWD_SALT,required"`
 }

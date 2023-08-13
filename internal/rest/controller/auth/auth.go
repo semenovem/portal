@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/semenovem/portal/pkg/failing"
+	"github.com/semenovem/portal/pkg/txt"
 	"net/http"
 )
 
@@ -25,20 +26,31 @@ func (cnt *Controller) Login(c echo.Context) error {
 		ctx  = c.Request().Context()
 	)
 
-	if nested := cnt.act.ExtractFormFromRequest(c, form); nested != nil {
+	if nested := cnt.com.ExtractFormFromRequest(c, form); nested != nil {
 		ll.Named("ExtractFormFromRequest").Nested(nested.Message())
 		return cnt.failing.SendNested(c, "", nested)
 	}
 
-	fmt.Println(">>>>>>>>>> ", form)
+	ll = ll.With("login", form.Login)
 
-	user, nested := cnt.act.GetUserByLogin(ctx, form.Login)
-	if nested != nil {
-		ll.Named("GetUserByLogin").Nested(nested.Message())
-		return cnt.failing.SendNested(c, "", nested)
+	authSession, authErr, err := cnt.authAct.NewLogin(
+		ctx,
+		form.Login,
+		form.Passwd,
+		c.Request().UserAgent(),
+		form.DeviceID,
+	)
+	if err != nil {
+		ll.Named("NewLogin").Nested(err.Error())
+		return cnt.failing.SendInternalServerErr(c, "", err)
 	}
 
-	fmt.Println(">˘˘˘˘˘˘˘˘˘˘˘˘˘˘˘ ", user)
+	if authErr != "" {
+		ll.AuthTag().Named("NewLogin").Nested(string(authErr))
+		return cnt.failing.Send(c, "", http.StatusBadRequest, txt.AuthInvalidLogoPasswd, err)
+	}
+
+	fmt.Println("!!!!!!!!!!!! authSession = ", authSession)
 
 	f := failing.Response{
 		Code:             0,

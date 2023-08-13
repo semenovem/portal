@@ -1,8 +1,9 @@
 package txt
 
 const (
-	ValidUserLogin             = "10004 Логин пользователя может содержать символы и цифры"
-	ValidatePasswordWeak       = "10005 Пароль должен содержать хотя бы одну букву в нижнем регистре, одну букву в верхнем регистре, одну цифру, один спецсимвол, и не содержать пробелов. Длинной 8-20 символов"
+	ValidUserLogin       = "10004 Логин пользователя может содержать символы и цифры"
+	ValidatePasswordWeak = "10005 Пароль должен содержать хотя бы одну букву в нижнем регистре, одну букву в верхнем регистре, одну цифру, один спецсимвол, и не содержать пробелов. Длинной 8-20 символов"
+
 	ValidateEmailNotSpecified  = "10012 Не указан электронный адрес"
 	ValidateEmailInvalid       = "10008 Необходимо указать валидный электронный адрес, длиной 4-64 символов"
 	ValidateUserNameLength     = "10005 Имя пользователя должно быть 3-64 символов"
@@ -18,8 +19,8 @@ const (
 )
 
 const (
-	AuthInvalidCredentials = "10200 Не верный логин или пароль"
-	AuthWrongPIN           = "10212 Неверный ПИН"
+	AuthInvalidLogoPasswd = "10200 Не верный логин или пароль"
+	AuthWrongPIN          = "10212 Неверный ПИН"
 )
 
 //nolint:lll
@@ -32,7 +33,7 @@ var messages = map[string]*struct {
 	NotFoundMethod:             {},
 	NotFoundErrEntity:          {},
 	NotFoundUser:               {},
-	AuthInvalidCredentials:     {},
+	AuthInvalidLogoPasswd:      {},
 	ValidateUserNameInvalid:    {},
 	ValidateUserNameLength:     {},
 	ValidatePasswordWeak:       {},

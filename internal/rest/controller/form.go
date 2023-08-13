@@ -29,5 +29,5 @@ func (f *PaginationForm) GetLimit() int {
 type CntArgs struct {
 	Logger  pkg.Logger
 	Failing *failing.Service
-	Act     *Action
+	Common  *Common
 }

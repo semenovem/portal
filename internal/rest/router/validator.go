@@ -3,7 +3,7 @@ package router
 import (
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
-	"github.com/semenovem/portal/pkg/entity"
+	"github.com/semenovem/portal/pkg/it"
 	"github.com/semenovem/portal/pkg/vld"
 )
 
@@ -16,8 +16,8 @@ func (cv *customValidator) Validate(i interface{}) error {
 }
 
 var strValidators = map[string]func(string) error{
-	vld.UserLoginTag:    entity.ValidateUserLogin,
-	vld.UserPasswordTag: entity.ValidateUserPassword,
+	vld.UserLoginTag:    it.ValidateUserLogin,
+	vld.UserPasswordTag: it.ValidateUserPassword,
 }
 
 func newValidation() (echo.Validator, error) {

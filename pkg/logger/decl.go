@@ -28,5 +28,6 @@ type Tag string
 
 const (
 	DatabaseTag = "DATABASE"
+	AuthTag     = "AUTH"
 	ClientTag   = "CLIENT"
 )

@@ -13,4 +13,5 @@ type Logger interface {
 	Nestedf(format string, v ...any)
 	Tags(tags ...string) Logger
 	DBTag() Logger
+	AuthTag() Logger
 }

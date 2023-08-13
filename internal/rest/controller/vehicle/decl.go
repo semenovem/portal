@@ -9,13 +9,13 @@ import (
 type Controller struct {
 	logger  pkg.Logger
 	failing *failing.Service
-	act     *controller.Action
+	act     *controller.Common
 }
 
 func New(arg *controller.CntArgs) *Controller {
 	return &Controller{
 		logger:  arg.Logger.Named("vehicle-cnt"),
 		failing: arg.Failing,
-		act:     arg.Act,
+		act:     arg.Common,
 	}
 }

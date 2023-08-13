@@ -6,25 +6,18 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/semenovem/portal/config"
-	authprovider "github.com/semenovem/portal/internal/provider/auth"
-	peopleprovider "github.com/semenovem/portal/internal/provider/people"
+	"github.com/semenovem/portal/internal/action"
+	"github.com/semenovem/portal/internal/provider"
 	"github.com/semenovem/portal/internal/rest/controller"
-	authCnt "github.com/semenovem/portal/internal/rest/controller/auth"
-	vehicleCnt "github.com/semenovem/portal/internal/rest/controller/vehicle"
+	authController "github.com/semenovem/portal/internal/rest/controller/auth"
+	vehicleController "github.com/semenovem/portal/internal/rest/controller/vehicle"
 	"github.com/semenovem/portal/pkg"
 	"github.com/semenovem/portal/pkg/failing"
+	"github.com/semenovem/portal/pkg/jwtoken"
 	"github.com/semenovem/portal/pkg/txt"
 	"net/http"
+	"time"
 )
-
-type Config struct {
-	Ctx            context.Context
-	Logger         pkg.Logger
-	Redis          *redis.Client
-	Global         *config.API
-	PeopleProvider *peopleprovider.Provider
-	AuthProvider   *authprovider.Provider
-}
 
 type Router struct {
 	ctx                 context.Context
@@ -32,13 +25,21 @@ type Router struct {
 	server              *echo.Echo
 	addr                string
 	unauth, auth, admin *echo.Group
-	vehicleCnt          *vehicleCnt.Controller
-	authCnt             *authCnt.Controller
+	vehicleCnt          *vehicleController.Controller
+	authCnt             *authController.Controller
 }
 
-func New(cfg *Config) (*Router, error) {
+func New(
+	ctx context.Context,
+	logger pkg.Logger,
+	config config.API,
+	redis *redis.Client,
+	authPvd *provider.AuthPvd,
+	peoplePvd *provider.PeoplePvd,
+	authAct *action.AuthAct,
+) (*Router, error) {
 	var (
-		ll = cfg.Logger.Named("router")
+		ll = logger.Named("router")
 		e  = echo.New()
 	)
 
@@ -76,7 +77,7 @@ func New(cfg *Config) (*Router, error) {
 
 	e.Use(
 		middleware.Logger(),
-		panicRecover(ll, cfg.Global.Base.CliMode),
+		panicRecover(ll, config.Base.CliMode),
 		middleware.CORSWithConfig(corsConfig),
 	)
 
@@ -88,8 +89,8 @@ func New(cfg *Config) (*Router, error) {
 	}
 
 	failure := failing.New(&failing.Config{
-		IsDevMode:             cfg.Global.IsDev(),
-		Logger:                cfg.Logger,
+		IsDevMode:             config.IsDev(),
+		Logger:                logger,
 		Messages:              txt.GetMessages(),
 		ValidationMessageMap:  validators,
 		HTTPStatuses:          txt.GetHTTPStatuses(),
@@ -97,25 +98,44 @@ func New(cfg *Config) (*Router, error) {
 		InvalidRequestMessage: invalidFailing,
 	})
 
-	// REST контроллеры
-	arg := controller.CntArgs{
-		Logger:  cfg.Logger,
+	jwtService := jwtoken.New(&jwtoken.Config{
+		AccessTokenSecret:    "werwerwer",
+		RefreshTokenSecret:   "qwerwqerwer",
+		AccessTokenLifetime:  time.Minute * 100,
+		RefreshTokenLifetime: time.Minute * 100,
+	})
+
+	// контроллеры
+	common := controller.NewAction(
+		logger,
+		failure,
+		authPvd,
+		peoplePvd,
+	)
+
+	cntArg := controller.CntArgs{
+		Logger:  logger,
 		Failing: failure,
-		Act: controller.NewAction(&controller.ActionConfig{
-			Logger:         cfg.Logger,
-			Failing:        failure,
-			PeopleProvider: cfg.PeopleProvider,
-			AuthProvider:   cfg.AuthProvider,
-		}),
+		Common:  common,
 	}
 
+	var (
+		authCnt = authController.New(
+			&cntArg,
+			jwtService,
+			peoplePvd,
+			authAct,
+		)
+		vehicleCnt = vehicleController.New(&cntArg)
+	)
+
 	r := &Router{
-		ctx:        cfg.Ctx,
-		logger:     cfg.Logger.Named("router"),
+		ctx:        ctx,
+		logger:     logger.Named("router"),
 		server:     e,
-		addr:       cfg.Global.RestPort,
-		vehicleCnt: vehicleCnt.New(&arg),
-		authCnt:    authCnt.New(&arg),
+		addr:       config.RestPort,
+		vehicleCnt: vehicleCnt,
+		authCnt:    authCnt,
 	}
 
 	g := e.Group("v1")

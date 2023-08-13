@@ -51,7 +51,7 @@ func (p *Pen) With(k string, v interface{}) pkg.Logger {
 		a.params = make([]string, 0)
 	}
 
-	a.params = append(a.params, fmt.Sprintf("%s:%v", k, v))
+	a.params = append(a.params, fmt.Sprintf("%s:%+v", k, v))
 
 	return a
 }
@@ -102,4 +102,8 @@ func (p *Pen) Tags(tags ...string) pkg.Logger {
 
 func (p *Pen) DBTag() pkg.Logger {
 	return p.Tags(DatabaseTag)
+}
+
+func (p *Pen) AuthTag() pkg.Logger {
+	return p.Tags(AuthTag)
 }
