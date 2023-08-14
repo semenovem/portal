@@ -60,7 +60,7 @@ insert into people.users
 values ('ivan', 'ivanov', 'note для пользователя', 1, 'login1',
         'ec95a5a1e2e7b82333340b5ec1db3e82e3a8ae9b', 'active', '2023-07-12T15:38:30Z', now()),
        ('oleg', 'olegovich', 'note2 для пользователя', 1, 'login2',
-        'ec95a5a1e2e7b82333340b5ec1db3e82e3a8ae9b', 'inactive', '2022-08-12T15:38:30Z', NULL)
+        'ec95a5a1e2e7b82333340b5ec1db3e82e3a8ae9b', 'active', '2022-08-12T15:38:30Z', NULL)
 
 on conflict do nothing;
 

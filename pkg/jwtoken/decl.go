@@ -57,6 +57,14 @@ type RefreshPayload struct {
 	RefreshID uuid.UUID
 }
 
+func (p *AccessPayload) IsExpired() bool {
+	return time.Unix(p.Expired, 0).Before(time.Now())
+}
+
+func (p *RefreshPayload) IsExpired() bool {
+	return time.Unix(p.Expired, 0).Before(time.Now())
+}
+
 type PairTokens struct {
 	Access  string
 	Refresh string

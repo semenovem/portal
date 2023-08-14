@@ -35,7 +35,7 @@ definitions:
       path:
         type: string
     type: object
-  internal_rest_controller_auth.LoginForm:
+  internal_rest_controller_auth.loginForm:
     properties:
       device_id:
         type: string
@@ -47,7 +47,7 @@ definitions:
     - login
     - password
     type: object
-  internal_rest_controller_auth.LoginResponse:
+  internal_rest_controller_auth.loginResponse:
     properties:
       access_token:
         type: string
@@ -84,14 +84,14 @@ paths:
         name: payload
         required: true
         schema:
-          $ref: '#/definitions/internal_rest_controller_auth.LoginForm'
+          $ref: '#/definitions/internal_rest_controller_auth.loginForm'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_rest_controller_auth.LoginResponse'
+            $ref: '#/definitions/internal_rest_controller_auth.loginResponse'
         "400":
           description: Bad Request
           schema:

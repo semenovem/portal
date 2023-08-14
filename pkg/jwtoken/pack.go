@@ -17,6 +17,7 @@ func (s *Service) NewPairTokens(params *TokenParams) (*PairTokens, error) {
 	refresh := &RefreshPayload{
 		Expired:   time.Now().Add(s.refreshLifetime).Unix(),
 		SessionID: params.SessionID,
+		RefreshID: params.RefreshID,
 	}
 
 	return s.newPairTokens(access, refresh)

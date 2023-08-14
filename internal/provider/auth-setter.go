@@ -33,6 +33,22 @@ func (p *AuthPvd) CreateSession(
 	}, nil
 }
 
+func (p *AuthPvd) LogoutSession(ctx context.Context, sessionID uint32) error {
+	sq := `UPDATE auth.sessions SET logout_at = now() WHERE id = $1`
+
+	if _, err := p.db.Exec(ctx, sq, sessionID); err != nil {
+		p.logger.Named("LogoutSession").With("sessionID", sessionID).DBTag().Error(err.Error())
+		return err
+	}
+
+	if err := p.setSessionCanceled(ctx, sessionID); err != nil {
+		p.logger.Named("setSessionCanceled").With("sessionID", sessionID).Nested(err.Error())
+		return err
+	}
+
+	return nil
+}
+
 //func (p *AuthPvd) CreateSession(
 //	ctx context.Context,
 //	userID uint32,

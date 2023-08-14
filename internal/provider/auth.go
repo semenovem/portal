@@ -2,24 +2,40 @@ package provider
 
 import (
 	"context"
+	"github.com/go-redis/redis/v8"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/semenovem/portal/pkg"
-	"github.com/semenovem/portal/pkg/it"
+	"time"
 )
 
 type AuthPvd struct {
-	db     *pgxpool.Pool
-	logger pkg.Logger
+	logger                    pkg.Logger
+	db                        *pgxpool.Pool
+	redis                     *redis.Client
+	jwtAccessTokenLifetimeMin time.Duration
 }
 
-func NewAuthPvd(db *pgxpool.Pool, logger pkg.Logger) *AuthPvd {
+func NewAuthPvd(
+	logger pkg.Logger,
+	db *pgxpool.Pool,
+	redisClient *redis.Client,
+	jwtAccessTokenLifetimeMin time.Duration,
+) *AuthPvd {
 	return &AuthPvd{
-		db:     db,
-		logger: logger.Named("authPvd"),
+		logger:                    logger.Named("authPvd"),
+		db:                        db,
+		redis:                     redisClient,
+		jwtAccessTokenLifetimeMin: jwtAccessTokenLifetimeMin,
 	}
 }
 
-func (p *AuthPvd) GetUserByEmail(ctx context.Context) (*it.User, error) {
+func (p *AuthPvd) Now(ctx context.Context) (time.Time, error) {
+	var t time.Time
 
-	return nil, nil
+	err := p.db.QueryRow(ctx, "SELECT now()").Scan(&t)
+	if err != nil {
+		p.logger.Named("Now").DBTag().Error(err.Error())
+	}
+
+	return t, err
 }

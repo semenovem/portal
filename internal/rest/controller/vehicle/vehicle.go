@@ -1,6 +1,7 @@
 package vehicle
 
 import (
+	"fmt"
 	"github.com/labstack/echo/v4"
 
 	_ "github.com/semenovem/portal/internal/rest/view"
@@ -19,6 +20,9 @@ import (
 //	@Tags		vehicles
 //	@Security	ApiKeyAuth
 func (ct *Controller) Search(c echo.Context) error {
+
+	fmt.Println("!!!!!!!!!!!!!")
+
 	return nil
 }
 

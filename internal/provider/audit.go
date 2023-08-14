@@ -19,6 +19,13 @@ func NewAudit(db *pgxpool.Pool, logger pkg.Logger) *Audit {
 	}
 }
 
+var filePath = ""
+
+// Пишем лог во временный файл
+func openFile() {
+
+}
+
 // Refusal отказ
 func (a *Audit) Refusal(code audit.Code, cause audit.Cause, payload map[string]interface{}) {
 	fmt.Printf("audit Refusal >>>>>>>>>> code=%s  cause=%s   payload:[%+v] \n", code, cause, payload)

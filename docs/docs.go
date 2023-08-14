@@ -46,7 +46,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_rest_controller_auth.LoginForm"
+                            "$ref": "#/definitions/internal_rest_controller_auth.loginForm"
                         }
                     }
                 ],
@@ -54,7 +54,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_rest_controller_auth.LoginResponse"
+                            "$ref": "#/definitions/internal_rest_controller_auth.loginResponse"
                         }
                     },
                     "400": {
@@ -303,7 +303,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_rest_controller_auth.LoginForm": {
+        "internal_rest_controller_auth.loginForm": {
             "type": "object",
             "required": [
                 "login",
@@ -321,7 +321,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_rest_controller_auth.LoginResponse": {
+        "internal_rest_controller_auth.loginResponse": {
             "type": "object",
             "properties": {
                 "access_token": {

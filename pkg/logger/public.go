@@ -104,6 +104,10 @@ func (p *Pen) DBTag() pkg.Logger {
 	return p.Tags(DatabaseTag)
 }
 
+func (p *Pen) RedisTag() pkg.Logger {
+	return p.Tags(RedisTag)
+}
+
 func (p *Pen) AuthTag() pkg.Logger {
 	return p.Tags(AuthTag)
 }

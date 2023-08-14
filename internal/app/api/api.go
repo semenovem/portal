@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -12,6 +13,8 @@ import (
 	"github.com/semenovem/portal/internal/zoo/conn"
 	"github.com/semenovem/portal/pkg"
 	"github.com/semenovem/portal/pkg/it"
+	"math"
+	"time"
 )
 
 type appAPI struct {
@@ -53,7 +56,7 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 
 		db, err := conn.ConnectDBPostgresSQL(ctxnest, ll, cfg.DBCoreConn.ConvTo())
 		if err != nil {
-			ll.Named("ConnectDBPostgresSQL").Error(err.Error())
+			ll.Named("ConnectDBPostgresSQL").DBTag().Error(err.Error())
 		}
 
 		if err = conn.Migrate(ll, db, cfg.DBMigrationsDir); err != nil {
@@ -69,10 +72,27 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 
 	// Провайдеры данных
 	var (
-		audit     = provider.NewAudit(app.db, logger)
-		authPvd   = provider.NewAuthPvd(app.db, logger)
+		audit   = provider.NewAudit(app.db, logger)
+		authPvd = provider.NewAuthPvd(
+			logger,
+			app.db,
+			app.redis,
+			time.Minute*time.Duration(cfg.JWT.AccessTokenLifetimeMin),
+		)
 		peoplePvd = provider.NewPeoplePvd(app.db, logger)
 	)
+
+	t, err := authPvd.Now(ctx)
+	if err != nil {
+		ll.Named("authPvd.Now").Nested(err.Error())
+		return err
+	}
+
+	if math.Abs(float64(t.Unix()-time.Now().Unix())) > 60 {
+		err = errors.New("the time in the database differs by more than a minute")
+		ll.Error(err.Error())
+		return err
+	}
 
 	// Экшены
 	authAct := action.NewAuth(

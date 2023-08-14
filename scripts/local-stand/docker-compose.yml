@@ -19,7 +19,8 @@ services:
   postgres:
     <<: *net
     # собрать в dockers
-    image: postgres:15.3.ru
+    image: postgres:15.3
+#    image: postgres:15.3.ru
     hostname: db-core
     command: -p 5432
     volumes:
@@ -29,9 +30,10 @@ services:
       POSTGRES_DB: ${__DB_CORE_NAME__}
       POSTGRES_USER: ${__DB_CORE_USER__}
       POSTGRES_PASSWORD: ${__DB_CORE_PASSWORD__}
-      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums --locale=ru_RU.UTF-8"
+#      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums --locale=ru_RU.UTF-8"
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
       POSTGRES_HOST_AUTH_METHOD: trust
-      # TODO явно установить порт БД
+#      TZ: Europe/Volgograd
       TZ: UTC
     ports:
       - ${__DB_CORE_PORT_EXPOSE__}:5432
@@ -53,8 +55,8 @@ services:
 
   redis-commander:
     <<: *net
-    container_name: redis-commander
-    hostname: redis-commander
+    container_name: redis-cmd
+#    hostname: redis-commander
     command: /usr/bin/dumb-init -- /redis-commander/docker/entrypoint.sh -p ${__DB_RAM_GUI_PORT_EXPOSE__}
     image: rediscommander/redis-commander:latest
     restart: always

@@ -89,7 +89,7 @@ func (s *Service) extractRefreshPayload(claims jwt.MapClaims) (*RefreshPayload, 
 		return nil, err
 	}
 
-	refreshID, err := unpackUUID(claims, claimSessionID)
+	refreshID, err := unpackUUID(claims, claimRefreshID)
 	if err != nil {
 		return nil, err
 	}

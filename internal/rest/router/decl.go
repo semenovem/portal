@@ -16,6 +16,7 @@ import (
 	"github.com/semenovem/portal/pkg/jwtoken"
 	"github.com/semenovem/portal/pkg/txt"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -33,7 +34,7 @@ func New(
 	ctx context.Context,
 	logger pkg.Logger,
 	config config.API,
-	redis *redis.Client,
+	redisClient *redis.Client,
 	authPvd *provider.AuthPvd,
 	peoplePvd *provider.PeoplePvd,
 	authAct *action.AuthAct,
@@ -99,10 +100,10 @@ func New(
 	})
 
 	jwtService := jwtoken.New(&jwtoken.Config{
-		AccessTokenSecret:    "werwerwer",
-		RefreshTokenSecret:   "qwerwqerwer",
-		AccessTokenLifetime:  time.Minute * 100,
-		RefreshTokenLifetime: time.Minute * 100,
+		AccessTokenSecret:    config.JWT.AccessTokenSecret,
+		RefreshTokenSecret:   config.JWT.RefreshTokenSecret,
+		AccessTokenLifetime:  time.Minute * time.Duration(config.JWT.AccessTokenLifetimeMin),
+		RefreshTokenLifetime: time.Hour * 24 * time.Duration(config.JWT.RefreshTokenLifetimeDay),
 	})
 
 	// контроллеры
@@ -123,8 +124,10 @@ func New(
 		authCnt = authController.New(
 			&cntArg,
 			jwtService,
-			peoplePvd,
 			authAct,
+			strings.Split(config.JWT.ServedDomains, ","),
+			time.Hour*24*time.Duration(config.JWT.RefreshTokenLifetimeDay),
+			config.JWT.RefreshTokenCookieName,
 		)
 		vehicleCnt = vehicleController.New(&cntArg)
 	)
@@ -138,11 +141,8 @@ func New(
 		authCnt:    authCnt,
 	}
 
-	g := e.Group("v1")
-
-	r.unauth = g
-	r.auth = g
-	r.admin = g
+	r.unauth = e.Group("v1")
+	r.auth = r.unauth.Group("", tokenMiddleware(logger, failure, jwtService, authPvd))
 
 	r.addRoutes()
 

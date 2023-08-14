@@ -121,3 +121,17 @@ func (a *AuthAct) newSession(
 
 	return session, "", nil
 }
+
+// Logout разлогин Сессии
+func (a *AuthAct) Logout(ctx context.Context, sessionID uint32) error {
+	ll := a.logger.Named("Logout")
+
+	if err := a.authPvd.LogoutSession(ctx, sessionID); err != nil {
+		ll.Named("LogoutSession").Nested(err.Error())
+		return err
+	}
+
+	// TODO сообщение в аудит безопасности
+
+	return nil
+}

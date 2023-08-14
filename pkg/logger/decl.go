@@ -28,6 +28,7 @@ type Tag string
 
 const (
 	DatabaseTag = "DATABASE"
+	RedisTag    = "REDIS"
 	AuthTag     = "AUTH"
 	ClientTag   = "CLIENT"
 )
