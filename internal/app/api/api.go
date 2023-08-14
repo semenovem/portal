@@ -1,4 +1,4 @@
-package api
+package apiapp
 
 import (
 	"context"
@@ -27,7 +27,7 @@ type appAPI struct {
 
 func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 	var (
-		ll  = logger.Named("appAPI.NewPeoplePvd")
+		ll  = logger.Named("appAPI.New")
 		app = appAPI{
 			ctx:    ctx,
 			logger: logger,

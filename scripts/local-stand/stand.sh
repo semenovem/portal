@@ -21,19 +21,19 @@ ERR=
 help() {
   info "use: sh stand.sh  - development stand management"
   info "commands: [up|down [-clear]] [command [-option]]"
-  info "    up [-clear]               - start docker compose (DB/redis etc. Look in the docker-compose.yml)"
-  info "    down                      - stop docker compose"
+  info "    up [-clear]        - start docker compose (DB/redis etc. Look in the docker-compose.yml)"
+  info "    down               - stop docker compose"
   info ""
-  info "    papi | api-portal         - run api-portal"
+  info "    papi | api-portal  - run api-portal"
+  info "    audit              - run audit"
   info ""
-  info "    ps                        - docker compose ps"
-  info "    ports                     - show exposed ports"
-  info "    redis-adm                 - start redis admin gui, if not yet"
-  info "    pg-adm                    - start postgres admin gui, if not yet"
+  info "    ps                 - docker compose ps"
+  info "    ports              - show exposed ports"
+  info "    redis-adm          - start redis admin gui, if not yet"
+  info "    pg-adm             - start postgres admin gui, if not yet"
   info ""
   info "    elk-up    - start elk stack"
   info "    elk-down  - stop elk stack"
-  info ""
   info ""
   info "options:"
   info "    -debug        - golang application debug mode. Work for api_clients, api_admins etc"
@@ -81,8 +81,7 @@ for p in "$@"; do
 
     # service operations
   "papi" | "api-portal") OPER="api-portal" ;;
-
-    # service functions
+  "audit") OPER="audit" ;;
   "curl") OPER="curl" ;;
 
   "redis-adm")
@@ -131,7 +130,7 @@ unset PREV p
 [ -n "$ARG_HELP" ] && help && exit 0
 
 which "docker" >/dev/null
-[ $? -ne 0 ] && err "Нужно установить docker" && ERR=1
+[ $? -ne 0 ] && err "docker needs to be installed" && ERR=1
 [ -n "$ERR" ] && help && exit 1
 
 # ------------------------------------------------
@@ -194,26 +193,42 @@ case "$OPER" in
     "$(func_get_work_image)" bash -c "$CMD"
   ;;
 
-  "elk-up")
-    docker compose \
-      -p elk-st \
-      --project-directory "$ROOT" \
-      -f "${ROOT}/docker-elk.yml" \
-      up
+"audit")
+  CMD="dlv debug /debugging/cmd/api/main.go --headless --listen=:40000 --api-version=2 --accept-multiclient --output /tmp/__debug_bin"
+  [ -z "$__ARG_MODE_DEBUG__" ] && CMD="$(func_run_cmd "go run /debugging/cmd/audit/main.go")"
+
+  docker run -it --rm \
+    --name "audit" \
+    --hostname "audit" \
+    --network "$__NET__" \
+    -p "${__AUDIT_GRPC_PORT_EXPOSE__}:9090" \
+    -p "${__AUDIT_DEBUGGING_PORT_EXPOSE__}:40000" \
+    -w "/debugging" \
+    -v "${ROOT}/../../:/debugging:ro" \
+    --env-file "${ROOT}/../../deployments/audit/local.env" \
+    "$(func_get_work_image)" bash -c "$CMD"
   ;;
 
-  "elk-down")
-#    has=$(docker compose ls "--filter=name=${__STAND_NAME__}" -q) || return 1
-#    [ -z "$has" ] && return 0
-
-    docker compose \
-      -p elk-st \
-      --project-directory "$ROOT" \
-      -f "${ROOT}/docker-elk.yml" \
-      down
+"elk-up")
+  docker compose \
+    -p elk-st \
+    --project-directory "$ROOT" \
+    -f "${ROOT}/docker-elk.yml" \
+    up
   ;;
 
+"elk-down")
+  #    has=$(docker compose ls "--filter=name=${__STAND_NAME__}" -q) || return 1
+  #    [ -z "$has" ] && return 0
 
+  docker compose \
+    -p elk-st \
+    --project-directory "$ROOT" \
+    -f "${ROOT}/docker-elk.yml" \
+    down
+  ;;
+
+\
   "curl")
   HAS=$(docker images --filter=reference="$__DOCKER_CURL_IMAGE__" -q) || exit 1
   if [ -z "$HAS" ]; then

@@ -67,9 +67,8 @@ func_clear() {
   func_stop_compose
   docker container prune -f # TODO заменить на менее обширный
   docker network rm "$__NET__" 2>/dev/null
-  for it in postgres redis s3cloud; do
-    id=$(docker volume ls -f name="${__STAND_NAME__}_${it}" -q)
-    [ -n "$id" ] && docker volume rm "$id"
+  for id in $(docker volume ls --filter name="$__STAND_NAME__" -q); do
+    docker volume rm "$id"
   done
   return 0
 }
