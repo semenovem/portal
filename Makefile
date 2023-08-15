@@ -17,7 +17,13 @@ docs:
   -g ./cmd/api/main.go --outputTypes yaml,go --output ./docs"
 
 
+## lint - go linter (wip)
 .PHONY: lint
 lint:
 	@sh scripts/lint
 
+
+## proto - compile proto
+.PHONY: proto
+proto:
+	@sh scripts/proto/compile.sh

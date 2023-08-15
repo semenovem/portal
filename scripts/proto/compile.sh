@@ -14,7 +14,7 @@ err() {
 help() {
   info "buf generate : compile.sh buf"
   info "proto compile: compile.sh censor"
-  info "proto compile: compile.sh ...имена директорий для компиляции (кроме sensor)"
+  info "proto compile: compile.sh ...имена директорий для компиляции"
   info "show versions: compile.sh ver"
 }
 show_versions() {
@@ -66,22 +66,12 @@ for p in "$@"; do
   esac
 done
 
-[ "$#" -eq 0 ] && err "Нет директорий для компиляции" && help && exit 1
+CMD="protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=."
+CMD="${CMD} --go-grpc_opt=paths=source_relative -I. audit/*.proto"
 
-# shellcheck disable=SC2068
-for DIR in $@; do
-  [ ! -d "${BIN}/${DIR}" ] && err "Переданный аргумент '$DIR' не является директорией" && exit 1
+echo "cmd = $CMD"
 
-  [ -z "$(find "${BIN}/${DIR}" -name "*.proto")" ] &&
-    info "В директории '${DIR}' нет proto файлов" && exit 1
-
-  CMD="protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=."
-  CMD="${CMD} --go-grpc_opt=paths=source_relative -I. ${DIR}/*.proto"
-
-  docker run -it --rm -w /app --platform linux/amd64 \
-    --user "$(id -u):$(id -g)" \
-    -v "${BIN}:/app" \
-    "$IMAGE" \
-    sh -c "cd /app; ${CMD}" && info "Директория '$DIR' - ок"
-
-done
+docker run -it --rm -w /app --platform linux/amd64 \
+  --user "$(id -u):$(id -g)" \
+  -v "${BIN}/../../proto:/app" \
+  "$IMAGE" sh -c "${CMD}" && info "Compile - ок"

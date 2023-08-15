@@ -11,10 +11,6 @@ service UsersSearch {
 message SearchRequest {
   uint32 Limit = 1;                     // если 0 - ошибка запроса
   uint32 Offset = 2;
-  repeated string DomainIDs = 3;        // если не передано - поиск по всем пользователям
-  repeated string SearchWords = 4;      // допустимые символы: a-z а-я 0-1 @ -_.  Можно передавать 0-3 слова
-  repeated string UserIDsExcluded = 5;  // Исключить id пользователей из поиска
-  repeated string SortBy = 6;           // Сортировка (по умолчанию по name), примеры: name DESC | email DESC, position
 }
 
 message SearchResponse{
