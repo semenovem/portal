@@ -18,86 +18,86 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// UsersSearchClient is the client API for UsersSearch service.
+// AuditClient is the client API for Audit service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type UsersSearchClient interface {
-	SearchUsers(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (*SearchResponse, error)
+type AuditClient interface {
+	RawString(ctx context.Context, in *RawRequest, opts ...grpc.CallOption) (*RawResponse, error)
 }
 
-type usersSearchClient struct {
+type auditClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewUsersSearchClient(cc grpc.ClientConnInterface) UsersSearchClient {
-	return &usersSearchClient{cc}
+func NewAuditClient(cc grpc.ClientConnInterface) AuditClient {
+	return &auditClient{cc}
 }
 
-func (c *usersSearchClient) SearchUsers(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (*SearchResponse, error) {
-	out := new(SearchResponse)
-	err := c.cc.Invoke(ctx, "/proto.UsersSearch/SearchUsers", in, out, opts...)
+func (c *auditClient) RawString(ctx context.Context, in *RawRequest, opts ...grpc.CallOption) (*RawResponse, error) {
+	out := new(RawResponse)
+	err := c.cc.Invoke(ctx, "/proto.Audit/RawString", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// UsersSearchServer is the server API for UsersSearch service.
-// All implementations must embed UnimplementedUsersSearchServer
+// AuditServer is the server API for Audit service.
+// All implementations must embed UnimplementedAuditServer
 // for forward compatibility
-type UsersSearchServer interface {
-	SearchUsers(context.Context, *SearchRequest) (*SearchResponse, error)
-	mustEmbedUnimplementedUsersSearchServer()
+type AuditServer interface {
+	RawString(context.Context, *RawRequest) (*RawResponse, error)
+	mustEmbedUnimplementedAuditServer()
 }
 
-// UnimplementedUsersSearchServer must be embedded to have forward compatible implementations.
-type UnimplementedUsersSearchServer struct {
+// UnimplementedAuditServer must be embedded to have forward compatible implementations.
+type UnimplementedAuditServer struct {
 }
 
-func (UnimplementedUsersSearchServer) SearchUsers(context.Context, *SearchRequest) (*SearchResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SearchUsers not implemented")
+func (UnimplementedAuditServer) RawString(context.Context, *RawRequest) (*RawResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RawString not implemented")
 }
-func (UnimplementedUsersSearchServer) mustEmbedUnimplementedUsersSearchServer() {}
+func (UnimplementedAuditServer) mustEmbedUnimplementedAuditServer() {}
 
-// UnsafeUsersSearchServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to UsersSearchServer will
+// UnsafeAuditServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to AuditServer will
 // result in compilation errors.
-type UnsafeUsersSearchServer interface {
-	mustEmbedUnimplementedUsersSearchServer()
+type UnsafeAuditServer interface {
+	mustEmbedUnimplementedAuditServer()
 }
 
-func RegisterUsersSearchServer(s grpc.ServiceRegistrar, srv UsersSearchServer) {
-	s.RegisterService(&UsersSearch_ServiceDesc, srv)
+func RegisterAuditServer(s grpc.ServiceRegistrar, srv AuditServer) {
+	s.RegisterService(&Audit_ServiceDesc, srv)
 }
 
-func _UsersSearch_SearchUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SearchRequest)
+func _Audit_RawString_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RawRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UsersSearchServer).SearchUsers(ctx, in)
+		return srv.(AuditServer).RawString(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.UsersSearch/SearchUsers",
+		FullMethod: "/proto.Audit/RawString",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UsersSearchServer).SearchUsers(ctx, req.(*SearchRequest))
+		return srv.(AuditServer).RawString(ctx, req.(*RawRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// UsersSearch_ServiceDesc is the grpc.ServiceDesc for UsersSearch service.
+// Audit_ServiceDesc is the grpc.ServiceDesc for Audit service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var UsersSearch_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "proto.UsersSearch",
-	HandlerType: (*UsersSearchServer)(nil),
+var Audit_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "proto.Audit",
+	HandlerType: (*AuditServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "SearchUsers",
-			Handler:    _UsersSearch_SearchUsers_Handler,
+			MethodName: "RawString",
+			Handler:    _Audit_RawString_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

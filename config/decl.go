@@ -61,3 +61,9 @@ func (c *DatabaseCoreConn) ConvTo() *conn.DBPGConfig {
 		MaxIdleLifetime: time.Second * time.Duration(c.MaxIdleLifetimeSec),
 	}
 }
+
+type Rest struct {
+	Port              uint16 `env:"REST_PORT,required"`
+	CorsAllowedHosts  string `env:"REST_CORS_ALLOWED_HOSTS,required"`
+	CorsMaxAgeSeconds uint32 `env:"REST_CORS_MAX_AGE_SECONDS,required"`
+}

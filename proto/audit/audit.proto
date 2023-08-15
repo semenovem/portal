@@ -4,16 +4,15 @@ option go_package = "github.com/semenovem/portal/proto/audit";
 
 package proto;
 
-service UsersSearch {
-  rpc SearchUsers (SearchRequest) returns (SearchResponse) {}
+service Audit {
+  rpc RawString (RawRequest) returns (RawResponse) {}
 }
 
-message SearchRequest {
-  uint32 Limit = 1;                     // если 0 - ошибка запроса
-  uint32 Offset = 2;
+message RawRequest {
+  string ID = 1;
+  string Payload = 2;
 }
 
-message SearchResponse{
-  uint32 Total = 1;
-  repeated string UserIDs = 2;
+message RawResponse{
+  uint32 Ok = 1;
 }

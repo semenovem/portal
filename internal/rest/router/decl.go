@@ -2,6 +2,7 @@ package router
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-redis/redis/v8"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -136,7 +137,7 @@ func New(
 		ctx:        ctx,
 		logger:     logger.Named("router"),
 		server:     e,
-		addr:       config.RestPort,
+		addr:       fmt.Sprintf(":%d", config.Rest.Port),
 		vehicleCnt: vehicleCnt,
 		authCnt:    authCnt,
 	}

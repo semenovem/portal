@@ -97,7 +97,7 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 	// Экшены
 	authAct := action.NewAuth(
 		logger,
-		it.NewUserPasswdAuth(cfg.PasswdSalt),
+		it.NewUserPasswdAuth(cfg.UserPasswdSalt),
 		audit,
 		authPvd,
 		peoplePvd,
