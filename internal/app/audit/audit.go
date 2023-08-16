@@ -3,12 +3,14 @@ package auditapp
 import (
 	"context"
 	"github.com/semenovem/portal/config"
+	"github.com/semenovem/portal/internal/app/audit/grpc/server"
 	"github.com/semenovem/portal/pkg"
 )
 
 type appAudit struct {
-	ctx    context.Context
-	logger pkg.Logger
+	ctx        context.Context
+	logger     pkg.Logger
+	grpcServer *server.GRPCServer
 }
 
 func New(ctx context.Context, logger pkg.Logger, cfg config.Audit) error {
@@ -18,10 +20,18 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.Audit) error {
 			ctx:    ctx,
 			logger: logger,
 		}
+		err error
 	)
 
 	ll.Info("start")
 	app.logger.Info("start")
+
+	app.grpcServer, err = server.New(ctx, logger, &cfg.GrpcServer)
+	if err != nil {
+		ll.Named("server.New").Nested(err.Error())
+		return err
+	}
+
 	//
 	//// Провайдеры данных
 	//var (

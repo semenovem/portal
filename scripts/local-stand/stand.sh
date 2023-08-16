@@ -190,6 +190,7 @@ case "$OPER" in
     -w "/debugging" \
     -v "${ROOT}/../../:/debugging:ro" \
     --env-file "${ROOT}/../../deployments/local.env" \
+    -e "GRPC_AUDIT_CLIENT_HOST=audit:9090" \
     "$(func_get_work_image)" bash -c "$CMD"
   ;;
 

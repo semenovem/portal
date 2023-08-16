@@ -67,3 +67,20 @@ type Rest struct {
 	CorsAllowedHosts  string `env:"REST_CORS_ALLOWED_HOSTS,required"`
 	CorsMaxAgeSeconds uint32 `env:"REST_CORS_MAX_AGE_SECONDS,required"`
 }
+
+func (r *Rest) GetCorsMaxAge() time.Duration {
+	return time.Second * time.Duration(r.CorsMaxAgeSeconds)
+}
+
+type GrpcServer struct {
+	Port                 string `env:"GRPC_SERVER_PORT,required"`
+	MaxProcessingTimeSec uint32 `env:"GRPC_SERVER_MAX_PROCESSING_TIME_SEC" envDefault:"5"`
+}
+
+func (s *GrpcServer) GetMaxProcessingTimeSec() time.Duration {
+	return time.Second * time.Duration(s.MaxProcessingTimeSec)
+}
+
+type GrpcClient struct {
+	Host string
+}

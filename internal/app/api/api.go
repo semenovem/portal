@@ -72,7 +72,7 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 
 	// Провайдеры данных
 	var (
-		audit   = provider.NewAudit(app.db, logger)
+		audit   = provider.NewAudit(ctx, app.db, logger, cfg.GetGRPCAuditConfig())
 		authPvd = provider.NewAuthPvd(
 			logger,
 			app.db,

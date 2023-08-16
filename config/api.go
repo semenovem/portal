@@ -21,7 +21,13 @@ type API struct {
 		RefreshTokenCookieName string `env:"JWT_REFRESH_TOKEN_COOKIE_NAME,required"`
 	}
 
-	Grpc struct {
-		//GRPCHost string `env:"GRPC_AUDIT_HOST,required"`
+	GrpcAuditClient struct {
+		Host string `env:"GRPC_AUDIT_CLIENT_HOST,required"`
+	}
+}
+
+func (c *API) GetGRPCAuditConfig() *GrpcClient {
+	return &GrpcClient{
+		Host: c.GrpcAuditClient.Host,
 	}
 }
