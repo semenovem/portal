@@ -2,7 +2,8 @@ package controller
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/semenovem/portal/internal/provider"
+	"github.com/semenovem/portal/internal/provider/auth_provider"
+	"github.com/semenovem/portal/internal/provider/people_provider"
 	"github.com/semenovem/portal/pkg"
 	"github.com/semenovem/portal/pkg/failing"
 	"net/http"
@@ -11,15 +12,15 @@ import (
 type Common struct {
 	logger    pkg.Logger
 	failing   *failing.Service
-	authPvd   *provider.AuthPvd
-	peoplePvd *provider.PeoplePvd
+	authPvd   *auth_provider.AuthProvider
+	peoplePvd *people_provider.PeopleProvider
 }
 
 func NewAction(
 	logger pkg.Logger,
 	failure *failing.Service,
-	authPvd *provider.AuthPvd,
-	peoplePvd *provider.PeoplePvd,
+	authPvd *auth_provider.AuthProvider,
+	peoplePvd *people_provider.PeopleProvider,
 ) *Common {
 	return &Common{
 		logger:    logger.Named("Common"),

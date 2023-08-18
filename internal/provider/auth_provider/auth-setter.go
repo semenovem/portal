@@ -1,4 +1,4 @@
-package provider
+package auth_provider
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"github.com/semenovem/portal/pkg/it"
 )
 
-func (p *AuthPvd) CreateSession(
+func (p *AuthProvider) CreateSession(
 	ctx context.Context,
 	userID uint32,
 	deviceID uuid.UUID,
@@ -33,7 +33,7 @@ func (p *AuthPvd) CreateSession(
 	}, nil
 }
 
-func (p *AuthPvd) LogoutSession(ctx context.Context, sessionID uint32) error {
+func (p *AuthProvider) LogoutSession(ctx context.Context, sessionID uint32) error {
 	sq := `UPDATE auth.sessions SET logout_at = now() WHERE id = $1`
 
 	if _, err := p.db.Exec(ctx, sq, sessionID); err != nil {
@@ -49,7 +49,7 @@ func (p *AuthPvd) LogoutSession(ctx context.Context, sessionID uint32) error {
 	return nil
 }
 
-//func (p *AuthPvd) CreateSession(
+//func (p *AuthProvider) CreateSession(
 //	ctx context.Context,
 //	userID uint32,
 //	deviceID uuid.UUID,

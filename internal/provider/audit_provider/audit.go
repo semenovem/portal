@@ -1,4 +1,4 @@
-package provider
+package audit_provider
 
 import (
 	"context"
@@ -15,7 +15,7 @@ import (
 	proto "github.com/semenovem/portal/proto/audit"
 )
 
-type Audit struct {
+type AuditProvider struct {
 	ctx        context.Context
 	db         *pgxpool.Pool
 	logger     pkg.Logger
@@ -36,8 +36,8 @@ func NewAudit(
 	db *pgxpool.Pool,
 	logger pkg.Logger,
 	grpcConfig *config.GrpcClient,
-) *Audit {
-	o := &Audit{
+) *AuditProvider {
+	o := &AuditProvider{
 		ctx:        ctx,
 		logger:     logger.Named("authPvd"),
 		db:         db,
@@ -50,7 +50,7 @@ func NewAudit(
 	return o
 }
 
-func (a *Audit) connectGrpc() error {
+func (a *AuditProvider) connectGrpc() error {
 	ll := a.logger.Named("connectGrpc")
 
 	conn, err := grpc.Dial(a.grpcConfig.Host, grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -65,7 +65,7 @@ func (a *Audit) connectGrpc() error {
 	return nil
 }
 
-func (a *Audit) processing() {
+func (a *AuditProvider) processing() {
 	var (
 		ll = a.logger.Named("processing")
 	)
@@ -112,7 +112,7 @@ func (a *Audit) processing() {
 }
 
 // Refusal отказ
-func (a *Audit) Refusal(code audit.Code, cause audit.Cause, payload map[string]interface{}) {
+func (a *AuditProvider) Refusal(code audit.Code, cause audit.Cause, payload map[string]interface{}) {
 	a.input <- &auditPipe{
 		code:    code,
 		cause:   cause,
@@ -121,7 +121,7 @@ func (a *Audit) Refusal(code audit.Code, cause audit.Cause, payload map[string]i
 }
 
 // Approved успешно
-func (a *Audit) Approved(code audit.Code, payload map[string]interface{}) {
+func (a *AuditProvider) Approved(code audit.Code, payload map[string]interface{}) {
 	a.input <- &auditPipe{
 		code:    code,
 		payload: payload,
@@ -129,14 +129,14 @@ func (a *Audit) Approved(code audit.Code, payload map[string]interface{}) {
 }
 
 // Send Аудит аутентификации
-func (a *Audit) Send(code audit.Code, decision audit.Decision, payload map[string]interface{}) {
+func (a *AuditProvider) Send(code audit.Code, decision audit.Decision, payload map[string]interface{}) {
 	fmt.Println("audit >>>>>>>>>> code = ", code)
 	fmt.Println("audit >>>>>>>>>> decision = ", decision)
 	fmt.Println("audit >>>>>>>>>> payload = ", payload)
 }
 
 // User Аудит действий пользователя
-func (a *Audit) User(userID uint32, action audit.Action, payload map[string]interface{}) {
+func (a *AuditProvider) User(userID uint32, action audit.Action, payload map[string]interface{}) {
 	fmt.Println("audit >>>>>>>>>> userID = ", userID)
 	fmt.Println("audit >>>>>>>>>> decision = ", action)
 	fmt.Println("audit >>>>>>>>>> payload = ", payload)

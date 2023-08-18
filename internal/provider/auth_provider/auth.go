@@ -1,4 +1,4 @@
-package provider
+package auth_provider
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-type AuthPvd struct {
+type AuthProvider struct {
 	logger                    pkg.Logger
 	db                        *pgxpool.Pool
 	redis                     *redis.Client
@@ -20,8 +20,8 @@ func NewAuthPvd(
 	db *pgxpool.Pool,
 	redisClient *redis.Client,
 	jwtAccessTokenLifetimeMin time.Duration,
-) *AuthPvd {
-	return &AuthPvd{
+) *AuthProvider {
+	return &AuthProvider{
 		logger:                    logger.Named("authPvd"),
 		db:                        db,
 		redis:                     redisClient,
@@ -29,7 +29,7 @@ func NewAuthPvd(
 	}
 }
 
-func (p *AuthPvd) Now(ctx context.Context) (time.Time, error) {
+func (p *AuthProvider) Now(ctx context.Context) (time.Time, error) {
 	var t time.Time
 
 	err := p.db.QueryRow(ctx, "SELECT now()").Scan(&t)

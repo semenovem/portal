@@ -1,4 +1,4 @@
-package provider
+package auth_provider
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 )
 
 // IsSessionCanceled проверяет, закончилась ли сессия
-func (p *AuthPvd) IsSessionCanceled(ctx context.Context, sessionID uint32) (bool, error) {
+func (p *AuthProvider) IsSessionCanceled(ctx context.Context, sessionID uint32) (bool, error) {
 	i, err := p.redis.Exists(ctx, p.getSessionCancelKeyName(sessionID)).Result()
 	if err != nil {
 		p.logger.Named("IsSessionCanceled").RedisTag().Error(err.Error())
@@ -17,7 +17,7 @@ func (p *AuthPvd) IsSessionCanceled(ctx context.Context, sessionID uint32) (bool
 }
 
 // IsSessionCanceled отозвать сессию
-func (p *AuthPvd) setSessionCanceled(ctx context.Context, sessionID uint32) error {
+func (p *AuthProvider) setSessionCanceled(ctx context.Context, sessionID uint32) error {
 	err := p.redis.Set(ctx, p.getSessionCancelKeyName(sessionID), "", p.jwtAccessTokenLifetimeMin).Err()
 	if err != nil {
 		p.logger.Named("setSessionCanceled").RedisTag().Error(err.Error())
@@ -27,6 +27,6 @@ func (p *AuthPvd) setSessionCanceled(ctx context.Context, sessionID uint32) erro
 	return nil
 }
 
-func (p *AuthPvd) getSessionCancelKeyName(sessionID uint32) string {
+func (p *AuthProvider) getSessionCancelKeyName(sessionID uint32) string {
 	return fmt.Sprintf("session_cancel_%d", sessionID)
 }

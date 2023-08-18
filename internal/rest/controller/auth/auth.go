@@ -110,6 +110,55 @@ func (cnt *Controller) Logout(c echo.Context) error {
 	if payload.IsExpired() {
 		ll.Named("IsExpired").Error("refresh token is expired")
 		// TODO сообщение в аудит безопасности
+
+		return cnt.failing.Send(c, "", http.StatusOK, err)
+	}
+
+	if err = cnt.authAct.Logout(ctx, payload.SessionID); err != nil {
+		ll.Named("Logout").Nested(err.Error())
+		return cnt.failing.Send(c, "", http.StatusOK, err)
+	}
+
+	return c.NoContent(http.StatusNoContent)
+}
+
+// Refresh docs
+//
+//	@Summary	Обновление токена авторизации
+//	@Description
+//	@Produce	json
+//	@Success	200		{object}	loginResponse
+//	@Failure	400		{object}	failing.Response
+//	@Router		/auth/refresh [POST]
+//	@Tags		auth
+//	@Security	ApiKeyAuth
+func (cnt *Controller) Refresh(c echo.Context) error {
+	var (
+		ll  = cnt.logger.Named("Refresh")
+		ctx = c.Request().Context()
+	)
+
+	for _, cookie := range cnt.refreshTokenCookies("") {
+		c.SetCookie(cookie)
+	}
+
+	refreshCookie, err := c.Cookie(cnt.jwtRefreshTokenCookieName)
+	if err != nil {
+		ll.Named("Cookie").Error(err.Error())
+		return cnt.failing.Send(c, "", http.StatusOK, err)
+	}
+
+	payload, err := cnt.jwt.GetRefreshPayload(refreshCookie.Value)
+	if err != nil {
+		ll.Named("GetRefreshPayload").Error(err.Error())
+		return cnt.failing.Send(c, "", http.StatusOK, err)
+	}
+
+	ll = ll.With("payload", payload)
+
+	if payload.IsExpired() {
+		ll.Named("IsExpired").Error("refresh token is expired")
+		// TODO сообщение в аудит безопасности
 		return cnt.failing.Send(c, "", http.StatusOK, err)
 	}
 

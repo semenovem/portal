@@ -7,8 +7,9 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/semenovem/portal/config"
-	"github.com/semenovem/portal/internal/action"
-	"github.com/semenovem/portal/internal/provider"
+	"github.com/semenovem/portal/internal/action/auth_action"
+	"github.com/semenovem/portal/internal/provider/auth_provider"
+	"github.com/semenovem/portal/internal/provider/people_provider"
 	"github.com/semenovem/portal/internal/rest/controller"
 	authController "github.com/semenovem/portal/internal/rest/controller/auth"
 	vehicleController "github.com/semenovem/portal/internal/rest/controller/vehicle"
@@ -36,9 +37,9 @@ func New(
 	logger pkg.Logger,
 	config config.API,
 	redisClient *redis.Client,
-	authPvd *provider.AuthPvd,
-	peoplePvd *provider.PeoplePvd,
-	authAct *action.AuthAct,
+	authPvd *auth_provider.AuthProvider,
+	peoplePvd *people_provider.PeopleProvider,
+	authAct *auth_action.AuthAction,
 ) (*Router, error) {
 	var (
 		ll = logger.Named("router")

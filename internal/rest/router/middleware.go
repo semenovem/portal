@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/semenovem/portal/internal/provider"
+	"github.com/semenovem/portal/internal/provider/auth_provider"
 	"github.com/semenovem/portal/pkg"
 	"github.com/semenovem/portal/pkg/failing"
 	"github.com/semenovem/portal/pkg/jwtoken"
@@ -59,7 +59,7 @@ func tokenMiddleware(
 	logger pkg.Logger,
 	fail *failing.Service,
 	jwtService *jwtoken.Service,
-	AuthPvd *provider.AuthPvd,
+	AuthPvd *auth_provider.AuthProvider,
 ) echo.MiddlewareFunc {
 	ll := logger.Named("tokenMiddleware")
 

@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"github.com/semenovem/portal/internal/action"
+	"github.com/semenovem/portal/internal/action/auth_action"
 	"github.com/semenovem/portal/internal/rest/controller"
 	"github.com/semenovem/portal/pkg"
 	"github.com/semenovem/portal/pkg/failing"
@@ -15,7 +15,7 @@ type Controller struct {
 	failing                   *failing.Service
 	jwt                       *jwtoken.Service
 	com                       *controller.Common
-	authAct                   *action.AuthAct
+	authAct                   *auth_action.AuthAction
 	jwtServedDomains          []string
 	jwtRefreshTokenLife       time.Duration
 	jwtRefreshTokenCookieName string
@@ -24,7 +24,7 @@ type Controller struct {
 func New(
 	arg *controller.CntArgs,
 	jwt *jwtoken.Service,
-	authAct *action.AuthAct,
+	authAct *auth_action.AuthAction,
 	jwtServedDomains []string,
 	jwtRefreshTokenLife time.Duration,
 	jwtRefreshTokenCookieName string,

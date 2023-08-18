@@ -1,4 +1,4 @@
-package action
+package auth_action
 
 import (
 	"context"
@@ -18,7 +18,7 @@ const (
 type AuthErr string
 
 // NewLogin авторизация пользователя по логопасу
-func (a *AuthAct) NewLogin(
+func (a *AuthAction) NewLogin(
 	ctx context.Context,
 	login, passwd, userAgent string,
 	deviceID uuid.UUID,
@@ -74,7 +74,7 @@ func (a *AuthAct) NewLogin(
 }
 
 // NewSession создание новой авторизованной сессии
-func (a *AuthAct) NewSession(
+func (a *AuthAction) NewSession(
 	ctx context.Context,
 	user *it.User,
 	userAgent string,
@@ -99,7 +99,7 @@ func (a *AuthAct) NewSession(
 }
 
 // Создание новой авторизованной сессии
-func (a *AuthAct) newSession(
+func (a *AuthAction) newSession(
 	ctx context.Context,
 	user *it.User,
 	deviceID uuid.UUID,
@@ -123,7 +123,7 @@ func (a *AuthAct) newSession(
 }
 
 // Logout разлогин Сессии
-func (a *AuthAct) Logout(ctx context.Context, sessionID uint32) error {
+func (a *AuthAction) Logout(ctx context.Context, sessionID uint32) error {
 	ll := a.logger.Named("Logout")
 
 	if err := a.authPvd.LogoutSession(ctx, sessionID); err != nil {

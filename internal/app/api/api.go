@@ -7,8 +7,10 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/semenovem/portal/config"
-	"github.com/semenovem/portal/internal/action"
-	"github.com/semenovem/portal/internal/provider"
+	"github.com/semenovem/portal/internal/action/auth_action"
+	"github.com/semenovem/portal/internal/provider/audit_provider"
+	"github.com/semenovem/portal/internal/provider/auth_provider"
+	"github.com/semenovem/portal/internal/provider/people_provider"
 	"github.com/semenovem/portal/internal/rest/router"
 	"github.com/semenovem/portal/internal/zoo/conn"
 	"github.com/semenovem/portal/pkg"
@@ -72,14 +74,14 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 
 	// Провайдеры данных
 	var (
-		audit   = provider.NewAudit(ctx, app.db, logger, cfg.GetGRPCAuditConfig())
-		authPvd = provider.NewAuthPvd(
+		audit   = audit_provider.NewAudit(ctx, app.db, logger, cfg.GetGRPCAuditConfig())
+		authPvd = auth_provider.NewAuthPvd(
 			logger,
 			app.db,
 			app.redis,
 			time.Minute*time.Duration(cfg.JWT.AccessTokenLifetimeMin),
 		)
-		peoplePvd = provider.NewPeoplePvd(app.db, logger)
+		peoplePvd = people_provider.NewPeoplePvd(app.db, logger)
 	)
 
 	t, err := authPvd.Now(ctx)
@@ -95,7 +97,7 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 	}
 
 	// Экшены
-	authAct := action.NewAuth(
+	authAct := auth_action.NewAuth(
 		logger,
 		it.NewUserPasswdAuth(cfg.UserPasswdSalt),
 		audit,

@@ -1,11 +1,12 @@
-package provider
+package people_provider
 
 import (
 	"context"
+	"github.com/semenovem/portal/internal/provider"
 	"github.com/semenovem/portal/pkg/it"
 )
 
-func (p *PeoplePvd) GetUser(ctx context.Context, userID uint32) (*it.User, error) {
+func (p *PeopleProvider) GetUser(ctx context.Context, userID uint32) (*it.User, error) {
 	var (
 		sq = `SELECT id, status, roles, start_work_at, fired_at, firstname, surname, avatar
        		FROM people.users
@@ -16,7 +17,7 @@ func (p *PeoplePvd) GetUser(ctx context.Context, userID uint32) (*it.User, error
 	err := p.db.QueryRow(ctx, sq, userID).
 		Scan(&u.ID, &u.Status, &u.Roles, &u.StartWorkAt, &u.FiredAt, &u.FirstName, &u.Surname, &u.Avatar)
 	if err != nil {
-		if !IsNoRows(err) {
+		if !provider.IsNoRows(err) {
 			p.logger.Named("GetUser").Error(err.Error())
 		}
 
@@ -26,7 +27,7 @@ func (p *PeoplePvd) GetUser(ctx context.Context, userID uint32) (*it.User, error
 	return &u, nil
 }
 
-func (p *PeoplePvd) GetUserByLogin(ctx context.Context, loginQuery string) (*it.LoggingUser, error) {
+func (p *PeopleProvider) GetUserByLogin(ctx context.Context, loginQuery string) (*it.LoggingUser, error) {
 	var (
 		sq = `SELECT id, login, passwd_hash
 				FROM people.users
@@ -38,7 +39,7 @@ func (p *PeoplePvd) GetUserByLogin(ctx context.Context, loginQuery string) (*it.
 
 	err := p.db.QueryRow(ctx, sq, loginQuery).Scan(&userID, &login, &passwd)
 	if err != nil {
-		if !IsNoRows(err) {
+		if !provider.IsNoRows(err) {
 			p.logger.DBTag().Named("GetUserByLogin").Error(err.Error())
 		}
 
@@ -47,7 +48,7 @@ func (p *PeoplePvd) GetUserByLogin(ctx context.Context, loginQuery string) (*it.
 
 	user, err := p.GetUser(ctx, userID)
 	if err != nil {
-		if !IsNoRows(err) {
+		if !provider.IsNoRows(err) {
 			p.logger.DBTag().Named("GetUser").Nested(err.Error())
 		}
 
