@@ -1,9 +1,13 @@
 package auth
 
-type loginResponse struct {
+type refreshResponse struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"` // TODO для разработки
-	UserID       uint32 `json:"user_id"`
+}
+
+type loginResponse struct {
+	refreshResponse
+	UserID uint32 `json:"user_id"`
 }
 
 type onetimeAuthResponse struct {

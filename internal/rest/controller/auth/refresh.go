@@ -13,7 +13,7 @@ import (
 //	@Description
 //	@Produce	json
 //	@Param		refresh-token	header		string	true	"refresh токен"
-//	@Success	200				{object}	loginResponse
+//	@Success	200				{object}	refreshResponse
 //	@Failure	400				{object}	failing.Response
 //	@Router		/auth/refresh [POST]
 //	@Tags		auth
@@ -50,9 +50,8 @@ func (cnt *Controller) Refresh(c echo.Context) error {
 
 	ll.With("sessionIDNew", session.ID).Debug("success")
 
-	return c.JSON(http.StatusOK, loginResponse{
+	return c.JSON(http.StatusOK, refreshResponse{
 		AccessToken:  pair.Access,
 		RefreshToken: pair.Refresh,
-		UserID:       session.UserID,
 	})
 }

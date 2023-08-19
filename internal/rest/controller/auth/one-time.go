@@ -108,8 +108,10 @@ func (cnt *Controller) LoginOnetimeLink(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, loginResponse{
-		AccessToken:  pair.Access,
-		RefreshToken: pair.Refresh,
-		UserID:       session.UserID,
+		refreshResponse: refreshResponse{
+			AccessToken:  pair.Access,
+			RefreshToken: pair.Refresh,
+		},
+		UserID: session.UserID,
 	})
 }
