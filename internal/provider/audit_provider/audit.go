@@ -12,24 +12,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	proto "github.com/semenovem/portal/proto/audit"
+	"github.com/semenovem/portal/proto/audit_grpc"
 )
-
-type AuditProvider struct {
-	ctx        context.Context
-	db         *pgxpool.Pool
-	logger     pkg.Logger
-	grpcConfig *config.GrpcClient
-	conn       *grpc.ClientConn
-	client     proto.AuditClient
-	input      chan *auditPipe
-}
-
-type auditPipe struct {
-	code    audit.Code
-	cause   audit.Cause
-	payload map[string]interface{}
-}
 
 func NewAudit(
 	ctx context.Context,
@@ -60,7 +44,7 @@ func (a *AuditProvider) connectGrpc() error {
 	}
 
 	a.conn = conn
-	a.client = proto.NewAuditClient(conn)
+	a.client = audit_grpc.NewAuditClient(conn)
 
 	return nil
 }
@@ -98,7 +82,7 @@ func (a *AuditProvider) processing() {
 			}
 		}
 
-		_, err = a.client.RawString(a.ctx, &proto.RawRequest{
+		_, err = a.client.RawString(a.ctx, &audit_grpc.RawRequest{
 			ID:      uuid.NewString(),
 			Payload: s,
 		})
@@ -136,7 +120,7 @@ func (a *AuditProvider) Send(code audit.Code, decision audit.Decision, payload m
 }
 
 // User Аудит действий пользователя
-func (a *AuditProvider) User(userID uint32, action audit.Action, payload map[string]interface{}) {
+func (a *AuditProvider) User(userID uint32, action audit.Code, payload map[string]interface{}) {
 	fmt.Println("audit >>>>>>>>>> userID = ", userID)
 	fmt.Println("audit >>>>>>>>>> decision = ", action)
 	fmt.Println("audit >>>>>>>>>> payload = ", payload)

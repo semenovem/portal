@@ -1,11 +1,11 @@
-package server
+package grpc_server
 
 import (
 	"context"
 	"fmt"
 	"github.com/semenovem/portal/config"
 	"github.com/semenovem/portal/pkg"
-	"github.com/semenovem/portal/proto/audit"
+	"github.com/semenovem/portal/proto/audit_grpc"
 	"google.golang.org/grpc"
 	"net"
 	"time"
@@ -14,7 +14,7 @@ import (
 type GRPCServer struct {
 	logger pkg.Logger
 	ctx    context.Context
-	audit.AuditServer
+	audit_grpc.AuditServer
 	maxProcessingTime time.Duration
 }
 
@@ -36,7 +36,7 @@ func New(
 
 	fmt.Println(">>>>>>> ", grpcServer)
 
-	audit.RegisterAuditServer(grpcServer, impl)
+	audit_grpc.RegisterAuditServer(grpcServer, impl)
 
 	listener, err := net.Listen("tcp", fmt.Sprint(":", cfg.Port))
 	if err != nil {

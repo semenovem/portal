@@ -2,27 +2,21 @@ package auth_action
 
 import (
 	"context"
+	"errors"
 	"github.com/google/uuid"
 	"github.com/semenovem/portal/internal/provider"
 	"github.com/semenovem/portal/pkg/audit"
 	"github.com/semenovem/portal/pkg/it"
+	"github.com/semenovem/portal/pkg/jwtoken"
 	"github.com/semenovem/portal/pkg/logger"
 )
-
-const (
-	authErrNoFoundUserByLogin = "no found user by login"
-	authErrPasswdIncorrect    = "password is incorrect"
-	authErrUserNotWorks       = "user not works"
-)
-
-type AuthErr string
 
 // NewLogin авторизация пользователя по логопасу
 func (a *AuthAction) NewLogin(
 	ctx context.Context,
 	login, passwd, userAgent string,
 	deviceID uuid.UUID,
-) (*it.AuthSession, AuthErr, error) {
+) (*it.AuthSession, error) {
 	var (
 		ll           = a.logger.Named("NewLogin")
 		auditPayload = audit.P{"login": login, "deviceID": deviceID, "userAgent": userAgent}
@@ -33,69 +27,43 @@ func (a *AuthAction) NewLogin(
 		ll = ll.Named("GetUserByLogin")
 
 		if provider.IsNoRows(err) {
-			ll.Tags(logger.AuthTag, logger.ClientTag).Info(authErrNoFoundUserByLogin)
-			a.audit.Refusal(audit.UserLogin, authErrNoFoundUserByLogin, auditPayload)
+			ll.Tags(logger.AuthTag, logger.ClientTag).Info(errNoFoundUserByLogin.msg)
+			a.audit.Refusal(audit.UserLogin, audit.Cause(errNoFoundUserByLogin.msg), auditPayload)
 
-			return nil, authErrNoFoundUserByLogin, nil
+			return nil, errNoFoundUserByLogin
 		}
 
 		ll.Nested(err.Error())
-		return nil, "", err
+		return nil, err
 	}
 
 	auditPayload["userID"] = loggingUser
 
 	if !a.passwdAuth.Matching(loggingUser.PasswdHash, passwd) {
-		ll.Named("Matching").Tags(logger.AuthTag, logger.ClientTag).Debug(authErrPasswdIncorrect)
-		a.audit.Refusal(audit.UserLogin, authErrPasswdIncorrect, auditPayload)
+		ll.Named("Matching").Tags(logger.AuthTag, logger.ClientTag).Debug(errPasswdIncorrect.msg)
+		a.audit.Refusal(audit.UserLogin, audit.Cause(errPasswdIncorrect.msg), auditPayload)
 
-		return nil, authErrPasswdIncorrect, nil
+		return nil, errPasswdIncorrect
 	}
 
-	session, authErr, err := a.newSession(ctx, loggingUser.ToUser(), deviceID)
-	if err != nil || authErr != "" {
-		ll = ll.Named("newSession")
-		if err != nil {
-			ll.Nested(err.Error())
-		} else {
-			ll.Nested(string(authErr))
+	session, err := a.newSession(ctx, loggingUser.ToUser(), deviceID)
+	if err != nil {
+		ll.Named("newSession").Nested(err.Error())
+
+		if authErr, ok := err.(AuthErr); ok {
+			a.audit.Refusal(audit.UserLogin, audit.Cause(authErr.msg), auditPayload)
 		}
 
-		a.audit.Refusal(audit.UserLogin, audit.Cause(authErr), auditPayload)
-
-		return nil, authErr, err
+		return nil, err
 	}
 
 	auditPayload["sessionID"] = session.ID
 	auditPayload["refreshID"] = session.RefreshID
 	a.audit.Approved(audit.UserLogin, auditPayload)
 
-	return session, "", nil
-}
+	ll.With("sessionID", session.ID).Debug("success")
 
-// NewSession создание новой авторизованной сессии
-func (a *AuthAction) NewSession(
-	ctx context.Context,
-	user *it.User,
-	userAgent string,
-	deviceID uuid.UUID,
-) (*it.AuthSession, AuthErr, error) {
-	var (
-		ll           = a.logger.Named("NewSession")
-		auditPayload = audit.P{"userID": user.ID, "deviceID": deviceID, "userAgent": userAgent}
-	)
-
-	session, authErr, err := a.newSession(ctx, user, deviceID)
-	if err != nil || authErr != "" {
-		ll.Named("newSession").Nested(err.Error())
-		return nil, authErr, err
-	}
-
-	auditPayload["sessionID"] = session.ID
-	auditPayload["refreshID"] = session.RefreshID
-	a.audit.Approved(audit.UserLogin, auditPayload)
-
-	return session, "", nil
+	return session, nil
 }
 
 // Создание новой авторизованной сессии
@@ -103,35 +71,113 @@ func (a *AuthAction) newSession(
 	ctx context.Context,
 	user *it.User,
 	deviceID uuid.UUID,
-) (*it.AuthSession, AuthErr, error) {
+) (*it.AuthSession, error) {
 	ll := a.logger.Named("newSession")
 
 	if err := user.IsWorks(); err != nil {
-		s := authErrUserNotWorks + "(" + err.Error() + ")"
+		s := errUserNotWorks.msg + "(" + err.Error() + ")"
 		ll.AuthTag().Named("IsWorks").With("user", user).Debug(s)
 
-		return nil, AuthErr(s), nil
+		return nil, errUserNotWorks
 	}
 
 	session, err := a.authPvd.CreateSession(ctx, user.ID, deviceID)
 	if err != nil {
 		ll.Named("CreateSession").Nested(err.Error())
-		return nil, "", err
+		return nil, err
 	}
 
-	return session, "", nil
+	return session, nil
 }
 
-// Logout разлогин Сессии
-func (a *AuthAction) Logout(ctx context.Context, sessionID uint32) error {
+// checkRefresh Проверить актуальность refresh токена
+func (a *AuthAction) checkRefresh(
+	ctx context.Context,
+	payload *jwtoken.RefreshPayload,
+) (*it.AuthSession, error) {
+	ll := a.logger.Named("checkRefresh").With("sessionID", payload.SessionID)
+
+	session, err := a.authPvd.GetSession(ctx, payload.SessionID)
+	if err != nil {
+		ll = ll.Named("GetSession")
+
+		if provider.IsNoRows(err) {
+			ll.AuthTag().Info(sessionNotFoundErrMsg.msg)
+			return nil, sessionNotFoundErrMsg
+		}
+
+		ll.Named("GetSession").Nested(err.Error())
+		return nil, err
+	}
+
+	if session.RefreshID != payload.RefreshID {
+		ll.Named("refreshToken").
+			With("refreshID_from_user", payload.RefreshID).
+			With("refreshID_from_DB", session.RefreshID).
+			AuthTag().Info(refreshUnknown.msg)
+
+		return nil, refreshUnknown
+	}
+
+	return session, nil
+}
+
+// Logout разлогин авторизованной сессии пользователя
+func (a *AuthAction) Logout(ctx context.Context, payload *jwtoken.RefreshPayload) error {
 	ll := a.logger.Named("Logout")
 
-	if err := a.authPvd.LogoutSession(ctx, sessionID); err != nil {
+	session, err := a.checkRefresh(ctx, payload)
+	if err != nil {
+		ll.Named("checkRefresh").Nested(err.Error())
+		return err
+	}
+
+	if err = a.authPvd.LogoutSession(ctx, payload.SessionID); err != nil {
 		ll.Named("LogoutSession").Nested(err.Error())
 		return err
 	}
 
-	// TODO сообщение в аудит безопасности
+	a.audit.User(session.UserID, audit.UserLogout, audit.P{"session_id": session.ID})
+
+	ll.With("sessionID", session.ID).Debug("success")
 
 	return nil
+}
+
+// Refresh выпустить новый refresh токен и прекратить действие предыдущего
+func (a *AuthAction) Refresh(
+	ctx context.Context,
+	payload *jwtoken.RefreshPayload,
+) (*it.AuthSession, error) {
+	ll := a.logger.Named("Refresh").With("sessionID", payload.SessionID)
+
+	sessionOld, err := a.checkRefresh(ctx, payload)
+	if err != nil {
+		ll.Named("checkRefresh").Nested(err.Error())
+		return nil, err
+	}
+
+	refreshID := uuid.New()
+
+	err = a.authPvd.UpdateRefreshSession(ctx, payload.SessionID, payload.RefreshID, refreshID)
+	if err != nil {
+		ll = ll.Named("UpdateRefreshSession")
+
+		if provider.IsNoRows(err) {
+			err = errors.New("authorized session could not be updated")
+
+			ll.With("refreshID_old", payload.RefreshID).
+				With("refreshID_new", refreshID).
+				AuthTag().Info(err.Error())
+
+			return nil, err
+		}
+
+		ll.Nested(err.Error())
+		return nil, err
+	}
+
+	ll.With("refreshID", refreshID).Debug("success")
+
+	return sessionOld.Reissue(refreshID), nil
 }

@@ -18,7 +18,7 @@ func IsDuplicateKeyError(err error) bool {
 
 // IsNoRows является ли ошибка БД следствием отсутствия запрошенной строки
 func IsNoRows(err error) bool {
-	return errors.Is(err, sql.ErrNoRows) || errors.Is(err, pgx.ErrNoRows)
+	return errors.Is(err, pgx.ErrNoRows) || errors.Is(err, sql.ErrNoRows)
 }
 
 // IsConstrainForeignKeyError ограничение удаления записи

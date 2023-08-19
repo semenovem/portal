@@ -3,6 +3,7 @@ package router
 func (r *Router) addRoutes() {
 	r.unauth.POST("/auth/login", r.authCnt.Login)
 	r.unauth.POST("/auth/logout", r.authCnt.Logout)
+	r.unauth.POST("/auth/refresh", r.authCnt.Refresh)
 
 	r.auth.GET("/vehicles", r.vehicleCnt.Search)
 

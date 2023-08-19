@@ -3,38 +3,51 @@ package logger
 import (
 	"fmt"
 	"io"
+	"runtime"
 	"strings"
 	"time"
 )
 
-func (p *Pen) save(level Level, format string, v ...any) {
-	var b = make([]byte, prefixLen)
+func (p *pen) save(level Level, format string, v ...any) {
+	var out = make([]byte, prefixLen)
 
 	if !p.hideTime {
-		b = append(b, []byte(fmt.Sprintf(" [%s]", time.Now().Format(time.RFC3339)))...)
+		out = append(out, []byte(fmt.Sprintf(" [%s]", time.Now().Format(time.RFC3339)))...)
 	}
 
+	// Оформление caller
+	_, path, line, _ := runtime.Caller(2)
+	ps := strings.Split(path, "/")
+
+	if len(ps) > 2 {
+		path = strings.Join(ps[len(ps)-3:], "/")
+	}
+
+	caller := fmt.Sprintf(" [%s:%d] ", path, line)
+	out = append(out, []byte(caller)...)
+	// ------------------------------------------------------
+
 	if p.names != nil {
-		b = append(b, []byte(" "+strings.Join(p.names, "."))...)
+		out = append(out, []byte(" "+strings.Join(p.names, "."))...)
 		if p.isNested {
-			b = append(b, nestedBytes...)
+			out = append(out, nestedBytes...)
 		}
 	}
 
 	if p.tags != nil {
-		b = append(b, []byte(" ["+strings.Join(p.tags, ".")+"]")...)
+		out = append(out, []byte(" ["+strings.Join(p.tags, ".")+"]")...)
 		if p.isNested {
-			b = append(b, nestedBytes...)
+			out = append(out, nestedBytes...)
 		}
 	}
 
 	if p.params != nil {
-		b = append(b, []byte(" ["+strings.Join(p.params, ", ")+"]")...)
+		out = append(out, []byte(" ["+strings.Join(p.params, ", ")+"]")...)
 	}
 
-	b = append(b, []byte(" "+fmt.Sprintf(format, v...))...)
+	out = append(out, []byte(" "+fmt.Sprintf(format, v...))...)
 
-	b = append(b, []byte("\n")...)
+	out = append(out, []byte("\n")...)
 
 	var (
 		writer io.Writer
@@ -53,15 +66,15 @@ func (p *Pen) save(level Level, format string, v ...any) {
 		writer = p.outDeb
 	}
 
-	_ = copy(b[0:prefixLen], prefix)
+	_ = copy(out[0:prefixLen], prefix)
 
-	if _, err := writer.Write(b); err != nil {
-		fmt.Println(prefixErr, string(b))
+	if _, err := writer.Write(out); err != nil {
+		fmt.Println(prefixErr, string(out))
 	}
 }
 
-func (p *Pen) copy() *Pen {
-	a := Pen{
+func (p *pen) copy() *pen {
+	a := pen{
 		level:    p.level,
 		isNested: p.isNested,
 		hideTime: p.hideTime,

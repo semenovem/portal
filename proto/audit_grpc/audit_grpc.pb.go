@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.21.4
-// source: audit/audit.proto
+// source: audit_grpc/audit.proto
 
-package audit
+package audit_grpc
 
 import (
 	context "context"
@@ -101,5 +101,5 @@ var Audit_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "audit/audit.proto",
+	Metadata: "audit_grpc/audit.proto",
 }

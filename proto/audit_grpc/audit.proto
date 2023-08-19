@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/semenovem/portal/proto/audit";
+option go_package = "github.com/semenovem/portal/proto/audit_grpc";
 
 package proto;
 

@@ -31,3 +31,32 @@ func NewAuth(
 		peoplePvd:  peoplePvd,
 	}
 }
+
+//vc-8182 mvp users search
+
+var (
+	errNoFoundUserByLogin = newAuthErr("no found user by login")
+	errPasswdIncorrect    = newAuthErr("password is incorrect")
+	errUserNotWorks       = newAuthErr("user not works")
+	sessionNotFoundErrMsg = newAuthErr("auth session not found")
+	refreshUnknown        = newAuthErr("refresh token data does not match")
+)
+
+type AuthErr struct {
+	msg string
+}
+
+func (e AuthErr) Error() string {
+	return e.msg
+}
+
+func IsAuthErr(err error) bool {
+	_, ok := err.(*AuthErr)
+	return ok
+}
+
+func newAuthErr(msg string) *AuthErr {
+	return &AuthErr{
+		msg: msg,
+	}
+}

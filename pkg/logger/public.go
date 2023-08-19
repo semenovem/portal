@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-type Pen struct {
+type pen struct {
 	names    []string
 	params   []string
 	level    int8
@@ -20,9 +20,9 @@ type Pen struct {
 	tags     []string
 }
 
-func New() (*Pen, *Setter) {
+func New() (pkg.Logger, *Setter) {
 	st := Setter{
-		logger: &Pen{
+		logger: &pen{
 			outErr: os.Stdout,
 			outInf: os.Stdout,
 			outDeb: os.Stdout,
@@ -32,7 +32,7 @@ func New() (*Pen, *Setter) {
 	return st.logger, &st
 }
 
-func (p *Pen) Named(n string) pkg.Logger {
+func (p *pen) Named(n string) pkg.Logger {
 	a := p.copy()
 
 	if a.names == nil {
@@ -44,7 +44,7 @@ func (p *Pen) Named(n string) pkg.Logger {
 	return a
 }
 
-func (p *Pen) With(k string, v interface{}) pkg.Logger {
+func (p *pen) With(k string, v interface{}) pkg.Logger {
 	a := p.copy()
 
 	if a.params == nil {
@@ -56,41 +56,41 @@ func (p *Pen) With(k string, v interface{}) pkg.Logger {
 	return a
 }
 
-func (p *Pen) Error(format string) {
+func (p *pen) Error(format string) {
 	p.save(Error, format)
 }
 
-func (p *Pen) Errorf(format string, v ...any) {
+func (p *pen) Errorf(format string, v ...any) {
 	p.save(Error, format, v...)
 }
 
-func (p *Pen) Info(format string) {
+func (p *pen) Info(format string) {
 	p.save(Info, format)
 }
 
-func (p *Pen) Infof(format string, v ...any) {
+func (p *pen) Infof(format string, v ...any) {
 	p.save(Info, format, v...)
 }
 
-func (p *Pen) Debug(format string) {
+func (p *pen) Debug(format string) {
 	p.save(Debug, format)
 }
 
-func (p *Pen) Debugf(format string, v ...any) {
+func (p *pen) Debugf(format string, v ...any) {
 	p.save(Debug, format, v...)
 }
 
-func (p *Pen) Nested(format string) {
+func (p *pen) Nested(format string) {
 	p.isNested = true
 	p.save(Debug, format)
 }
 
-func (p *Pen) Nestedf(format string, v ...any) {
+func (p *pen) Nestedf(format string, v ...any) {
 	p.isNested = true
 	p.save(Debug, format, v...)
 }
 
-func (p *Pen) Tags(tags ...string) pkg.Logger {
+func (p *pen) Tags(tags ...string) pkg.Logger {
 	if p.tags == nil {
 		p.tags = make([]string, 0)
 	}
@@ -100,14 +100,14 @@ func (p *Pen) Tags(tags ...string) pkg.Logger {
 	return p
 }
 
-func (p *Pen) DBTag() pkg.Logger {
+func (p *pen) DBTag() pkg.Logger {
 	return p.Tags(DatabaseTag)
 }
 
-func (p *Pen) RedisTag() pkg.Logger {
+func (p *pen) RedisTag() pkg.Logger {
 	return p.Tags(RedisTag)
 }
 
-func (p *Pen) AuthTag() pkg.Logger {
+func (p *pen) AuthTag() pkg.Logger {
 	return p.Tags(AuthTag)
 }

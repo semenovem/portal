@@ -1,10 +1,12 @@
 package auth
 
 import (
+	"github.com/labstack/echo/v4"
 	"github.com/semenovem/portal/internal/action/auth_action"
 	"github.com/semenovem/portal/internal/rest/controller"
 	"github.com/semenovem/portal/pkg"
 	"github.com/semenovem/portal/pkg/failing"
+	"github.com/semenovem/portal/pkg/it"
 	"github.com/semenovem/portal/pkg/jwtoken"
 	"net/http"
 	"time"
@@ -65,4 +67,47 @@ func (cnt *Controller) refreshTokenCookies(refreshToken string) []*http.Cookie {
 	}
 
 	return cookies
+}
+
+// Получить токен и проверить срок его действия
+func (cnt *Controller) extractRefreshToken(c echo.Context) (*jwtoken.RefreshPayload, failing.Nested) {
+	var (
+		ll = cnt.logger.Named("ExtractRefreshToken").AuthTag()
+	)
+
+	refreshCookie, err := c.Cookie(cnt.jwtRefreshTokenCookieName)
+	if err != nil {
+		ll.Named("Cookie").Error(err.Error())
+		return nil, failing.NewNested(http.StatusUnauthorized, err)
+	}
+
+	payload, err := cnt.jwt.GetRefreshPayload(refreshCookie.Value)
+	if err != nil {
+		ll.Named("GetRefreshPayload").Error(err.Error())
+		return nil, failing.NewNested(http.StatusUnauthorized, err)
+	}
+
+	if payload.IsExpired() {
+		ll.With("payload", payload).AuthTag().Info("refresh token is expired")
+		return nil, failing.NewNested(http.StatusUnauthorized, err)
+	}
+
+	return payload, nil
+}
+
+// ExtractRefreshToken получить токен и проверить срок его действия
+func (cnt *Controller) pairToken(session *it.AuthSession) (*jwtoken.PairTokens, failing.Nested) {
+	ll := cnt.logger.Named("ExtractRefreshToken").AuthTag()
+
+	pair, err := cnt.jwt.NewPairTokens(&jwtoken.TokenParams{
+		SessionID: session.ID,
+		UserID:    session.UserID,
+		RefreshID: session.RefreshID,
+	})
+	if err != nil {
+		ll.Named("NewPairTokens").Error(err.Error())
+		return nil, failing.NewNested(http.StatusInternalServerError, err)
+	}
+
+	return pair, nil
 }

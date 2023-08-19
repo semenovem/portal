@@ -1,14 +1,14 @@
 package logger
 
 type Setter struct {
-	logger *Pen
+	logger *pen
 }
 
 func (s *Setter) SetLevel(level int8) {
 	s.logger.setLevel(level)
 }
 
-func (p *Pen) setLevel(lev int8) {
+func (p *pen) setLevel(lev int8) {
 	p.level = lev
 }
 

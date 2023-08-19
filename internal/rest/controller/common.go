@@ -30,8 +30,8 @@ func NewAction(
 	}
 }
 
-// ExtractFormFromRequest получить данные из запроса
-func (a *Common) ExtractFormFromRequest(c echo.Context, form interface{}) failing.Nested {
+// ExtractForm получить данные из запроса
+func (a *Common) ExtractForm(c echo.Context, form interface{}) failing.Nested {
 	if err := c.Bind(form); err != nil {
 		a.logger.Named("GetFormFromRequest.bind.CLIENT").Debug(err.Error())
 		return failing.NewNested(http.StatusBadRequest, err)

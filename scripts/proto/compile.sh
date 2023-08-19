@@ -12,11 +12,10 @@ err() {
   echo "\033[0;31m[ERR] $*\033[0m"
 }
 help() {
-  info "buf generate : compile.sh buf"
-  info "proto compile: compile.sh censor"
-  info "proto compile: compile.sh ...имена директорий для компиляции"
+  info "proto compile: compile.sh"
   info "show versions: compile.sh ver"
 }
+
 show_versions() {
   info "Версии библиотек: "
 
@@ -67,7 +66,7 @@ for p in "$@"; do
 done
 
 CMD="protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=."
-CMD="${CMD} --go-grpc_opt=paths=source_relative -I. audit/*.proto"
+CMD="${CMD} --go-grpc_opt=paths=source_relative -I. audit_grpc/*.proto"
 
 echo "cmd = $CMD"
 

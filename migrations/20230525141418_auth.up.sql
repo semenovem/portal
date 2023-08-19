@@ -5,6 +5,6 @@ CREATE TABLE IF NOT EXISTS auth.sessions
   user_id    integer REFERENCES people.users NOT NULL,
   device_id  uuid                            NOT NULL,
   created_at timestamp default now()         NOT NULL,
-  logout_at  timestamp default NULL          NULL,
+  logouted   bool      default false         NOT NULL, -- вышел из системы или был разлогинен
   refresh_id uuid                            NOT NULL
 );

@@ -3,6 +3,7 @@ package auth_provider
 import (
 	"context"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/semenovem/portal/pkg/it"
 )
 
@@ -12,7 +13,6 @@ func (p *AuthProvider) CreateSession(
 	deviceID uuid.UUID,
 ) (*it.AuthSession, error) {
 	var (
-		ll        = p.logger.Named("CreateSession")
 		refreshID = uuid.New()
 		sessionID uint32
 
@@ -21,7 +21,8 @@ func (p *AuthProvider) CreateSession(
 	)
 
 	if err := p.db.QueryRow(ctx, sq, userID, deviceID, refreshID).Scan(&sessionID); err != nil {
-		ll.DBTag().Named("QueryRow").With("userID", userID).Error(err.Error())
+		p.logger.DBTag().Named("CreateSession.QueryRow").
+			With("userID", userID).Error(err.Error())
 		return nil, err
 	}
 
@@ -34,16 +35,51 @@ func (p *AuthProvider) CreateSession(
 }
 
 func (p *AuthProvider) LogoutSession(ctx context.Context, sessionID uint32) error {
-	sq := `UPDATE auth.sessions SET logout_at = now() WHERE id = $1`
+	var (
+		ll = p.logger.Named("LogoutSession").With("sessionID", sessionID)
+		sq = `UPDATE auth.sessions SET logouted = true WHERE logouted = false AND id = $1`
+	)
 
-	if _, err := p.db.Exec(ctx, sq, sessionID); err != nil {
-		p.logger.Named("LogoutSession").With("sessionID", sessionID).DBTag().Error(err.Error())
+	if result, err := p.db.Exec(ctx, sq, sessionID); err != nil {
+		ll.Named("Exec").DBTag().Error(err.Error())
+		return err
+	} else if result.RowsAffected() == 0 {
+		ll.Named("Exec").AuthTag().Info("auth session id (not logouted) not found")
+	}
+
+	if err := p.sessionCanceled(ctx, sessionID); err != nil {
+		ll.Named("sessionCanceled").Nested(err.Error())
 		return err
 	}
 
-	if err := p.setSessionCanceled(ctx, sessionID); err != nil {
-		p.logger.Named("setSessionCanceled").With("sessionID", sessionID).Nested(err.Error())
+	return nil
+}
+
+func (p *AuthProvider) UpdateRefreshSession(
+	ctx context.Context,
+	sessionID uint32,
+	refreshOldID uuid.UUID,
+	refreshNewID uuid.UUID,
+) error {
+	var (
+		ll = p.logger.Named("UpdateRefreshSession").
+			With("sessionID", sessionID).
+			With("refreshOldID", refreshOldID).
+			With("refreshNewID", refreshNewID)
+
+		sq = `UPDATE auth.sessions SET refresh_id = $3
+				WHERE logouted = false AND refresh_id = $2 AND id = $1`
+	)
+
+	result, err := p.db.Exec(ctx, sq, sessionID, refreshOldID, refreshNewID)
+	if err != nil {
+		ll.Named("Exec").DBTag().Error(err.Error())
 		return err
+	}
+
+	if result.RowsAffected() == 0 {
+		ll.Named("RowsAffected").Debug(err.Error())
+		return pgx.ErrNoRows
 	}
 
 	return nil
