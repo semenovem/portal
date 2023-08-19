@@ -80,6 +80,7 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 			app.db,
 			app.redis,
 			time.Minute*time.Duration(cfg.JWT.AccessTokenLifetimeMin),
+			time.Minute*time.Duration(cfg.Auth.OnetimeEntryLifetimeMin),
 		)
 		peoplePvd = people_provider.NewPeoplePvd(app.db, logger)
 	)
@@ -110,10 +111,10 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 		ctx,
 		logger,
 		cfg,
-		app.redis,
 		authPvd,
 		peoplePvd,
 		authAct,
+		audit,
 	); err != nil {
 		ll.Named("router").Nested(err.Error())
 		return err

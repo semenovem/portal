@@ -51,8 +51,23 @@ definitions:
     properties:
       access_token:
         type: string
+      refresh_token:
+        description: TODO для разработки
+        type: string
       user_id:
         type: integer
+    type: object
+  internal_rest_controller_auth.onetimeAuthForm:
+    properties:
+      user_id:
+        type: integer
+    required:
+    - user_id
+    type: object
+  internal_rest_controller_auth.onetimeAuthResponse:
+    properties:
+      uri:
+        type: string
     type: object
   internal_rest_controller_vehicle.ListResponse:
     properties:
@@ -99,6 +114,97 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Авторизация пользователя
+      tags:
+      - auth
+  /auth/logout:
+    post:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_rest_controller_auth.loginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_semenovem_portal_pkg_failing.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Выход из авторизованной сессии пользователя
+      tags:
+      - auth
+  /auth/onetime:
+    post:
+      parameters:
+      - description: данные для создания сессии
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/internal_rest_controller_auth.onetimeAuthForm'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_rest_controller_auth.onetimeAuthResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_semenovem_portal_pkg_failing.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Создание ссылки для одноразовой авторизации
+      tags:
+      - auth
+  /auth/onetime/:entry_id:
+    post:
+      parameters:
+      - description: id сессии авторизации
+        in: path
+        name: session_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_rest_controller_auth.loginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_semenovem_portal_pkg_failing.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Логин по одноразовой ссылке
+      tags:
+      - auth
+  /auth/refresh:
+    post:
+      parameters:
+      - description: asdfasdf
+        in: header
+        name: refresh-token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_rest_controller_auth.loginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_semenovem_portal_pkg_failing.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Обновление токена авторизации
       tags:
       - auth
   /vehicles:

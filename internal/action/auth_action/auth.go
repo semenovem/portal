@@ -27,10 +27,10 @@ func (a *AuthAction) NewLogin(
 		ll = ll.Named("GetUserByLogin")
 
 		if provider.IsNoRows(err) {
-			ll.Tags(logger.AuthTag, logger.ClientTag).Info(errNoFoundUserByLogin.msg)
-			a.audit.Refusal(audit.UserLogin, audit.Cause(errNoFoundUserByLogin.msg), auditPayload)
+			ll.Tags(logger.AuthTag, logger.ClientTag).Info(errUserNoFound.msg)
+			a.audit.Refusal(audit.UserLogin, audit.Cause(errUserNoFound.msg), auditPayload)
 
-			return nil, errNoFoundUserByLogin
+			return nil, errUserNoFound
 		}
 
 		ll.Nested(err.Error())
@@ -66,6 +66,45 @@ func (a *AuthAction) NewLogin(
 	return session, nil
 }
 
+// NewSession Создание новой авторизованной сессии
+//func (a *AuthAction) NewSession(
+//	ctx context.Context,
+//	userID uint32,
+//	deviceID uuid.UUID,
+//) (*it.AuthSession, error) {
+//	ll := a.logger.Named("NewSession")
+//
+//	user, err := a.peoplePvd.GetUser(ctx, userID)
+//	if err != nil {
+//		ll.Named("GetUser").Nested(err.Error())
+//
+//		if provider.IsNoRows(err) {
+//			return nil, errUserNoFound
+//		}
+//
+//		return nil, err
+//	}
+//
+//	session, err := a.newSession(ctx, user, deviceID)
+//	if err != nil {
+//		ll.Named("newSession").Nested(err.Error())
+//		return nil, err
+//	}
+//
+//	return session, nil
+//}
+
+func (a *AuthAction) canAuth(user *it.User) error {
+	if err := user.IsWorks(); err != nil {
+		s := errUserNotWorks.msg + "(" + err.Error() + ")"
+		a.logger.Named("canAuth").AuthTag().With("user", user).Debug(s)
+
+		return errUserNotWorks
+	}
+
+	return nil
+}
+
 // Создание новой авторизованной сессии
 func (a *AuthAction) newSession(
 	ctx context.Context,
@@ -74,11 +113,9 @@ func (a *AuthAction) newSession(
 ) (*it.AuthSession, error) {
 	ll := a.logger.Named("newSession")
 
-	if err := user.IsWorks(); err != nil {
-		s := errUserNotWorks.msg + "(" + err.Error() + ")"
-		ll.AuthTag().Named("IsWorks").With("user", user).Debug(s)
-
-		return nil, errUserNotWorks
+	if err := a.canAuth(user); err != nil {
+		ll.Named("canAuth").Nested(err.Error())
+		return nil, err
 	}
 
 	session, err := a.authPvd.CreateSession(ctx, user.ID, deviceID)
@@ -176,8 +213,6 @@ func (a *AuthAction) Refresh(
 		ll.Nested(err.Error())
 		return nil, err
 	}
-
-	ll.With("refreshID", refreshID).Debug("success")
 
 	return sessionOld.Reissue(refreshID), nil
 }

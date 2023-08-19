@@ -3,6 +3,8 @@ package auth
 import (
 	"github.com/labstack/echo/v4"
 	"net/http"
+
+	_ "github.com/semenovem/portal/pkg/failing"
 )
 
 // Refresh docs
@@ -10,8 +12,9 @@ import (
 //	@Summary	Обновление токена авторизации
 //	@Description
 //	@Produce	json
-//	@Success	200		{object}	loginResponse
-//	@Failure	400		{object}	failing.Response
+//	@Param		refresh-token	header		string	true	"refresh токен"
+//	@Success	200				{object}	loginResponse
+//	@Failure	400				{object}	failing.Response
 //	@Router		/auth/refresh [POST]
 //	@Tags		auth
 //	@Security	ApiKeyAuth
@@ -44,6 +47,8 @@ func (cnt *Controller) Refresh(c echo.Context) error {
 	for _, cookie := range cnt.refreshTokenCookies(pair.Refresh) {
 		c.SetCookie(cookie)
 	}
+
+	ll.With("sessionIDNew", session.ID).Debug("success")
 
 	return c.JSON(http.StatusOK, loginResponse{
 		AccessToken:  pair.Access,

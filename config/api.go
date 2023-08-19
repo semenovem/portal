@@ -21,6 +21,10 @@ type API struct {
 		RefreshTokenCookieName string `env:"JWT_REFRESH_TOKEN_COOKIE_NAME,required"`
 	}
 
+	Auth struct {
+		OnetimeEntryLifetimeMin uint32 `env:"AUTH_ONETIME_ENTRY_LIFETIME_MIN,required"`
+	}
+
 	GrpcAuditClient struct {
 		Host string `env:"GRPC_AUDIT_CLIENT_HOST,required"`
 	}

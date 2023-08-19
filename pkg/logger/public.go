@@ -80,6 +80,22 @@ func (p *pen) Debugf(format string, v ...any) {
 	p.save(Debug, format, v...)
 }
 
+func (p *pen) DebugOrErr(isDebug bool, format string) {
+	if isDebug {
+		p.save(Debug, format)
+	} else {
+		p.save(Error, format)
+	}
+}
+
+func (p *pen) DebugOrErrf(isDebug bool, format string, v ...any) {
+	if isDebug {
+		p.save(Debug, format, v...)
+	} else {
+		p.save(Error, format, v...)
+	}
+}
+
 func (p *pen) Nested(format string) {
 	p.isNested = true
 	p.save(Debug, format)
@@ -110,4 +126,8 @@ func (p *pen) RedisTag() pkg.Logger {
 
 func (p *pen) AuthTag() pkg.Logger {
 	return p.Tags(AuthTag)
+}
+
+func (p *pen) ClientTag() pkg.Logger {
+	return p.Tags(ClientTag)
 }

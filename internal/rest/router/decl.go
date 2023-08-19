@@ -3,11 +3,11 @@ package router
 import (
 	"context"
 	"fmt"
-	"github.com/go-redis/redis/v8"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/semenovem/portal/config"
 	"github.com/semenovem/portal/internal/action/auth_action"
+	"github.com/semenovem/portal/internal/provider/audit_provider"
 	"github.com/semenovem/portal/internal/provider/auth_provider"
 	"github.com/semenovem/portal/internal/provider/people_provider"
 	"github.com/semenovem/portal/internal/rest/controller"
@@ -36,10 +36,10 @@ func New(
 	ctx context.Context,
 	logger pkg.Logger,
 	config config.API,
-	redisClient *redis.Client,
 	authPvd *auth_provider.AuthProvider,
 	peoplePvd *people_provider.PeopleProvider,
 	authAct *auth_action.AuthAction,
+	audit *audit_provider.AuditProvider,
 ) (*Router, error) {
 	var (
 		ll = logger.Named("router")
@@ -127,6 +127,7 @@ func New(
 			&cntArg,
 			jwtService,
 			authAct,
+			audit,
 			strings.Split(config.JWT.ServedDomains, ","),
 			time.Hour*24*time.Duration(config.JWT.RefreshTokenLifetimeDay),
 			config.JWT.RefreshTokenCookieName,
@@ -143,7 +144,7 @@ func New(
 		authCnt:    authCnt,
 	}
 
-	r.unauth = e.Group("v1")
+	r.unauth = e.Group("")
 	r.auth = r.unauth.Group("", tokenMiddleware(logger, failure, jwtService, authPvd))
 
 	r.addRoutes()

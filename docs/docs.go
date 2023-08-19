@@ -66,6 +66,155 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/logout": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Выход из авторизованной сессии пользователя",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_rest_controller_auth.loginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/onetime": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Создание ссылки для одноразовой авторизации",
+                "parameters": [
+                    {
+                        "description": "данные для создания сессии",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_rest_controller_auth.onetimeAuthForm"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_rest_controller_auth.onetimeAuthResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/onetime/:entry_id": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Логин по одноразовой ссылке",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id сессии авторизации",
+                        "name": "session_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_rest_controller_auth.loginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/refresh": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Обновление токена авторизации",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "asdfasdf",
+                        "name": "refresh-token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_rest_controller_auth.loginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/vehicles": {
             "get": {
                 "security": [
@@ -327,8 +476,31 @@ const docTemplate = `{
                 "access_token": {
                     "type": "string"
                 },
+                "refresh_token": {
+                    "description": "TODO для разработки",
+                    "type": "string"
+                },
                 "user_id": {
                     "type": "integer"
+                }
+            }
+        },
+        "internal_rest_controller_auth.onetimeAuthForm": {
+            "type": "object",
+            "required": [
+                "user_id"
+            ],
+            "properties": {
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "internal_rest_controller_auth.onetimeAuthResponse": {
+            "type": "object",
+            "properties": {
+                "uri": {
+                    "type": "string"
                 }
             }
         },

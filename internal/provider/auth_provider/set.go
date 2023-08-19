@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/semenovem/portal/internal/provider"
 	"github.com/semenovem/portal/pkg/it"
 )
 
@@ -83,6 +84,38 @@ func (p *AuthProvider) UpdateRefreshSession(
 	}
 
 	return nil
+}
+
+func (p *AuthProvider) NewOnetimeEntry(
+	ctx context.Context,
+	userID uint32,
+) (entryID uuid.UUID, err error) {
+	entryID = uuid.New()
+
+	err = p.redis.Set(ctx, getOnetimeEntryKeyName(entryID), userID, p.onetimeEntryLifetime).Err()
+	if err != nil {
+		p.logger.Named("NewOnetimeEntry").With("onetimeEntryID", entryID).Error(err.Error())
+	}
+
+	return entryID, err
+}
+
+func (p *AuthProvider) GetDelOnetimeEntry(
+	ctx context.Context,
+	entryID uuid.UUID,
+) (userID uint32, err error) {
+	v, err := p.redis.GetDel(ctx, getOnetimeEntryKeyName(entryID)).Uint64()
+	if err != nil {
+		ll := p.logger.Named("GetDelOnetimeEntry").With("onetimeEntryID", entryID)
+
+		if provider.IsNoRec(err) {
+			ll.Debug(provider.MsgErrNoRecordRedis)
+		} else {
+			ll.Error(err.Error())
+		}
+	}
+
+	return uint32(v), err
 }
 
 //func (p *AuthProvider) CreateSession(

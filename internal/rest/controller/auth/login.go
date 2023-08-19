@@ -73,8 +73,9 @@ func (cnt *Controller) Login(c echo.Context) error {
 //	@Summary	Выход из авторизованной сессии пользователя
 //	@Description
 //	@Produce	json
-//	@Success	200		{object}	loginResponse
-//	@Failure	400		{object}	failing.Response
+//	@Param		refresh-token	header		string	true	"refresh токен"
+//	@Success	200	{object}	loginResponse
+//	@Failure	400	{object}	failing.Response
 //	@Router		/auth/logout [POST]
 //	@Tags		auth
 //	@Security	ApiKeyAuth

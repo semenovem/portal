@@ -3,6 +3,7 @@ package auth
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/semenovem/portal/internal/action/auth_action"
+	"github.com/semenovem/portal/internal/provider/audit_provider"
 	"github.com/semenovem/portal/internal/rest/controller"
 	"github.com/semenovem/portal/pkg"
 	"github.com/semenovem/portal/pkg/failing"
@@ -18,6 +19,7 @@ type Controller struct {
 	jwt                       *jwtoken.Service
 	com                       *controller.Common
 	authAct                   *auth_action.AuthAction
+	audit                     *audit_provider.AuditProvider
 	jwtServedDomains          []string
 	jwtRefreshTokenLife       time.Duration
 	jwtRefreshTokenCookieName string
@@ -27,6 +29,7 @@ func New(
 	arg *controller.CntArgs,
 	jwt *jwtoken.Service,
 	authAct *auth_action.AuthAction,
+	audit *audit_provider.AuditProvider,
 	jwtServedDomains []string,
 	jwtRefreshTokenLife time.Duration,
 	jwtRefreshTokenCookieName string,
@@ -36,6 +39,7 @@ func New(
 		failing:                   arg.Failing,
 		com:                       arg.Common,
 		authAct:                   authAct,
+		audit:                     audit,
 		jwt:                       jwt,
 		jwtServedDomains:          jwtServedDomains,
 		jwtRefreshTokenLife:       jwtRefreshTokenLife,

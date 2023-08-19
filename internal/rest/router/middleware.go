@@ -69,13 +69,23 @@ func tokenMiddleware(
 
 			if tokenFromHeader == "" {
 				ll.AuthTag().Debug("empty header [Authorization] token")
-				return fail.Send(c, "", http.StatusUnauthorized, errors.New("empty header [Authorization] token"))
+				return fail.Send(
+					c,
+					"",
+					http.StatusUnauthorized,
+					errors.New("empty header [Authorization] token"),
+				)
 			}
 
 			split := strings.Fields(tokenFromHeader)
 			if len(split) != 2 {
 				ll.AuthTag().Debug("invalid bearer token")
-				return fail.Send(c, "", http.StatusUnauthorized, errors.New("invalid bearer token"))
+				return fail.Send(
+					c,
+					"",
+					http.StatusUnauthorized,
+					errors.New("invalid bearer token"),
+				)
 			}
 
 			payload, err := jwtService.GetAccessPayload(split[1])
@@ -86,7 +96,12 @@ func tokenMiddleware(
 
 			if payload.IsExpired() {
 				ll.AuthTag().Debug("access token expired")
-				return fail.Send(c, "", http.StatusUnauthorized, errors.New("access token expired"))
+				return fail.Send(
+					c,
+					"",
+					http.StatusUnauthorized,
+					errors.New("access token expired"),
+				)
 			}
 
 			// Проверить отозванные сессии
@@ -96,42 +111,17 @@ func tokenMiddleware(
 				return fail.SendInternalServerErr(c, "", err)
 			}
 
-			fmt.Printf("!!!!!!!!!!! = isCancel =  %+v\n", payload)
-			fmt.Printf("!!!!!!!!!!! = isCancel =  %+v\n", isCancel)
+			if isCancel {
+				ll.Debug("user is logouted")
+				return fail.Send(
+					c,
+					"",
+					http.StatusUnauthorized,
+					errors.New("user is logouted"),
+				)
+			}
 
-			//if !token.Valid {
-			//	ll.Named("AUTH").Warn("Token invalid")
-			//	return fail.Send(c, "", http.StatusUnauthorized, errors.New("token invalid"))
-			//}
-			//
-			//authToken, err := extractAuthTokenFromAccessToken(token, c)
-			//if err != nil {
-			//	return fail.Send(c, "", http.StatusUnauthorized, err)
-			//}
-			//
-			//ctx := c.Request().Context()
-			//
-			//has, err := action.HasTokenRevokedInRedis(ctx, authToken.RefreshID)
-			//if err != nil {
-			//	ll.Named("REDIS").With("authToken", authToken).Error(err)
-			//	return fail.SendInternalServerErr(c, "", err)
-			//}
-			//
-			//if has {
-			//	err = errors.New("refresh token has been revoked")
-			//	ll.Named("AUTH").With("authToken", authToken).Debug(err)
-			//
-			//	return fail.Send(c, "", http.StatusUnauthorized, err)
-			//}
-			//
-			//has, nested := hasUserAuth2factor(c.Request().Context(), authToken)
-			//if nested != nil {
-			//	ll.Named("NESTED").Debug(nested.Message())
-			//	return fail.SendNested(c, "", nested)
-			//}
-			//
-			//c.Set(common.AuthTokenKeyName, authToken)
-			//c.Set(authUserHave2FA, has)
+			c.Set("this_user_id", payload.UserID)
 
 			return next(c)
 		}

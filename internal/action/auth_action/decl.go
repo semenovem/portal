@@ -32,14 +32,13 @@ func NewAuth(
 	}
 }
 
-//vc-8182 mvp users search
-
 var (
-	errNoFoundUserByLogin = newAuthErr("no found user by login")
+	errUserNoFound        = newAuthErr("user no found")
 	errPasswdIncorrect    = newAuthErr("password is incorrect")
 	errUserNotWorks       = newAuthErr("user not works")
 	sessionNotFoundErrMsg = newAuthErr("auth session not found")
 	refreshUnknown        = newAuthErr("refresh token data does not match")
+	onetimeEntryNotFound  = newAuthErr("onetime entry not found")
 )
 
 type AuthErr struct {

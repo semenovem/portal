@@ -3,8 +3,13 @@ package provider
 import (
 	"database/sql"
 	"errors"
+	"github.com/go-redis/redis/v8"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
+)
+
+const (
+	MsgErrNoRecordRedis = "no record in redis"
 )
 
 // IsDuplicateKeyError является ли ошибки БД следствием ограничения дублирования
@@ -19,6 +24,11 @@ func IsDuplicateKeyError(err error) bool {
 // IsNoRows является ли ошибка БД следствием отсутствия запрошенной строки
 func IsNoRows(err error) bool {
 	return errors.Is(err, pgx.ErrNoRows) || errors.Is(err, sql.ErrNoRows)
+}
+
+// IsNoRec является ли ошибка Redis следствием отсутствия записи
+func IsNoRec(err error) bool {
+	return errors.Is(err, redis.Nil)
 }
 
 // IsConstrainForeignKeyError ограничение удаления записи
