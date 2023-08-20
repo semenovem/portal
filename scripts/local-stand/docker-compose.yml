@@ -53,9 +53,9 @@ services:
     entrypoint: redis-server --appendonly yes
 
 
-  redis-commander:
+  redis-gui:
     <<: *net
-    container_name: redis-cmd
+#    container_name: redis-cmd
 #    hostname: redis-commander
     command: /usr/bin/dumb-init -- /redis-commander/docker/entrypoint.sh -p ${__DB_RAM_GUI_PORT_EXPOSE__}
     image: rediscommander/redis-commander:latest
@@ -69,6 +69,8 @@ services:
       - ./configs/redis-config.json:/redis-commander/config/local.json:ro
     deploy:
       replicas: 1
+    logging:
+      driver: none
 
 
 #  s3cloud:
@@ -111,6 +113,7 @@ services:
   swagger:
     <<: *net
     image: swaggerapi/swagger-ui:v5.3.1
+    command: tail -f /dev/null
     ports:
       - ${__SWAGGER_PORT_EXPOSE__}:8080
     environment:

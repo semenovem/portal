@@ -148,7 +148,8 @@ case "$STAND_OPER" in
 
   OPTS="$([ -n "$ARG_STAND_CLEAR" ] && echo "--force-recreate" || echo "--no-recreate")"
   if [ -z "$LOGS" ] || [ -z "$OPER" ]; then
-    OPTS="${OPTS} --detach"
+#    OPTS="${OPTS} --detach"
+    :
   fi
 
   docker compose \
