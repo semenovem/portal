@@ -27,8 +27,10 @@ type Level int8
 type Tag string
 
 const (
-	DatabaseTag = "DATABASE"
-	RedisTag    = "REDIS"
-	AuthTag     = "AUTH"
-	ClientTag   = "CLIENT"
+	databaseTag = "DATABASE"
+	redisTag    = "REDIS"
+	authTag     = "AUTH"
+	clientTag   = "CLIENT"
+	denyTag     = "DENY"
+	notFound    = "NOT_FOUND"
 )

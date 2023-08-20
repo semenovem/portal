@@ -3,6 +3,8 @@ package people_cnt
 import (
 	"fmt"
 	"github.com/labstack/echo/v4"
+	"github.com/semenovem/portal/internal/action"
+	"net/http"
 
 	_ "github.com/semenovem/portal/internal/rest/view"
 	_ "github.com/semenovem/portal/pkg/failing"
@@ -13,15 +15,41 @@ import (
 //	@Summary	Получить свой профиль
 //	@Description
 //	@Produce	json
-//	@Success	200		{object}	ProfileFull
+//	@Success	200		{object}	userProfileView
 //	@Failure	400		{object}	failing.Response
 //	@Router		/people/self/profile [GET]
 //	@Tags		people
 //	@Security	ApiKeyAuth
-func (ct *Controller) SelfProfile(c echo.Context) error {
-	fmt.Println("!!!!!!!!!!!!!")
+func (cnt *Controller) SelfProfile(c echo.Context) error {
+	var (
+		ll  = cnt.logger.Named("SelfProfile")
+		ctx = c.Request().Context()
+	)
 
-	return nil
+	thisUserID, nested := cnt.act.ExtractThisUser(c)
+	if nested != nil {
+		ll.Named("ExtractThisUser").Nested(nested.Message())
+		return cnt.failing.SendNested(c, "", nested)
+	}
+
+	user, err := cnt.peopleAct.GetUserProfile(ctx, thisUserID, thisUserID)
+	if err != nil {
+		ll = ll.Named("GetUserProfile").With("thisUserID", thisUserID)
+
+		switch err.(type) {
+		case action.NotFoundErr:
+			ll.NotFoundTag().Info(err.Error())
+			return cnt.failing.Send(c, "", http.StatusNotFound, err)
+		case action.ForbiddenErr:
+			ll.DenyTag().Info(err.Error())
+			return cnt.failing.Send(c, "", http.StatusForbidden, err)
+		default:
+			ll.Nested(err.Error())
+			return cnt.failing.SendInternalServerErr(c, "", err)
+		}
+	}
+
+	return c.JSON(http.StatusOK, newUserProfileView(user))
 }
 
 // Profile docs
@@ -36,7 +64,7 @@ func (ct *Controller) SelfProfile(c echo.Context) error {
 //	@Router		/people/:user_id/profile [GET]
 //	@Tags		people
 //	@Security	ApiKeyAuth
-func (ct *Controller) Profile(c echo.Context) error {
+func (cnt *Controller) Profile(c echo.Context) error {
 	fmt.Println("!!!!!!!!!!!!!")
 
 	return nil

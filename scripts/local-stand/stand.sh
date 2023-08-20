@@ -147,10 +147,12 @@ case "$STAND_OPER" in
   func_create_network && func_build_if_not_exist_s3_mc_image || exit 1
 
   OPTS="$([ -n "$ARG_STAND_CLEAR" ] && echo "--force-recreate" || echo "--no-recreate")"
-  if [ -z "$LOGS" ] || [ -z "$OPER" ]; then
-#    OPTS="${OPTS} --detach"
-    :
+  if [ -z "$LOGS" ] || [ -n "$OPER" ]; then
+    OPTS="${OPTS} --detach"
   fi
+
+  echo ">>>> \$LOGS = $LOGS"
+  echo ">>>> \$OPER = $OPER"
 
   docker compose \
     -p "$__STAND_NAME__" \

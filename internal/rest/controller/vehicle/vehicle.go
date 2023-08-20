@@ -19,7 +19,7 @@ import (
 //	@Router		/vehicles [GET]
 //	@Tags		vehicles
 //	@Security	ApiKeyAuth
-func (ct *Controller) Search(c echo.Context) error {
+func (cnt *Controller) Search(c echo.Context) error {
 
 	fmt.Println("!!!!!!!!!!!!!")
 
@@ -37,7 +37,7 @@ func (ct *Controller) Search(c echo.Context) error {
 //	@Router		/vehicles/:vehicle_id [GET]
 //	@Tags		vehicles
 //	@Security	ApiKeyAuth
-func (ct *Controller) Get(c echo.Context) error {
+func (cnt *Controller) Get(c echo.Context) error {
 	return nil
 }
 
@@ -52,7 +52,7 @@ func (ct *Controller) Get(c echo.Context) error {
 //	@Router		/vehicles/:vehicle_id [PUT]
 //	@Tags		vehicles
 //	@Security	ApiKeyAuth
-func (ct *Controller) Upd(c echo.Context) error {
+func (cnt *Controller) Upd(c echo.Context) error {
 	return nil
 }
 
@@ -67,7 +67,7 @@ func (ct *Controller) Upd(c echo.Context) error {
 //	@Router		/vehicles/:vehicle_id [POST]
 //	@Tags		vehicles
 //	@Security	ApiKeyAuth
-func (ct *Controller) Create(c echo.Context) error {
+func (cnt *Controller) Create(c echo.Context) error {
 	return nil
 }
 
@@ -82,6 +82,6 @@ func (ct *Controller) Create(c echo.Context) error {
 //	@Router		/vehicles/:vehicle_id [POST]
 //	@Tags		vehicles
 //	@Security	ApiKeyAuth
-func (ct *Controller) Del(c echo.Context) error {
+func (cnt *Controller) Del(c echo.Context) error {
 	return nil
 }

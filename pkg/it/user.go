@@ -15,51 +15,34 @@ const (
 	maxUserLoginLen = 50 // TODO синхронизировать с типом столбца хранения
 )
 
-type User struct {
-	ID          uint32
-	Status      UserStatus
-	Roles       []UserRole
-	StartWorkAt time.Time // Время начала работы
-	FiredAt     *time.Time
-	Avatar      *string
-	Note        string
-	FirstName   string
-	Surname     string
+// UserCore основные данные сущности
+type UserCore struct {
+	ID     uint32
+	Status UserStatus
+	Roles  []UserRole
 }
 
-// IsWorks работает ли сотрудник
-func (u *User) IsWorks() error {
-	if u.Status != UserStatusActive {
-		return ErrUserHaveNotActiveStatus
-	}
-	now := time.Now()
-
-	if u.StartWorkAt.After(now) {
-		return ErrUserNotStartWork
-	}
-
-	if u.FiredAt != nil && u.FiredAt.Before(now) {
-		return ErrUserFired
-	}
-
-	return nil
+type UserProfile struct {
+	UserCore
+	Avatar       *string
+	FirstName    string
+	Surname      string
+	PositionName string
+	Note         string
 }
 
-// LoggingUser авторизующийся по логину пользователь
-type LoggingUser struct {
-	User
-	PasswdHash string
-	Login      string
+type EmployeeProfile struct {
+	UserProfile
+	Position    UserPosition // должность
+	Boss        *UserBoss    // Руководитель
+	StartWorkAt *time.Time   // Дата начала работы
+	FiredAt     *time.Time   // Дата увольнения
+	ExpiredAt   *time.Time   // Время автоматической блокировки
 }
 
-func (u *LoggingUser) ToUser() *User {
-	return &u.User
-}
-
-func (u *LoggingUser) CanLogging() *User {
-	return &User{
-		ID:     u.ID,
-		Status: u.Status,
-		Roles:  u.Roles,
-	}
+type UserBoss struct {
+	ID        uint32
+	Firstname string
+	Surname   string
+	UserPosition
 }

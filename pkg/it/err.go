@@ -11,6 +11,7 @@ var (
 	ErrValidShort       = ern("invalid: short")                       // Короткий
 	ErrValidLong        = ern("invalid: long")                        // Длинный
 
+	ErrUserExpired             = ern("user expired")
 	ErrUserFired               = ern("user fired")
 	ErrUserNotStartWork        = ern("user not start work")
 	ErrUserHaveNotActiveStatus = ern("user have not active status")

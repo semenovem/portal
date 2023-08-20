@@ -23,13 +23,13 @@ CREATE TABLE IF NOT EXISTS media.image_boxes
 CREATE TABLE IF NOT EXISTS media.vehicle_images
 (
   id                    serial PRIMARY KEY,
-  cabin_image_box_id    integer REFERENCES media.image_boxes NULL, -- список картинок, входящих в набор
-  front_image_box_id    integer REFERENCES media.image_boxes NULL,
-  left_image_box_id     integer REFERENCES media.image_boxes NULL,
-  right_image_box_id    integer REFERENCES media.image_boxes NULL,
-  back_image_box_id     integer REFERENCES media.image_boxes NULL,
-  odometer_image_box_id integer REFERENCES media.image_boxes NULL,
-  other_image_box_id    integer REFERENCES media.image_boxes NULL
+  cabin_image_box_id    int REFERENCES media.image_boxes NULL, -- список картинок, входящих в набор
+  front_image_box_id    int REFERENCES media.image_boxes NULL,
+  left_image_box_id     int REFERENCES media.image_boxes NULL,
+  right_image_box_id    int REFERENCES media.image_boxes NULL,
+  back_image_box_id     int REFERENCES media.image_boxes NULL,
+  odometer_image_box_id int REFERENCES media.image_boxes NULL,
+  other_image_box_id    int REFERENCES media.image_boxes NULL
 );
 
 -- аватарки

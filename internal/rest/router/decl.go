@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/semenovem/portal/config"
 	"github.com/semenovem/portal/internal/action/auth_action"
+	"github.com/semenovem/portal/internal/action/people_action"
 	"github.com/semenovem/portal/internal/provider/audit_provider"
 	"github.com/semenovem/portal/internal/provider/auth_provider"
 	"github.com/semenovem/portal/internal/provider/people_provider"
@@ -41,6 +42,7 @@ func New(
 	authPvd *auth_provider.AuthProvider,
 	peoplePvd *people_provider.PeopleProvider,
 	authAct *auth_action.AuthAction,
+	peopleAct *people_action.PeopleAction,
 	audit *audit_provider.AuditProvider,
 ) (*Router, error) {
 	var (
@@ -93,7 +95,7 @@ func New(
 		return nil, err
 	}
 
-	failure := failing.New(&failing.Config{
+	failureService := failing.New(&failing.Config{
 		IsDevMode:             config.IsDev(),
 		Logger:                logger,
 		Messages:              txt.GetMessages(),
@@ -111,20 +113,18 @@ func New(
 	})
 
 	// контроллеры
-	common := controller.NewAction(
-		logger,
-		failure,
-		authPvd,
-		peoplePvd,
-	)
-
-	cntArg := &controller.CntArgs{
-		Logger:  logger,
-		Failing: failure,
-		Common:  common,
-	}
-
 	var (
+		cntArg = &controller.CntArgs{
+			Logger:  logger,
+			Failing: failureService,
+			Common: controller.NewAction(
+				logger,
+				failureService,
+				authPvd,
+				peoplePvd,
+			),
+		}
+
 		authCnt = authController.New(
 			cntArg,
 			jwtService,
@@ -136,9 +136,8 @@ func New(
 		)
 
 		vehicleCnt = vehicleController.New(cntArg)
+		peopleCnt  = people_cnt.New(cntArg, peopleAct)
 	)
-
-	peopleCnt := people_cnt.New(cntArg)
 
 	r := &Router{
 		ctx:        ctx,
@@ -151,7 +150,7 @@ func New(
 	}
 
 	r.unauth = e.Group("")
-	r.auth = r.unauth.Group("", tokenMiddleware(logger, failure, jwtService, authPvd))
+	r.auth = r.unauth.Group("", tokenMiddleware(logger, failureService, jwtService, authPvd))
 
 	r.addRoutes()
 

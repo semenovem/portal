@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS vehicle.vehicles
   tonnage         smallint                NOT NULL, -- грузоподъемность в килограммах
   created_at      timestamp default now() NOT NULL, -- дата создания записи
   updated_at      timestamp default now() NOT NULL, -- обновление данных
-  created_user_id int REFERENCES people.users       -- кто создал запись
+  created_user_id int REFERENCES people.employees   -- кто создал запись
 );
 
 
@@ -39,14 +39,14 @@ CREATE TABLE IF NOT EXISTS vehicle.vehicles
 CREATE TABLE IF NOT EXISTS vehicle.maintenances
 (
   id             serial PRIMARY KEY,
-  vehicle_id     integer REFERENCES vehicle.vehicles,              -- дата создания записи
+  vehicle_id     int REFERENCES vehicle.vehicles,                  -- дата создания записи
   created_at     timestamp default now()                 NOT NULL, -- дата создания записи
   note           text      default ''                    NOT NULL, -- примечание
   contractor_id  int REFERENCES vehicle.contractors (id) NULL,
-  user_id        int REFERENCES people.users             NOT NULL,
+  user_id        int REFERENCES people.employees         NOT NULL,
   start_date     timestamp,                                        -- дата начала работ по обслуживанию
   end_date       timestamp,                                        -- дата завершения работ по обслуживанию
-  user_master_id int REFERENCES people.users,                      -- ответственный за обслуживание сотрудник
+  user_master_id int REFERENCES people.employees,                  -- ответственный за обслуживание сотрудник
   cost           real      default 0                     NOT NULL, -- стоимость
   doc_images     smallint[]                                        -- фото/сканы
 );
@@ -65,9 +65,9 @@ CREATE TABLE IF NOT EXISTS vehicle.maintenance_items
 
 CREATE TABLE IF NOT EXISTS vehicle.maintenance_use_items
 (
-  maintenance_id      integer REFERENCES vehicle.maintenances      NOT NULL,
-  maintenance_item_id integer REFERENCES vehicle.maintenance_items NOT NULL,
-  cost                real default 0                               NOT NULL -- стоимость
+  maintenance_id      int REFERENCES vehicle.maintenances      NOT NULL,
+  maintenance_item_id int REFERENCES vehicle.maintenance_items NOT NULL,
+  cost                real default 0                           NOT NULL -- стоимость
 );
 
 -- Таблица пробегов АМ
@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS vehicle.odometers
   id         serial PRIMARY KEY,
   value      int CHECK ( value > 0 )         NOT NULL,
   vehicle_id int REFERENCES vehicle.vehicles NOT NULL,
-  creator_id int REFERENCES people.users     NOT NULL,
+  creator_id int REFERENCES people.employees NOT NULL,
   created_at timestamp default now()         NOT NULL
 );
 
@@ -87,7 +87,7 @@ CREATE TABLE IF NOT EXISTS vehicle.inspections
   id               serial PRIMARY KEY,
   vehicle_id       int REFERENCES vehicle.vehicles                   NOT NULL,
   created_at       timestamp                           default now() NOT NULL,
-  master_user_id   integer REFERENCES people.users                   NOT NULL,
+  master_user_id   int REFERENCES people.employees                   NOT NULL,
   note             text                                default ''    NOT NULL,
   vehicle_image_id int REFERENCES media.vehicle_images default NULL  NULL,
   odometer_id      int REFERENCES vehicle.odometers    default NULL  NULL

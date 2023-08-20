@@ -5,6 +5,11 @@ import (
 	"github.com/semenovem/portal/pkg"
 )
 
+const (
+	userIDIsEmpty    = "userID is empty"
+	userLoginIsEmpty = "login is empty"
+)
+
 type PeopleProvider struct {
 	db     *pgxpool.Pool
 	logger pkg.Logger

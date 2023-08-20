@@ -106,7 +106,7 @@ func (p *pen) Nestedf(format string, v ...any) {
 	p.save(Debug, format, v...)
 }
 
-func (p *pen) Tags(tags ...string) pkg.Logger {
+func (p *pen) addTag(tags ...string) pkg.Logger {
 	if p.tags == nil {
 		p.tags = make([]string, 0)
 	}
@@ -117,17 +117,42 @@ func (p *pen) Tags(tags ...string) pkg.Logger {
 }
 
 func (p *pen) DBTag() pkg.Logger {
-	return p.Tags(DatabaseTag)
+	return p.addTag(databaseTag)
 }
 
 func (p *pen) RedisTag() pkg.Logger {
-	return p.Tags(RedisTag)
+	return p.addTag(redisTag)
 }
 
 func (p *pen) AuthTag() pkg.Logger {
-	return p.Tags(AuthTag)
+	return p.addTag(authTag)
 }
 
 func (p *pen) ClientTag() pkg.Logger {
-	return p.Tags(ClientTag)
+	return p.addTag(clientTag)
+}
+
+func (p *pen) DenyTag() pkg.Logger {
+	return p.addTag(denyTag)
+}
+
+func (p *pen) NotFoundTag() pkg.Logger {
+	return p.addTag(notFound)
+}
+
+// ----------------------------------------
+
+func (p *pen) DB(err error) {
+	p.addTag(databaseTag)
+	p.save(Error, err.Error())
+}
+
+func (p *pen) DBStr(msg string) {
+	p.addTag(databaseTag)
+	p.save(Error, msg)
+}
+
+func (p *pen) DBf(format string, v ...any) {
+	p.addTag(databaseTag)
+	p.save(Error, format, v...)
 }

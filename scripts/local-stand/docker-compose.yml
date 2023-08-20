@@ -20,7 +20,7 @@ services:
     <<: *net
     # собрать в dockers
     image: postgres:15.3
-#    image: postgres:15.3.ru
+    #    image: postgres:15.3.ru
     hostname: db-core
     command: -p 5432
     volumes:
@@ -30,13 +30,18 @@ services:
       POSTGRES_DB: ${__DB_CORE_NAME__}
       POSTGRES_USER: ${__DB_CORE_USER__}
       POSTGRES_PASSWORD: ${__DB_CORE_PASSWORD__}
-#      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums --locale=ru_RU.UTF-8"
+      #      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums --locale=ru_RU.UTF-8"
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
       POSTGRES_HOST_AUTH_METHOD: trust
-#      TZ: Europe/Volgograd
+      #      TZ: Europe/Volgograd
       TZ: UTC
     ports:
       - ${__DB_CORE_PORT_EXPOSE__}:5432
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 300M
 
 
   redis:
@@ -51,12 +56,20 @@ services:
     environment:
       TZ: UTC
     entrypoint: redis-server --appendonly yes
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 100M
+        reservations:
+          cpus: '0.5'
+          memory: 10M
 
 
   redis-gui:
     <<: *net
-#    container_name: redis-cmd
-#    hostname: redis-commander
+    #    container_name: redis-cmd
+    #    hostname: redis-commander
     command: /usr/bin/dumb-init -- /redis-commander/docker/entrypoint.sh -p ${__DB_RAM_GUI_PORT_EXPOSE__}
     image: rediscommander/redis-commander:latest
     restart: always
@@ -69,51 +82,57 @@ services:
       - ./configs/redis-config.json:/redis-commander/config/local.json:ro
     deploy:
       replicas: 1
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 50M
+        reservations:
+          cpus: '0.01'
+          memory: 30M
     logging:
       driver: none
 
 
-#  s3cloud:
-#    <<: *net
-#    image: quay.io/minio/minio:latest
-#    hostname: s3cloud
-#    command: server /data --console-address :9001 --certs-dir /certs
-#    ports:
-#      - ${__DB_S3_GUI_PORT_EXPOSE__}:9001
-#    environment:
-#      MINIO_ROOT_USER: ${__DB_S3_ACCESS_KEY__}
-#      MINIO_ROOT_PASSWORD: ${__DB_S3_SECRET_KEY__}
-#      MINIO_VOLUMES: /data
-#    volumes:
-#      - s3cloud:/data
-#      - ./configs/s3cloud/private.key:/certs/private.key:ro
-#      - ./configs/s3cloud/public.crt:/certs/public.crt:ro
-#    deploy:
-#      replicas: 0
-#
-#
-#  s3-mc:
-#    <<: *net
-#    image: ${__DOCKER_S3_MC_IMAGE__}
-#    command: /bin/sh /home/minio/create-bucket.sh
-#    environment:
-#      S3_API_URL: ${__DB_S3_API_URL__}
-#      S3_ACCESS_KEY: ${__DB_S3_ACCESS_KEY__}
-#      S3_SECRET_KEY: ${__DB_S3_SECRET_KEY__}
-#      S3_BUCKET_NAME: ${__DB_S3_BUCKET_NAME__}
-#    volumes:
-#      - ./configs/s3cloud/create-bucket.sh:/home/minio/create-bucket.sh:ro
-#    depends_on:
-#      - s3cloud
-#    deploy:
-#      replicas: 0
+  #  s3cloud:
+  #    <<: *net
+  #    image: quay.io/minio/minio:latest
+  #    hostname: s3cloud
+  #    command: server /data --console-address :9001 --certs-dir /certs
+  #    ports:
+  #      - ${__DB_S3_GUI_PORT_EXPOSE__}:9001
+  #    environment:
+  #      MINIO_ROOT_USER: ${__DB_S3_ACCESS_KEY__}
+  #      MINIO_ROOT_PASSWORD: ${__DB_S3_SECRET_KEY__}
+  #      MINIO_VOLUMES: /data
+  #    volumes:
+  #      - s3cloud:/data
+  #      - ./configs/s3cloud/private.key:/certs/private.key:ro
+  #      - ./configs/s3cloud/public.crt:/certs/public.crt:ro
+  #    deploy:
+  #      replicas: 0
+  #
+  #
+  #  s3-mc:
+  #    <<: *net
+  #    image: ${__DOCKER_S3_MC_IMAGE__}
+  #    command: /bin/sh /home/minio/create-bucket.sh
+  #    environment:
+  #      S3_API_URL: ${__DB_S3_API_URL__}
+  #      S3_ACCESS_KEY: ${__DB_S3_ACCESS_KEY__}
+  #      S3_SECRET_KEY: ${__DB_S3_SECRET_KEY__}
+  #      S3_BUCKET_NAME: ${__DB_S3_BUCKET_NAME__}
+  #    volumes:
+  #      - ./configs/s3cloud/create-bucket.sh:/home/minio/create-bucket.sh:ro
+  #    depends_on:
+  #      - s3cloud
+  #    deploy:
+  #      replicas: 0
 
 
 
   swagger:
     <<: *net
-    image: swaggerapi/swagger-ui:v5.3.1
-    command: tail -f /dev/null
+    image: swaggerapi/swagger-ui:v5.4.2
     ports:
       - ${__SWAGGER_PORT_EXPOSE__}:8080
     environment:
@@ -125,4 +144,11 @@ services:
       driver: none
     deploy:
       replicas: 1
+      resources:
+        limits:
+          cpus: '0.05'
+          memory: 30M
+        reservations:
+          cpus: '0.001'
+          memory: 10M
 

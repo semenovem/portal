@@ -8,6 +8,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/semenovem/portal/config"
 	"github.com/semenovem/portal/internal/action/auth_action"
+	"github.com/semenovem/portal/internal/action/people_action"
 	"github.com/semenovem/portal/internal/provider/audit_provider"
 	"github.com/semenovem/portal/internal/provider/auth_provider"
 	"github.com/semenovem/portal/internal/provider/people_provider"
@@ -98,10 +99,15 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 	}
 
 	// Экшены
-	authAct := auth_action.NewAuth(
+	authAct := auth_action.New(
 		logger,
 		it.NewUserPasswdAuth(cfg.UserPasswdSalt),
 		authPvd,
+		peoplePvd,
+	)
+
+	peopleAct := people_action.New(
+		logger,
 		peoplePvd,
 	)
 
@@ -113,6 +119,7 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 		authPvd,
 		peoplePvd,
 		authAct,
+		peopleAct,
 		audit,
 	); err != nil {
 		ll.Named("router").Nested(err.Error())

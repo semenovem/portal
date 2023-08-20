@@ -11,21 +11,21 @@ import (
 func (a *AuthAction) CreateOnetimeEntry(ctx context.Context, userID uint32) (uuid.UUID, error) {
 	ll := a.logger.Named("CreateOnetimeEntry")
 
-	user, err := a.peoplePvd.GetUser(ctx, userID)
+	userAuth, err := a.peoplePvd.GetUserAuth(ctx, userID)
 	if err != nil {
-		ll.Named("GetUser").Nested(err.Error())
+		ll.Named("CreateOnetimeEntry").Nested(err.Error())
 
 		if provider.IsNoRows(err) {
 			return uuid.Nil, errUserNoFound
 		}
 	}
 
-	if err = a.canAuth(user); err != nil {
-		ll.Named("canAuth").Nested(err.Error())
+	if err = a.canLogin(userAuth); err != nil {
+		ll.Named("canLogin").Nested(err.Error())
 		return uuid.Nil, err
 	}
 
-	entryID, err := a.authPvd.NewOnetimeEntry(ctx, user.ID)
+	entryID, err := a.authPvd.NewOnetimeEntry(ctx, userAuth.ID)
 	if err != nil {
 		ll.Named("NewOnetimeEntry").Nested(err.Error())
 	}
@@ -42,15 +42,15 @@ func (a *AuthAction) LoginByOnetimeEntryID(ctx context.Context, entryID uuid.UUI
 		ll.Named("GetDelOnetimeEntry").Nested(err.Error())
 
 		if provider.IsNoRec(err) {
-			return nil, onetimeEntryNotFound
+			return nil, errOnetimeEntryNotFound
 		}
 
 		return nil, err
 	}
 
-	user, err := a.peoplePvd.GetUser(ctx, userID)
+	user, err := a.peoplePvd.GetUserAuth(ctx, userID)
 	if err != nil {
-		ll.Named("GetUser").Nested(err.Error())
+		ll.Named("GetUserAuth").Nested(err.Error())
 
 		if provider.IsNoRows(err) {
 			return nil, errUserNoFound
