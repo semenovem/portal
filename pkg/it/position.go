@@ -1,6 +1,7 @@
 package it
 
 type UserPosition struct {
-	ID   uint16
-	Name string
+	ID       uint16
+	Title    string
+	ParentID uint16
 }

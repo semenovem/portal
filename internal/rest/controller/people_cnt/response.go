@@ -18,7 +18,7 @@ func newUserProfileView(u *it.UserProfile) *userProfileView {
 		ID:        u.ID,
 		FirstName: u.FirstName,
 		SurName:   u.Surname,
-		Position:  u.PositionName,
+		Position:  u.PositionTitle,
 	}
 	if u.Avatar != nil {
 		r.Avatar = *u.Avatar

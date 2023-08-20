@@ -224,6 +224,116 @@ const docTemplate = `{
                 }
             }
         },
+        "/people/positions": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Проверяет действующие права на просмотр расширенных данных пользователя\n",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "people/position"
+                ],
+                "summary": "Получить профиль пользователя по его ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id пользователя",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/peoples/:user_id/profile": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Проверяет действующие права на просмотр расширенных данных пользователя\n",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "people"
+                ],
+                "summary": "Получить профиль пользователя по его ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id пользователя",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_rest_controller_people_cnt.userProfileView"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/peoples/self/profile": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "people"
+                ],
+                "summary": "Получить свой профиль",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_rest_controller_people_cnt.userProfileView"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/vehicles": {
             "get": {
                 "security": [
@@ -524,6 +634,27 @@ const docTemplate = `{
                 },
                 "refresh_token": {
                     "description": "TODO для разработки",
+                    "type": "string"
+                }
+            }
+        },
+        "internal_rest_controller_people_cnt.userProfileView": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "description": "TODO нужно собрать uri на загрузку аватара",
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "position": {
+                    "type": "string"
+                },
+                "sur_name": {
                     "type": "string"
                 }
             }

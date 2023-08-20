@@ -6,6 +6,10 @@ import (
 	"time"
 )
 
+type UserForm struct {
+	UserID uint32 `param:"user_id" validate:"required"`
+}
+
 type SearchForm struct {
 	StartTime time.Time   `json:"start_time" query:"start_time" binding:"datetime=2006-01-02T15:04:05Z07:00" validate:"omitempty"`
 	EndTime   time.Time   `json:"end_time" query:"end_time" binding:"datetime=2006-01-02T15:04:05Z07:00" validate:"omitempty"`

@@ -72,5 +72,5 @@ values ('ivan', 'ivanov', 'note для пользователя', 'inactive', 'l
 on conflict do nothing;
 
 insert into people.users (firstname, surname, position)
-values ('Петр', 'Петрович', 2)
+values ('Петр', 'Петрович', 'оператор')
 on conflict do nothing;

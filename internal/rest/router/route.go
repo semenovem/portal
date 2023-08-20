@@ -9,8 +9,11 @@ func (r *Router) addRoutes() {
 	r.unauth.POST("/auth/onetime/:entry_id", r.authCnt.LoginOnetimeLink)
 
 	// People
-	r.auth.GET("/people/self/profile", r.peopleCnt.SelfProfile)
-	r.auth.GET("/people/:user_id/profile", r.peopleCnt.Profile)
+	r.auth.GET("/peoples/self/profile", r.peopleCnt.SelfProfile)
+	r.auth.GET("/peoples/:user_id/profile", r.peopleCnt.Profile)
+
+	// People Position
+	r.auth.GET("/peoples/positions", r.peopleCnt.Profile)
 
 	//
 	r.auth.GET("/vehicles", r.vehicleCnt.Search)

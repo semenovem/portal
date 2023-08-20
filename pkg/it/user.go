@@ -24,11 +24,11 @@ type UserCore struct {
 
 type UserProfile struct {
 	UserCore
-	Avatar       *string
-	FirstName    string
-	Surname      string
-	PositionName string
-	Note         string
+	Avatar        *string
+	FirstName     string
+	Surname       string
+	PositionTitle string
+	Note          string
 }
 
 type EmployeeProfile struct {

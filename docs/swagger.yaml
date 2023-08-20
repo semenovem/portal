@@ -79,6 +79,20 @@ definitions:
         description: TODO для разработки
         type: string
     type: object
+  internal_rest_controller_people_cnt.userProfileView:
+    properties:
+      avatar:
+        description: TODO нужно собрать uri на загрузку аватара
+        type: string
+      first_name:
+        type: string
+      id:
+        type: integer
+      position:
+        type: string
+      sur_name:
+        type: string
+    type: object
   internal_rest_controller_vehicle.ListResponse:
     properties:
       items:
@@ -223,6 +237,76 @@ paths:
       summary: Обновление токена авторизации
       tags:
       - auth
+  /people/positions:
+    get:
+      description: |
+        Проверяет действующие права на просмотр расширенных данных пользователя
+      parameters:
+      - description: id пользователя
+        in: path
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_semenovem_portal_pkg_failing.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Получить профиль пользователя по его ID
+      tags:
+      - people/position
+  /peoples/:user_id/profile:
+    get:
+      description: |
+        Проверяет действующие права на просмотр расширенных данных пользователя
+      parameters:
+      - description: id пользователя
+        in: path
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_rest_controller_people_cnt.userProfileView'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_semenovem_portal_pkg_failing.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Получить профиль пользователя по его ID
+      tags:
+      - people
+  /peoples/self/profile:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_rest_controller_people_cnt.userProfileView'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_semenovem_portal_pkg_failing.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Получить свой профиль
+      tags:
+      - people
   /vehicles:
     get:
       parameters:
