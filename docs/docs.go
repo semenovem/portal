@@ -80,6 +80,15 @@ const docTemplate = `{
                     "auth"
                 ],
                 "summary": "Выход из авторизованной сессии пользователя",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "refresh токен",
+                        "name": "refresh-token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -193,7 +202,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "asdfasdf",
+                        "description": "refresh токен",
                         "name": "refresh-token",
                         "in": "header",
                         "required": true
@@ -203,7 +212,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_rest_controller_auth.loginResponse"
+                            "$ref": "#/definitions/internal_rest_controller_auth.refreshResponse"
                         }
                     },
                     "400": {
@@ -499,7 +508,22 @@ const docTemplate = `{
         "internal_rest_controller_auth.onetimeAuthResponse": {
             "type": "object",
             "properties": {
+                "entry_id": {
+                    "type": "string"
+                },
                 "uri": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_rest_controller_auth.refreshResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "refresh_token": {
+                    "description": "TODO для разработки",
                     "type": "string"
                 }
             }

@@ -30,7 +30,7 @@ func (cnt *Controller) CreateOnetimeLink(c echo.Context) error {
 
 	thisUserID, nested := cnt.com.ExtractUserAndForm(c, form)
 	if nested != nil {
-		ll.Named("ExtractForm").Nested(nested.Message())
+		ll.Named("ExtractUserAndForm").Nested(nested.Message())
 		return cnt.failing.SendNested(c, "", nested)
 	}
 
@@ -41,13 +41,13 @@ func (cnt *Controller) CreateOnetimeLink(c echo.Context) error {
 		ll.Named("CreateOnetimeEntry").Nested(err.Error())
 
 		if auth_action.IsAuthErr(err) {
-			return cnt.failing.Send(c, "", http.StatusForbidden, err)
+			return cnt.failing.Send(c, "", http.StatusBadRequest, err)
 		}
 
 		return cnt.failing.SendInternalServerErr(c, "", err)
 	}
 
-	cnt.audit.User(thisUserID, audit.CreateOnetimeEntry, audit.P{
+	cnt.audit.Auth(thisUserID, audit.CreateOnetimeEntry, audit.P{
 		"user_id":    form.UserID,
 		"session_id": entryID,
 	})
@@ -87,14 +87,15 @@ func (cnt *Controller) LoginOnetimeLink(c echo.Context) error {
 	if err != nil {
 		ll.Named("LoginByOnetimeEntryID").Nested(err.Error())
 		if auth_action.IsAuthErr(err) {
-			return cnt.failing.Send(c, "", http.StatusBadRequest, err)
+			return cnt.failing.Send(c, "", http.StatusNotFound, err)
 		}
 
 		return cnt.failing.SendInternalServerErr(c, "", err)
 	}
 
-	cnt.audit.User(session.UserID, audit.UserLogin, audit.P{
-		"session_id": session.ID,
+	cnt.audit.Auth(session.UserID, audit.UserLogin, audit.P{
+		"sessionID":        session.ID,
+		"byOnetimeEntryID": form.EntryID,
 	})
 
 	pair, nested := cnt.pairToken(session)

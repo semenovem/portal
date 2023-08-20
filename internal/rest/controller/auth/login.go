@@ -3,6 +3,7 @@ package auth
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/semenovem/portal/internal/action/auth_action"
+	"github.com/semenovem/portal/pkg/audit"
 	"github.com/semenovem/portal/pkg/txt"
 	"net/http"
 
@@ -38,7 +39,6 @@ func (cnt *Controller) Login(c echo.Context) error {
 		ctx,
 		form.Login,
 		form.Passwd,
-		c.Request().UserAgent(),
 		form.DeviceID,
 	)
 	if err != nil {
@@ -56,6 +56,11 @@ func (cnt *Controller) Login(c echo.Context) error {
 		ll.Named("pairToken").Nested(nested.Message())
 		return cnt.failing.SendNested(c, "", nested)
 	}
+
+	cnt.audit.Auth(session.UserID, audit.UserLogin, audit.P{
+		"user-agent": c.Request().UserAgent(),
+		"sessionID":  session.ID,
+	})
 
 	for _, cookie := range cnt.refreshTokenCookies(pair.Refresh) {
 		c.SetCookie(cookie)
@@ -76,8 +81,8 @@ func (cnt *Controller) Login(c echo.Context) error {
 //	@Description
 //	@Produce	json
 //	@Param		refresh-token	header		string	true	"refresh токен"
-//	@Success	200	{object}	loginResponse
-//	@Failure	400	{object}	failing.Response
+//	@Success	200				{object}	loginResponse
+//	@Failure	400				{object}	failing.Response
 //	@Router		/auth/logout [POST]
 //	@Tags		auth
 //	@Security	ApiKeyAuth
@@ -99,7 +104,8 @@ func (cnt *Controller) Logout(c echo.Context) error {
 
 	ll = ll.With("payload", payload)
 
-	if err := cnt.authAct.Logout(ctx, payload); err != nil {
+	userID, err := cnt.authAct.Logout(ctx, payload)
+	if err != nil {
 		ll.Named("Logout").Nested(err.Error())
 
 		if auth_action.IsAuthErr(err) {
@@ -108,6 +114,11 @@ func (cnt *Controller) Logout(c echo.Context) error {
 
 		return cnt.failing.SendInternalServerErr(c, "", err)
 	}
+
+	cnt.audit.Auth(userID, audit.UserLogout, audit.P{
+		"user-agent": c.Request().UserAgent(),
+		"sessionID":  payload.SessionID,
+	})
 
 	return c.NoContent(http.StatusNoContent)
 }

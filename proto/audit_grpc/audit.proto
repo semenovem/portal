@@ -6,6 +6,8 @@ package proto;
 
 service Audit {
   rpc RawString (RawRequest) returns (RawResponse) {}
+  rpc Event (EventRequest) returns (RawResponse) {} // События
+  rpc Action (UserActionRequest) returns (RawResponse) {} // Действия
 }
 
 message RawRequest {
@@ -14,5 +16,23 @@ message RawRequest {
 }
 
 message RawResponse{
+  uint32 Ok = 1;
+}
+
+message EventRequest {
+  uint32 UserID = 1;
+  string Code = 2;
+  bytes Payload = 3;
+}
+
+message UserActionRequest {
+  uint32 UserID = 1;
+  string Code = 2;
+  string Operation = 3;
+  string Action = 4;
+  bytes Payload = 5;
+}
+
+message AuthResponse{
   uint32 Ok = 1;
 }

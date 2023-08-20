@@ -12,6 +12,7 @@ import (
 	"github.com/semenovem/portal/internal/provider/people_provider"
 	"github.com/semenovem/portal/internal/rest/controller"
 	authController "github.com/semenovem/portal/internal/rest/controller/auth"
+	"github.com/semenovem/portal/internal/rest/controller/people_cnt"
 	vehicleController "github.com/semenovem/portal/internal/rest/controller/vehicle"
 	"github.com/semenovem/portal/pkg"
 	"github.com/semenovem/portal/pkg/failing"
@@ -30,6 +31,7 @@ type Router struct {
 	unauth, auth, admin *echo.Group
 	vehicleCnt          *vehicleController.Controller
 	authCnt             *authController.Controller
+	peopleCnt           *people_cnt.Controller
 }
 
 func New(
@@ -116,7 +118,7 @@ func New(
 		peoplePvd,
 	)
 
-	cntArg := controller.CntArgs{
+	cntArg := &controller.CntArgs{
 		Logger:  logger,
 		Failing: failure,
 		Common:  common,
@@ -124,7 +126,7 @@ func New(
 
 	var (
 		authCnt = authController.New(
-			&cntArg,
+			cntArg,
 			jwtService,
 			authAct,
 			audit,
@@ -132,8 +134,11 @@ func New(
 			time.Hour*24*time.Duration(config.JWT.RefreshTokenLifetimeDay),
 			config.JWT.RefreshTokenCookieName,
 		)
-		vehicleCnt = vehicleController.New(&cntArg)
+
+		vehicleCnt = vehicleController.New(cntArg)
 	)
+
+	peopleCnt := people_cnt.New(cntArg)
 
 	r := &Router{
 		ctx:        ctx,
@@ -142,6 +147,7 @@ func New(
 		addr:       fmt.Sprintf(":%d", config.Rest.Port),
 		vehicleCnt: vehicleCnt,
 		authCnt:    authCnt,
+		peopleCnt:  peopleCnt,
 	}
 
 	r.unauth = e.Group("")

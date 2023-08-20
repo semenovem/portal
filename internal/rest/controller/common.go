@@ -10,6 +10,10 @@ import (
 	"net/http"
 )
 
+const (
+	ThisUserID = "this_user_id"
+)
+
 type Common struct {
 	logger    pkg.Logger
 	failing   *failing.Service
@@ -46,6 +50,17 @@ func (a *Common) ExtractForm(c echo.Context, form interface{}) failing.Nested {
 	return nil
 }
 
+// ExtractThisUser получить данные авторизованного пользователя из запроса
+func (a *Common) ExtractThisUser(c echo.Context) (uint32, failing.Nested) {
+	userID, ok := c.Get(ThisUserID).(uint32)
+	if !ok {
+		a.logger.Named("ExtractThisUser").ClientTag().Debug("invalid format user_id")
+		return 0, failing.NewNested(http.StatusBadRequest, errors.New("invalid format user_id"))
+	}
+
+	return userID, nil
+}
+
 // ExtractUserAndForm получить данные из запроса и авторизованного пользователя
 func (a *Common) ExtractUserAndForm(c echo.Context, form interface{}) (uint32, failing.Nested) {
 	if nested := a.ExtractForm(c, form); nested != nil {
@@ -53,10 +68,10 @@ func (a *Common) ExtractUserAndForm(c echo.Context, form interface{}) (uint32, f
 		return 0, nested
 	}
 
-	userID, ok := c.Get("this_user_id").(uint32)
-	if !ok {
-		a.logger.Named("this_user_id").ClientTag().Debug("invalid format user_id")
-		return 0, failing.NewNested(http.StatusBadRequest, errors.New("invalid format user_id"))
+	userID, nested := a.ExtractThisUser(c)
+	if nested != nil {
+		a.logger.Named("ExtractThisUser").Nested(nested.Message())
+		return 0, nested
 	}
 
 	return userID, nil

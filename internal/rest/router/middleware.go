@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/semenovem/portal/internal/provider/auth_provider"
+	"github.com/semenovem/portal/internal/rest/controller"
 	"github.com/semenovem/portal/pkg"
 	"github.com/semenovem/portal/pkg/failing"
 	"github.com/semenovem/portal/pkg/jwtoken"
@@ -121,7 +122,7 @@ func tokenMiddleware(
 				)
 			}
 
-			c.Set("this_user_id", payload.UserID)
+			c.Set(controller.ThisUserID, payload.UserID)
 
 			return next(c)
 		}

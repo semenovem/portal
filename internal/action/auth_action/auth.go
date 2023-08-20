@@ -5,7 +5,6 @@ import (
 	"errors"
 	"github.com/google/uuid"
 	"github.com/semenovem/portal/internal/provider"
-	"github.com/semenovem/portal/pkg/audit"
 	"github.com/semenovem/portal/pkg/it"
 	"github.com/semenovem/portal/pkg/jwtoken"
 	"github.com/semenovem/portal/pkg/logger"
@@ -14,12 +13,13 @@ import (
 // NewLogin авторизация пользователя по логопасу
 func (a *AuthAction) NewLogin(
 	ctx context.Context,
-	login, passwd, userAgent string,
+	login, passwd string,
 	deviceID uuid.UUID,
 ) (*it.AuthSession, error) {
 	var (
-		ll           = a.logger.Named("NewLogin")
-		auditPayload = audit.P{"login": login, "deviceID": deviceID, "userAgent": userAgent}
+		ll = a.logger.Named("NewLogin").
+			With("login", login).
+			With("deviceID", deviceID)
 	)
 
 	loggingUser, err := a.peoplePvd.GetUserByLogin(ctx, login)
@@ -28,8 +28,6 @@ func (a *AuthAction) NewLogin(
 
 		if provider.IsNoRows(err) {
 			ll.Tags(logger.AuthTag, logger.ClientTag).Info(errUserNoFound.msg)
-			a.audit.Refusal(audit.UserLogin, audit.Cause(errUserNoFound.msg), auditPayload)
-
 			return nil, errUserNoFound
 		}
 
@@ -37,31 +35,28 @@ func (a *AuthAction) NewLogin(
 		return nil, err
 	}
 
-	auditPayload["userID"] = loggingUser
+	ll.With("userID", loggingUser.ID)
 
 	if !a.passwdAuth.Matching(loggingUser.PasswdHash, passwd) {
-		ll.Named("Matching").Tags(logger.AuthTag, logger.ClientTag).Debug(errPasswdIncorrect.msg)
-		a.audit.Refusal(audit.UserLogin, audit.Cause(errPasswdIncorrect.msg), auditPayload)
-
+		ll.Named("Matching").AuthTag().ClientTag().Debug(errPasswdIncorrect.msg)
 		return nil, errPasswdIncorrect
 	}
 
 	session, err := a.newSession(ctx, loggingUser.ToUser(), deviceID)
 	if err != nil {
-		ll.Named("newSession").Nested(err.Error())
+		ll = ll.Named("newSession")
 
-		if authErr, ok := err.(AuthErr); ok {
-			a.audit.Refusal(audit.UserLogin, audit.Cause(authErr.msg), auditPayload)
+		if IsAuthErr(err) {
+			ll.AuthTag().Info(err.Error())
+			return nil, err
 		}
 
+		ll.Nested(err.Error())
 		return nil, err
 	}
 
-	auditPayload["sessionID"] = session.ID
-	auditPayload["refreshID"] = session.RefreshID
-	a.audit.Approved(audit.UserLogin, auditPayload)
-
-	ll.With("sessionID", session.ID).Debug("success")
+	ll.AuthTag().With("sessionID", session.ID).With("refreshID", session.RefreshID).
+		Debug("success")
 
 	return session, nil
 }
@@ -97,7 +92,7 @@ func (a *AuthAction) NewLogin(
 func (a *AuthAction) canAuth(user *it.User) error {
 	if err := user.IsWorks(); err != nil {
 		s := errUserNotWorks.msg + "(" + err.Error() + ")"
-		a.logger.Named("canAuth").AuthTag().With("user", user).Debug(s)
+		a.logger.Named("canAuth").With("user", user).Debug(s)
 
 		return errUserNotWorks
 	}
@@ -139,7 +134,7 @@ func (a *AuthAction) checkRefresh(
 		ll = ll.Named("GetSession")
 
 		if provider.IsNoRows(err) {
-			ll.AuthTag().Info(sessionNotFoundErrMsg.msg)
+			ll.Debug(sessionNotFoundErrMsg.msg)
 			return nil, sessionNotFoundErrMsg
 		}
 
@@ -160,25 +155,28 @@ func (a *AuthAction) checkRefresh(
 }
 
 // Logout разлогин авторизованной сессии пользователя
-func (a *AuthAction) Logout(ctx context.Context, payload *jwtoken.RefreshPayload) error {
-	ll := a.logger.Named("Logout")
+func (a *AuthAction) Logout(ctx context.Context, payload *jwtoken.RefreshPayload) (uint32, error) {
+	ll := a.logger.Named("Logout").With("sessionID", payload.SessionID)
 
 	session, err := a.checkRefresh(ctx, payload)
 	if err != nil {
+		if IsAuthErr(err) {
+			ll.Named("checkRefresh").AuthTag().Info(err.Error())
+			return 0, err
+		}
+
 		ll.Named("checkRefresh").Nested(err.Error())
-		return err
+		return 0, err
 	}
 
 	if err = a.authPvd.LogoutSession(ctx, payload.SessionID); err != nil {
 		ll.Named("LogoutSession").Nested(err.Error())
-		return err
+		return 0, err
 	}
 
-	a.audit.User(session.UserID, audit.UserLogout, audit.P{"session_id": session.ID})
+	ll.AuthTag().With("userID", session.UserID).Debug("success")
 
-	ll.With("sessionID", session.ID).Debug("success")
-
-	return nil
+	return session.UserID, nil
 }
 
 // Refresh выпустить новый refresh токен и прекратить действие предыдущего

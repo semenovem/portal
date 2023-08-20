@@ -101,7 +101,6 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 	authAct := auth_action.NewAuth(
 		logger,
 		it.NewUserPasswdAuth(cfg.UserPasswdSalt),
-		audit,
 		authPvd,
 		peoplePvd,
 	)
