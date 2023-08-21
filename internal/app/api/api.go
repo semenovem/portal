@@ -7,11 +7,15 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/semenovem/portal/config"
-	"github.com/semenovem/portal/internal/action/auth_action"
-	"github.com/semenovem/portal/internal/action/people_action"
+	"github.com/semenovem/portal/internal/abc/auth/auth_action"
+	"github.com/semenovem/portal/internal/abc/media/action"
+	"github.com/semenovem/portal/internal/abc/media/provider"
+	"github.com/semenovem/portal/internal/abc/people/action"
+	"github.com/semenovem/portal/internal/abc/people/provider"
+	"github.com/semenovem/portal/internal/abc/store/action"
+	"github.com/semenovem/portal/internal/abc/store/provider"
 	"github.com/semenovem/portal/internal/provider/audit_provider"
 	"github.com/semenovem/portal/internal/provider/auth_provider"
-	"github.com/semenovem/portal/internal/provider/people_provider"
 	"github.com/semenovem/portal/internal/rest/router"
 	"github.com/semenovem/portal/internal/zoo/conn"
 	"github.com/semenovem/portal/pkg"
@@ -75,17 +79,63 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 
 	// Провайдеры данных
 	var (
-		audit   = audit_provider.NewAudit(ctx, app.db, logger, cfg.GetGRPCAuditConfig())
-		authPvd = auth_provider.NewAuthPvd(
+		audit   = audit_provider.New(ctx, app.db, logger, cfg.GetGRPCAuditConfig())
+		authPvd = auth_provider.New(
 			logger,
 			app.db,
 			app.redis,
 			time.Minute*time.Duration(cfg.JWT.AccessTokenLifetimeMin),
 			time.Minute*time.Duration(cfg.Auth.OnetimeEntryLifetimeMin),
 		)
-		peoplePvd = people_provider.NewPeoplePvd(app.db, logger)
+		peoplePvd = people_provider.New(app.db, logger)
+
+		storePvd = store_provider.New(logger, app.db, app.redis, time.Minute, time.Minute)
+
+		mediaPvd = media_provider.New(logger, app.db, app.redis)
 	)
 
+	// Экшены
+	var (
+		authAct = auth_action.New(
+			logger,
+			it.NewUserPasswdAuth(cfg.UserPasswdSalt),
+			authPvd,
+			peoplePvd,
+		)
+
+		peopleAct = people_action.New(
+			logger,
+			peoplePvd,
+		)
+
+		storeAct = store_action.New(
+			logger,
+			storePvd,
+		)
+
+		mediaAct = media_action.New(logger, mediaPvd)
+	)
+
+	// Router
+	if app.router, err = router.New(
+		ctx,
+		logger,
+		cfg,
+		audit,
+		authPvd,
+		peoplePvd,
+		authAct,
+		peopleAct,
+		storeAct,
+		mediaAct,
+	); err != nil {
+		ll.Named("router").Nested(err.Error())
+		return err
+	}
+
+	go app.router.Start()
+
+	// Проверки
 	t, err := authPvd.Now(ctx)
 	if err != nil {
 		ll.Named("authPvd.Now").Nested(err.Error())
@@ -97,36 +147,6 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 		ll.Error(err.Error())
 		return err
 	}
-
-	// Экшены
-	authAct := auth_action.New(
-		logger,
-		it.NewUserPasswdAuth(cfg.UserPasswdSalt),
-		authPvd,
-		peoplePvd,
-	)
-
-	peopleAct := people_action.New(
-		logger,
-		peoplePvd,
-	)
-
-	// Router
-	if app.router, err = router.New(
-		ctx,
-		logger,
-		cfg,
-		authPvd,
-		peoplePvd,
-		authAct,
-		peopleAct,
-		audit,
-	); err != nil {
-		ll.Named("router").Nested(err.Error())
-		return err
-	}
-
-	go app.router.Start()
 
 	return nil
 }

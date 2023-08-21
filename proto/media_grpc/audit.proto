@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+option go_package = "github.com/semenovem/portal/proto/media_grpc";
+
+package proto;
+
+service Media {
+  rpc Save (EventRequest) returns (RawResponse) {} // События
+  rpc Action (UserActionRequest) returns (RawResponse) {} // Действия
+}
+
+message RawRequest {
+  string ID = 1;
+  string Payload = 2;
+}
+
+message RawResponse{
+  uint32 Ok = 1;
+}
+
+message EventRequest {
+  uint32 UserID = 1;
+  string Code = 2;
+  bytes Payload = 3;
+}
+
+message UserActionRequest {
+  uint32 UserID = 1;
+  string Code = 2;
+  string Operation = 3;
+  string Action = 4;
+  bytes Payload = 5;
+}
+
+message AuthResponse{
+  uint32 Ok = 1;
+}

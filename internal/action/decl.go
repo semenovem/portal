@@ -1,9 +1,5 @@
 package action
 
-const (
-	msgErrForbidden = "access denied"
-)
-
 var (
 	ErrForbidden = newForbiddenErr("access denied")
 

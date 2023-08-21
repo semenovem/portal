@@ -15,6 +15,11 @@ func (r *Router) addRoutes() {
 	// People Position
 	r.auth.GET("/peoples/positions", r.peopleCnt.Profile)
 
+	// Store
+	r.auth.GET("/store/:store_path", r.storeCnt.Load)
+	r.auth.POST("/store/:store_path", r.storeCnt.Store)
+	r.auth.DELETE("/store/:store_path", r.storeCnt.Delete)
+
 	//
 	r.auth.GET("/vehicles", r.vehicleCnt.Search)
 	r.auth.GET("/vehicles/:vehicle_id", r.vehicleCnt.Get)

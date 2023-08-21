@@ -60,7 +60,7 @@ func tokenMiddleware(
 	logger pkg.Logger,
 	fail *failing.Service,
 	jwtService *jwtoken.Service,
-	AuthPvd *auth_provider.AuthProvider,
+	authPvd *auth_provider.AuthProvider,
 ) echo.MiddlewareFunc {
 	ll := logger.Named("tokenMiddleware")
 
@@ -106,7 +106,7 @@ func tokenMiddleware(
 			}
 
 			// Проверить отозванные сессии
-			isCancel, err := AuthPvd.IsSessionCanceled(c.Request().Context(), payload.SessionID)
+			isCancel, err := authPvd.IsSessionCanceled(c.Request().Context(), payload.SessionID)
 			if err != nil {
 				ll.Named("IsSessionCanceled").Nested(err.Error())
 				return fail.SendInternalServerErr(c, "", err)

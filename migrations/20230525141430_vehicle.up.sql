@@ -39,16 +39,16 @@ CREATE TABLE IF NOT EXISTS vehicle.vehicles
 CREATE TABLE IF NOT EXISTS vehicle.maintenances
 (
   id             serial PRIMARY KEY,
-  vehicle_id     int REFERENCES vehicle.vehicles,                  -- дата создания записи
-  created_at     timestamp default now()                 NOT NULL, -- дата создания записи
-  note           text      default ''                    NOT NULL, -- примечание
-  contractor_id  int REFERENCES vehicle.contractors (id) NULL,
-  user_id        int REFERENCES people.employees         NOT NULL,
-  start_date     timestamp,                                        -- дата начала работ по обслуживанию
-  end_date       timestamp,                                        -- дата завершения работ по обслуживанию
-  user_master_id int REFERENCES people.employees,                  -- ответственный за обслуживание сотрудник
-  cost           real      default 0                     NOT NULL, -- стоимость
-  doc_images     smallint[]                                        -- фото/сканы
+  vehicle_id     int REFERENCES vehicle.vehicles,             -- дата создания записи
+  created_at     timestamp default now()            NOT NULL, -- дата создания записи
+  note           text      default ''               NOT NULL, -- примечание
+  contractor_id  int REFERENCES vehicle.contractors NULL,
+  user_id        int REFERENCES people.employees    NOT NULL,
+  start_date     timestamp,                                   -- дата начала работ по обслуживанию
+  end_date       timestamp,                                   -- дата завершения работ по обслуживанию
+  user_master_id int REFERENCES people.employees,             -- ответственный за обслуживание сотрудник
+  cost           real      default 0                NOT NULL, -- стоимость
+  doc_images     smallint[]                                   -- фото/сканы
 );
 
 
@@ -92,4 +92,14 @@ CREATE TABLE IF NOT EXISTS vehicle.inspections
   vehicle_image_id int REFERENCES media.vehicle_images default NULL  NULL,
   odometer_id      int REFERENCES vehicle.odometers    default NULL  NULL
 );
+
+-- --------------------------------------
+-- --------------------------------------
+
+INSERT INTO vehicle.vehicles (brand, model, date_of_issue, date_start_use, date_end_use, status,
+                              note, "number", vin, tonnage, created_at, updated_at, created_user_id)
+VALUES ('asdasdasd', 'sdsaddf', '2023-08-21', '2023-08-21', NULL, 'active', 'note note note',
+        'sadfasf', '`sdasfdasdf', 2134, '2023-08-21 10:33:05.497822', '2023-08-21 10:33:05.497822',
+        4);
+
 

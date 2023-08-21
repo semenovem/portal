@@ -3,8 +3,8 @@ package controller
 import (
 	"errors"
 	"github.com/labstack/echo/v4"
+	"github.com/semenovem/portal/internal/abc/people/provider"
 	"github.com/semenovem/portal/internal/provider/auth_provider"
-	"github.com/semenovem/portal/internal/provider/people_provider"
 	"github.com/semenovem/portal/pkg"
 	"github.com/semenovem/portal/pkg/failing"
 	"net/http"

@@ -18,7 +18,7 @@ type AuthProvider struct {
 	onetimeEntryLifetime   time.Duration
 }
 
-func NewAuthPvd(
+func New(
 	logger pkg.Logger,
 	db *pgxpool.Pool,
 	redisClient *redis.Client,
@@ -26,7 +26,7 @@ func NewAuthPvd(
 	onetimeEntryLifetime time.Duration,
 ) *AuthProvider {
 	return &AuthProvider{
-		logger:                 logger.Named("authPvd"),
+		logger:                 logger.Named("AuthProvider"),
 		db:                     db,
 		redis:                  redisClient,
 		jwtAccessTokenLifetime: jwtAccessTokenLifetimeMin,

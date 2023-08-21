@@ -28,16 +28,27 @@ CREATE TABLE IF NOT EXISTS people.users
   expired_at  timestamp                         default NULL  NULL,     -- УЗ активна до указанного времени
 
   login       varchar(128) UNIQUE               default NULL  NULL,
-  passwd_hash varchar(40)                       default ''    NOT NULL  -- хэш пароля
+  passwd_hash varchar(40)                       default NULL  NULL      -- хэш пароля
 );
 
 -- Сотрудники компании
 CREATE TABLE IF NOT EXISTS people.employees
 (
-  position_id int REFERENCES people.positions NOT NULL,
-  worked_at   timestamp default now()         NOT NULL, -- дата начала работы
-  fired_at    timestamp default NULL          NULL      -- дата увольнения (последний день работы)
-) INHERITS (people.users);
+  user_id     int PRIMARY KEY REFERENCES people.users NOT NULL,
+  position_id int REFERENCES people.positions         NOT NULL,
+  worked_at   timestamp default now()                 NOT NULL, -- дата начала работы
+  fired_at    timestamp default NULL                  NULL      -- дата увольнения (последний день работы)
+);
+
+-- Сотрудники компании
+-- CREATE TABLE IF NOT EXISTS people.employees
+-- (
+--   user_id
+--   id2         serial PRIMARY KEY,
+--   position_id int REFERENCES people.positions NOT NULL,
+--   worked_at   timestamp default now()         NOT NULL, -- дата начала работы
+--   fired_at    timestamp default NULL          NULL      -- дата увольнения (последний день работы)
+-- ) INHERITS (people.users);
 
 -- Дополнительные поля пользователя
 CREATE TABLE IF NOT EXISTS people.user_additional_fields
@@ -55,22 +66,32 @@ CREATE TABLE IF NOT EXISTS people.user_additional_fields
 -- ----------------------------------------------------------------
 
 
-insert into people.positions (title, description)
-values ('должность 1', 'описание должности 1'),
-       ('водитель-экспедитор', 'описание должности 2'),
-       ('грузчик', '')
+insert into people.positions (title, description, parent_id)
+values ('водитель', 'описание должности 1', null),
+       ('водитель-экспедитор', 'описание должности 2', null),
+       ('экспедитор', 'описание должности 2', null),
+       ('грузчик-экспедитор', 'описание должности 2', null),
+       ('Руководитель отдела транспорта', '', null),
+       ('Генеральный директор', '', null),
+       ('Руководитель АТИ', '', null),
+       ('Оператор', '', null),
+       ('грузчик', '', null)
 on conflict do nothing;
 
+insert into people.users (firstname, surname, note, status, position, login, passwd_hash)
+values ('Петр', 'Петрович', '', 'active', 'оператор', null, null),
+       ('Иван', 'Сидорович', '', 'active', 'оператор2', 'login1',
+        'ec95a5a1e2e7b82333340b5ec1db3e82e3a8ae9b'),
+       ('ivan', 'ivanov', 'note для пользователя', 'inactive', '', 'login2',
+        'ec95a5a1e2e7b82333340b5ec1db3e82e3a8ae9b'),
+       ('oleg', 'olegovich', 'note2 для пользователя', 'active', '', 'login3',
+        'ec95a5a1e2e7b82333340b5ec1db3e82e3a8ae9b'),
+       ('Макс', 'Масков', 'note(макс) для пользователя', 'active', '', 'login4',
+        'ec95a5a1e2e7b82333340b5ec1db3e82e3a8ae9b')
 
-insert into people.employees
-(firstname, surname, note, status, login, passwd_hash, position_id, worked_at, fired_at)
-values ('ivan', 'ivanov', 'note для пользователя', 'inactive', 'login1',
-        'ec95a5a1e2e7b82333340b5ec1db3e82e3a8ae9b', 1, '2023-07-12T15:38:30Z', now()),
-
-       ('oleg', 'olegovich', 'note2 для пользователя', 'active', 'login2',
-        'ec95a5a1e2e7b82333340b5ec1db3e82e3a8ae9b', 2, '2022-08-12T15:38:30Z', NULL)
 on conflict do nothing;
 
-insert into people.users (firstname, surname, position)
-values ('Петр', 'Петрович', 'оператор')
+insert into people.employees (user_id, position_id, worked_at, fired_at)
+values (3, 1, '2023-07-12T15:38:30Z', now()),
+       (4, 2, '2022-08-12T15:38:30Z', NULL)
 on conflict do nothing;

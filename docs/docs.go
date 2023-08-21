@@ -236,7 +236,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "people/position"
+                    "peoples/position"
                 ],
                 "summary": "Получить профиль пользователя по его ID",
                 "parameters": [
@@ -276,7 +276,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "people"
+                    "peoples"
                 ],
                 "summary": "Получить профиль пользователя по его ID",
                 "parameters": [
@@ -315,7 +315,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "people"
+                    "peoples"
                 ],
                 "summary": "Получить свой профиль",
                 "responses": {
@@ -324,6 +324,123 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/internal_rest_controller_people_cnt.userProfileView"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/store/:store_path": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "store"
+                ],
+                "summary": "Чтение произвольных клиентских данных",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "code store",
+                        "name": "store_code",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_rest_controller_store_cnt.loadView"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Для возможности восстановления состоянии на клиенте\n",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "store"
+                ],
+                "summary": "Сохранение произвольных клиентских данных",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "code store",
+                        "name": "store_code",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Данные для сохранения",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_rest_controller_store_cnt.storeForm"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "no content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "store"
+                ],
+                "summary": "Удаление",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "code store",
+                        "name": "store_code",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "no content"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -655,6 +772,29 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "sur_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_rest_controller_store_cnt.loadView": {
+            "type": "object",
+            "properties": {
+                "payload": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_rest_controller_store_cnt.storeForm": {
+            "type": "object",
+            "required": [
+                "payload",
+                "storePath"
+            ],
+            "properties": {
+                "payload": {
+                    "type": "string"
+                },
+                "storePath": {
                     "type": "string"
                 }
             }

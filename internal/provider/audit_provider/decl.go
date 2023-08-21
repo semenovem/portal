@@ -28,7 +28,7 @@ type auditPipe struct {
 	payload map[string]interface{}
 }
 
-func NewAudit(
+func New(
 	ctx context.Context,
 	db *pgxpool.Pool,
 	logger pkg.Logger,
@@ -36,7 +36,7 @@ func NewAudit(
 ) *AuditProvider {
 	o := &AuditProvider{
 		ctx:        ctx,
-		logger:     logger.Named("authPvd"),
+		logger:     logger.Named("AuditProvider"),
 		db:         db,
 		grpcConfig: grpcConfig,
 		input:      make(chan *auditPipe, 1000),

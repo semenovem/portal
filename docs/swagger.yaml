@@ -93,6 +93,21 @@ definitions:
       sur_name:
         type: string
     type: object
+  internal_rest_controller_store_cnt.loadView:
+    properties:
+      payload:
+        type: string
+    type: object
+  internal_rest_controller_store_cnt.storeForm:
+    properties:
+      payload:
+        type: string
+      storePath:
+        type: string
+    required:
+    - payload
+    - storePath
+    type: object
   internal_rest_controller_vehicle.ListResponse:
     properties:
       items:
@@ -262,7 +277,7 @@ paths:
       - ApiKeyAuth: []
       summary: Получить профиль пользователя по его ID
       tags:
-      - people/position
+      - peoples/position
   /peoples/:user_id/profile:
     get:
       description: |
@@ -288,7 +303,7 @@ paths:
       - ApiKeyAuth: []
       summary: Получить профиль пользователя по его ID
       tags:
-      - people
+      - peoples
   /peoples/self/profile:
     get:
       produces:
@@ -306,7 +321,81 @@ paths:
       - ApiKeyAuth: []
       summary: Получить свой профиль
       tags:
-      - people
+      - peoples
+  /store/:store_path:
+    delete:
+      parameters:
+      - description: code store
+        in: path
+        name: store_code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: no content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_semenovem_portal_pkg_failing.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Удаление
+      tags:
+      - store
+    get:
+      parameters:
+      - description: code store
+        in: path
+        name: store_code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_rest_controller_store_cnt.loadView'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_semenovem_portal_pkg_failing.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Чтение произвольных клиентских данных
+      tags:
+      - store
+    post:
+      description: |
+        Для возможности восстановления состоянии на клиенте
+      parameters:
+      - description: code store
+        in: path
+        name: store_code
+        required: true
+        type: string
+      - description: Данные для сохранения
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/internal_rest_controller_store_cnt.storeForm'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: no content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_semenovem_portal_pkg_failing.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Сохранение произвольных клиентских данных
+      tags:
+      - store
   /vehicles:
     get:
       parameters:
