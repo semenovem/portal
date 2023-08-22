@@ -1,4 +1,4 @@
-package audit_provider
+package audit
 
 import (
 	"encoding/json"

@@ -6,19 +6,19 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/semenovem/portal/config"
-	"github.com/semenovem/portal/internal/abc/auth/auth_action"
+	auth_action "github.com/semenovem/portal/internal/abc/auth/action"
 	"github.com/semenovem/portal/internal/abc/auth/controller"
-	"github.com/semenovem/portal/internal/abc/media/action"
+	auth_provider "github.com/semenovem/portal/internal/abc/auth/provider"
+	controller2 "github.com/semenovem/portal/internal/abc/controller"
+	media_action "github.com/semenovem/portal/internal/abc/media/action"
 	"github.com/semenovem/portal/internal/abc/media/controller"
-	"github.com/semenovem/portal/internal/abc/people/action"
+	people_action "github.com/semenovem/portal/internal/abc/people/action"
 	"github.com/semenovem/portal/internal/abc/people/controller"
-	"github.com/semenovem/portal/internal/abc/people/provider"
-	"github.com/semenovem/portal/internal/abc/store/action"
+	people_provider "github.com/semenovem/portal/internal/abc/people/provider"
+	store_action "github.com/semenovem/portal/internal/abc/store/action"
 	"github.com/semenovem/portal/internal/abc/store/controller"
-	"github.com/semenovem/portal/internal/provider/audit_provider"
-	"github.com/semenovem/portal/internal/provider/auth_provider"
-	"github.com/semenovem/portal/internal/rest/controller"
-	vehicleController "github.com/semenovem/portal/internal/rest/controller/vehicle"
+	"github.com/semenovem/portal/internal/abc/vehicle/controller"
+	"github.com/semenovem/portal/internal/audit"
 	"github.com/semenovem/portal/pkg"
 	"github.com/semenovem/portal/pkg/failing"
 	"github.com/semenovem/portal/pkg/jwtoken"
@@ -34,7 +34,7 @@ type Router struct {
 	server              *echo.Echo
 	addr                string
 	unauth, auth, admin *echo.Group
-	vehicleCnt          *vehicleController.Controller
+	vehicleCnt          *vehicle_controller.Controller
 	authCnt             *auth_controller.Controller
 	peopleCnt           *people_controller.Controller
 	storeCnt            *store_controller.Controller
@@ -44,10 +44,12 @@ type Router struct {
 func New(
 	ctx context.Context,
 	logger pkg.Logger,
-	config config.API,
-	auditPvd *audit_provider.AuditProvider,
+	config *config.API,
+	auditService *audit.AuditProvider,
+	jwtService *jwtoken.Service,
 	authPvd *auth_provider.AuthProvider,
 	peoplePvd *people_provider.PeopleProvider,
+
 	authAct *auth_action.AuthAction,
 	peopleAct *people_action.PeopleAction,
 	storeAct *store_action.StoreAction,
@@ -113,56 +115,47 @@ func New(
 		InvalidRequestMessage: invalidFailing,
 	})
 
-	jwtService := jwtoken.New(&jwtoken.Config{
-		AccessTokenSecret:    config.JWT.AccessTokenSecret,
-		RefreshTokenSecret:   config.JWT.RefreshTokenSecret,
-		AccessTokenLifetime:  time.Minute * time.Duration(config.JWT.AccessTokenLifetimeMin),
-		RefreshTokenLifetime: time.Hour * 24 * time.Duration(config.JWT.RefreshTokenLifetimeDay),
-	})
+	cntArg := &controller2.CntArgs{
+		Logger:         logger,
+		FailureService: failureService,
+		Audit:          auditService,
+		Common: controller2.NewAction(
+			logger,
+			failureService,
+			authPvd,
+			peoplePvd,
+		),
+	}
 
-	// контроллеры
-	var (
-		cntArg = &controller.CntArgs{
-			Logger:  logger,
-			Failing: failureService,
-			Common: controller.NewAction(
-				logger,
-				failureService,
-				authPvd,
-				peoplePvd,
-			),
-		}
+	r := &Router{
+		ctx:    ctx,
+		logger: logger.Named("router"),
+		server: e,
+		addr:   fmt.Sprintf(":%d", config.Rest.Port),
 
-		authCnt = auth_controller.New(
+		vehicleCnt: vehicle_controller.New(cntArg),
+
+		authCnt: auth_controller.New(
 			cntArg,
 			jwtService,
 			authAct,
-			auditPvd,
 			strings.Split(config.JWT.ServedDomains, ","),
 			time.Hour*24*time.Duration(config.JWT.RefreshTokenLifetimeDay),
 			config.JWT.RefreshTokenCookieName,
-		)
+		),
 
-		vehicleCnt = vehicleController.New(cntArg)
-		peopleCnt  = people_controller.New(cntArg, peopleAct)
-		storeCnt   = store_controller.New(cntArg, storeAct, auditPvd)
-		mediaCnt   = media_controller.New(cntArg, mediaAct, auditPvd)
-	)
-
-	r := &Router{
-		ctx:        ctx,
-		logger:     logger.Named("router"),
-		server:     e,
-		addr:       fmt.Sprintf(":%d", config.Rest.Port),
-		vehicleCnt: vehicleCnt,
-		authCnt:    authCnt,
-		peopleCnt:  peopleCnt,
-		storeCnt:   storeCnt,
-		mediaCnt:   mediaCnt,
+		peopleCnt: people_controller.New(cntArg, peopleAct),
+		storeCnt:  store_controller.New(cntArg, storeAct),
+		mediaCnt:  media_controller.New(cntArg, mediaAct),
 	}
 
 	r.unauth = e.Group("")
-	r.auth = r.unauth.Group("", tokenMiddleware(logger, failureService, jwtService, authPvd))
+	r.auth = r.unauth.Group("", tokenMiddleware(
+		logger,
+		failureService,
+		jwtService,
+		authPvd,
+	))
 
 	r.addRoutes()
 

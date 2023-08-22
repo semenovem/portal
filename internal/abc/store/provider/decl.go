@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/semenovem/portal/internal/provider"
+	"github.com/semenovem/portal/internal/abc/provider"
 	"github.com/semenovem/portal/pkg"
 	"time"
 )

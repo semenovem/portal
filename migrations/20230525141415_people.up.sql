@@ -17,18 +17,18 @@ CREATE TABLE IF NOT EXISTS people.positions
 CREATE TABLE IF NOT EXISTS people.users
 (
   id          serial PRIMARY KEY,
-  firstname   varchar                                         NOT NULL, -- Имя
-  surname     varchar                           default ''    NOT NULL, -- Фамилия
-  deleted     bool                              default false NOT NULL,
-  note        text                              default ''    NOT NULL, -- примечание
-  position    varchar                           default ''    NOT NULL,
-  status      people.statuses_enum              default 'inactive',
-  roles       people.roles_enum[]               default NULL  NULL,
-  avatar      int REFERENCES media.avatars (id) default NULL  NULL,
-  expired_at  timestamp                         default NULL  NULL,     -- УЗ активна до указанного времени
+  firstname   varchar                                    NOT NULL, -- Имя
+  surname     varchar                      default ''    NOT NULL, -- Фамилия
+  deleted     bool                         default false NOT NULL,
+  note        text                         default ''    NOT NULL, -- примечание
+  position    varchar                      default ''    NOT NULL,
+  status      people.statuses_enum         default 'inactive',
+  roles       people.roles_enum[]          default NULL  NULL,
+  avatar      int REFERENCES media.avatars default NULL  NULL,
+  expired_at  timestamp                    default NULL  NULL,     -- УЗ активна до указанного времени
 
-  login       varchar(128) UNIQUE               default NULL  NULL,
-  passwd_hash varchar(40)                       default NULL  NULL      -- хэш пароля
+  login       varchar(128) UNIQUE          default NULL  NULL,
+  passwd_hash varchar(40)                  default NULL  NULL      -- хэш пароля
 );
 
 -- Сотрудники компании
@@ -39,16 +39,6 @@ CREATE TABLE IF NOT EXISTS people.employees
   worked_at   timestamp default now()                 NOT NULL, -- дата начала работы
   fired_at    timestamp default NULL                  NULL      -- дата увольнения (последний день работы)
 );
-
--- Сотрудники компании
--- CREATE TABLE IF NOT EXISTS people.employees
--- (
---   user_id
---   id2         serial PRIMARY KEY,
---   position_id int REFERENCES people.positions NOT NULL,
---   worked_at   timestamp default now()         NOT NULL, -- дата начала работы
---   fired_at    timestamp default NULL          NULL      -- дата увольнения (последний день работы)
--- ) INHERITS (people.users);
 
 -- Дополнительные поля пользователя
 CREATE TABLE IF NOT EXISTS people.user_additional_fields

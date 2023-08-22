@@ -46,7 +46,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_rest_controller_auth.loginForm"
+                            "$ref": "#/definitions/internal_abc_auth_controller.loginForm"
                         }
                     }
                 ],
@@ -54,7 +54,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_rest_controller_auth.loginResponse"
+                            "$ref": "#/definitions/internal_abc_auth_controller.loginResponse"
                         }
                     },
                     "400": {
@@ -93,7 +93,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_rest_controller_auth.loginResponse"
+                            "$ref": "#/definitions/internal_abc_auth_controller.loginResponse"
                         }
                     },
                     "400": {
@@ -126,7 +126,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_rest_controller_auth.onetimeAuthForm"
+                            "$ref": "#/definitions/internal_abc_auth_controller.onetimeAuthForm"
                         }
                     }
                 ],
@@ -134,7 +134,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_rest_controller_auth.onetimeAuthResponse"
+                            "$ref": "#/definitions/internal_abc_auth_controller.onetimeAuthResponse"
                         }
                     },
                     "400": {
@@ -173,7 +173,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_rest_controller_auth.loginResponse"
+                            "$ref": "#/definitions/internal_abc_auth_controller.loginResponse"
                         }
                     },
                     "400": {
@@ -212,7 +212,125 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_rest_controller_auth.refreshResponse"
+                            "$ref": "#/definitions/internal_abc_auth_controller.refreshResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/people": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "people"
+                ],
+                "summary": "Создает пользователя",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id пользователя",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_abc_people_controller.userProfileView"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/people/:user_id": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "people"
+                ],
+                "summary": "Удаляет пользователя",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id пользователя",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_abc_people_controller.userProfileView"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/people/:user_id/profile": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Проверяет действующие права на просмотр расширенных данных пользователя\n",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "people"
+                ],
+                "summary": "Получить профиль пользователя по его ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id пользователя",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_abc_people_controller.userProfileView"
                         }
                     },
                     "400": {
@@ -236,7 +354,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "peoples/position"
+                    "people/position"
                 ],
                 "summary": "Получить профиль пользователя по его ID",
                 "parameters": [
@@ -264,47 +382,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/peoples/:user_id/profile": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Проверяет действующие права на просмотр расширенных данных пользователя\n",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "peoples"
-                ],
-                "summary": "Получить профиль пользователя по его ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "id пользователя",
-                        "name": "user_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/internal_rest_controller_people_cnt.userProfileView"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/peoples/self/profile": {
+        "/people/self/profile": {
             "get": {
                 "security": [
                     {
@@ -315,14 +393,14 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "peoples"
+                    "people"
                 ],
                 "summary": "Получить свой профиль",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_rest_controller_people_cnt.userProfileView"
+                            "$ref": "#/definitions/internal_abc_people_controller.userProfileView"
                         }
                     },
                     "400": {
@@ -361,7 +439,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_rest_controller_store_cnt.loadView"
+                            "$ref": "#/definitions/internal_abc_store_controller.loadView"
                         }
                     },
                     "400": {
@@ -400,7 +478,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_rest_controller_store_cnt.storeForm"
+                            "$ref": "#/definitions/internal_abc_store_controller.storeForm"
                         }
                     }
                 ],
@@ -510,7 +588,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_rest_controller_vehicle.ListResponse"
+                            "$ref": "#/definitions/internal_abc_vehicle_controller.ListResponse"
                         }
                     },
                     "400": {
@@ -688,7 +766,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_rest_controller_auth.loginForm": {
+        "internal_abc_auth_controller.loginForm": {
             "type": "object",
             "required": [
                 "login",
@@ -706,7 +784,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_rest_controller_auth.loginResponse": {
+        "internal_abc_auth_controller.loginResponse": {
             "type": "object",
             "properties": {
                 "access_token": {
@@ -721,7 +799,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_rest_controller_auth.onetimeAuthForm": {
+        "internal_abc_auth_controller.onetimeAuthForm": {
             "type": "object",
             "required": [
                 "user_id"
@@ -732,7 +810,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_rest_controller_auth.onetimeAuthResponse": {
+        "internal_abc_auth_controller.onetimeAuthResponse": {
             "type": "object",
             "properties": {
                 "entry_id": {
@@ -743,7 +821,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_rest_controller_auth.refreshResponse": {
+        "internal_abc_auth_controller.refreshResponse": {
             "type": "object",
             "properties": {
                 "access_token": {
@@ -755,7 +833,22 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_rest_controller_people_cnt.userProfileView": {
+        "internal_abc_media_controller.storeForm": {
+            "type": "object",
+            "required": [
+                "payload",
+                "storePath"
+            ],
+            "properties": {
+                "payload": {
+                    "type": "string"
+                },
+                "storePath": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_abc_people_controller.userProfileView": {
             "type": "object",
             "properties": {
                 "avatar": {
@@ -776,7 +869,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_rest_controller_store_cnt.loadView": {
+        "internal_abc_store_controller.loadView": {
             "type": "object",
             "properties": {
                 "payload": {
@@ -784,7 +877,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_rest_controller_store_cnt.storeForm": {
+        "internal_abc_store_controller.storeForm": {
             "type": "object",
             "required": [
                 "payload",
@@ -799,7 +892,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_rest_controller_vehicle.ListResponse": {
+        "internal_abc_vehicle_controller.ListResponse": {
             "type": "object",
             "properties": {
                 "items": {

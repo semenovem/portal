@@ -35,7 +35,7 @@ definitions:
       path:
         type: string
     type: object
-  internal_rest_controller_auth.loginForm:
+  internal_abc_auth_controller.loginForm:
     properties:
       device_id:
         type: string
@@ -47,7 +47,7 @@ definitions:
     - login
     - password
     type: object
-  internal_rest_controller_auth.loginResponse:
+  internal_abc_auth_controller.loginResponse:
     properties:
       access_token:
         type: string
@@ -57,21 +57,21 @@ definitions:
       user_id:
         type: integer
     type: object
-  internal_rest_controller_auth.onetimeAuthForm:
+  internal_abc_auth_controller.onetimeAuthForm:
     properties:
       user_id:
         type: integer
     required:
     - user_id
     type: object
-  internal_rest_controller_auth.onetimeAuthResponse:
+  internal_abc_auth_controller.onetimeAuthResponse:
     properties:
       entry_id:
         type: string
       uri:
         type: string
     type: object
-  internal_rest_controller_auth.refreshResponse:
+  internal_abc_auth_controller.refreshResponse:
     properties:
       access_token:
         type: string
@@ -79,7 +79,17 @@ definitions:
         description: TODO для разработки
         type: string
     type: object
-  internal_rest_controller_people_cnt.userProfileView:
+  internal_abc_media_controller.storeForm:
+    properties:
+      payload:
+        type: string
+      storePath:
+        type: string
+    required:
+    - payload
+    - storePath
+    type: object
+  internal_abc_people_controller.userProfileView:
     properties:
       avatar:
         description: TODO нужно собрать uri на загрузку аватара
@@ -93,12 +103,12 @@ definitions:
       sur_name:
         type: string
     type: object
-  internal_rest_controller_store_cnt.loadView:
+  internal_abc_store_controller.loadView:
     properties:
       payload:
         type: string
     type: object
-  internal_rest_controller_store_cnt.storeForm:
+  internal_abc_store_controller.storeForm:
     properties:
       payload:
         type: string
@@ -108,7 +118,7 @@ definitions:
     - payload
     - storePath
     type: object
-  internal_rest_controller_vehicle.ListResponse:
+  internal_abc_vehicle_controller.ListResponse:
     properties:
       items:
         items:
@@ -138,14 +148,14 @@ paths:
         name: payload
         required: true
         schema:
-          $ref: '#/definitions/internal_rest_controller_auth.loginForm'
+          $ref: '#/definitions/internal_abc_auth_controller.loginForm'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_rest_controller_auth.loginResponse'
+            $ref: '#/definitions/internal_abc_auth_controller.loginResponse'
         "400":
           description: Bad Request
           schema:
@@ -169,7 +179,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_rest_controller_auth.loginResponse'
+            $ref: '#/definitions/internal_abc_auth_controller.loginResponse'
         "400":
           description: Bad Request
           schema:
@@ -187,14 +197,14 @@ paths:
         name: payload
         required: true
         schema:
-          $ref: '#/definitions/internal_rest_controller_auth.onetimeAuthForm'
+          $ref: '#/definitions/internal_abc_auth_controller.onetimeAuthForm'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_rest_controller_auth.onetimeAuthResponse'
+            $ref: '#/definitions/internal_abc_auth_controller.onetimeAuthResponse'
         "400":
           description: Bad Request
           schema:
@@ -218,7 +228,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_rest_controller_auth.loginResponse'
+            $ref: '#/definitions/internal_abc_auth_controller.loginResponse'
         "400":
           description: Bad Request
           schema:
@@ -242,7 +252,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_rest_controller_auth.refreshResponse'
+            $ref: '#/definitions/internal_abc_auth_controller.refreshResponse'
         "400":
           description: Bad Request
           schema:
@@ -252,6 +262,80 @@ paths:
       summary: Обновление токена авторизации
       tags:
       - auth
+  /people:
+    post:
+      parameters:
+      - description: id пользователя
+        in: path
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_abc_people_controller.userProfileView'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_semenovem_portal_pkg_failing.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Создает пользователя
+      tags:
+      - people
+  /people/:user_id:
+    delete:
+      parameters:
+      - description: id пользователя
+        in: path
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_abc_people_controller.userProfileView'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_semenovem_portal_pkg_failing.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Удаляет пользователя
+      tags:
+      - people
+  /people/:user_id/profile:
+    get:
+      description: |
+        Проверяет действующие права на просмотр расширенных данных пользователя
+      parameters:
+      - description: id пользователя
+        in: path
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_abc_people_controller.userProfileView'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_semenovem_portal_pkg_failing.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Получить профиль пользователя по его ID
+      tags:
+      - people
   /people/positions:
     get:
       description: |
@@ -277,34 +361,8 @@ paths:
       - ApiKeyAuth: []
       summary: Получить профиль пользователя по его ID
       tags:
-      - peoples/position
-  /peoples/:user_id/profile:
-    get:
-      description: |
-        Проверяет действующие права на просмотр расширенных данных пользователя
-      parameters:
-      - description: id пользователя
-        in: path
-        name: user_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/internal_rest_controller_people_cnt.userProfileView'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/github_com_semenovem_portal_pkg_failing.Response'
-      security:
-      - ApiKeyAuth: []
-      summary: Получить профиль пользователя по его ID
-      tags:
-      - peoples
-  /peoples/self/profile:
+      - people/position
+  /people/self/profile:
     get:
       produces:
       - application/json
@@ -312,7 +370,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_rest_controller_people_cnt.userProfileView'
+            $ref: '#/definitions/internal_abc_people_controller.userProfileView'
         "400":
           description: Bad Request
           schema:
@@ -321,7 +379,7 @@ paths:
       - ApiKeyAuth: []
       summary: Получить свой профиль
       tags:
-      - peoples
+      - people
   /store/:store_path:
     delete:
       parameters:
@@ -357,7 +415,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_rest_controller_store_cnt.loadView'
+            $ref: '#/definitions/internal_abc_store_controller.loadView'
         "400":
           description: Bad Request
           schema:
@@ -381,7 +439,7 @@ paths:
         name: payload
         required: true
         schema:
-          $ref: '#/definitions/internal_rest_controller_store_cnt.storeForm'
+          $ref: '#/definitions/internal_abc_store_controller.storeForm'
       produces:
       - application/json
       responses:
@@ -430,7 +488,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_rest_controller_vehicle.ListResponse'
+            $ref: '#/definitions/internal_abc_vehicle_controller.ListResponse'
         "400":
           description: Bad Request
           schema:

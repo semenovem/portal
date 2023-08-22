@@ -9,11 +9,15 @@ func (r *Router) addRoutes() {
 	r.unauth.POST("/auth/onetime/:entry_id", r.authCnt.LoginOnetimeLink)
 
 	// People
-	r.auth.GET("/peoples/self/profile", r.peopleCnt.SelfProfile)
-	r.auth.GET("/peoples/:user_id/profile", r.peopleCnt.Profile)
+	r.auth.POST("/people", r.peopleCnt.CreateUser)
+
+	r.auth.GET("/people/self/profile", r.peopleCnt.SelfProfile)
+	
+	r.auth.GET("/people/:user_id/profile", r.peopleCnt.Profile)
+	r.auth.DELETE("/people/:user_id", r.peopleCnt.DeleteUser)
 
 	// People Position
-	r.auth.GET("/peoples/positions", r.peopleCnt.Profile)
+	r.auth.GET("/people/positions", r.peopleCnt.Profile)
 
 	// Store
 	r.auth.GET("/store/:store_path", r.storeCnt.Load)

@@ -2,9 +2,9 @@ package store_action
 
 import (
 	"context"
+	"github.com/semenovem/portal/internal/abc/action"
+	"github.com/semenovem/portal/internal/abc/provider"
 	"github.com/semenovem/portal/internal/abc/store/provider"
-	"github.com/semenovem/portal/internal/action"
-	"github.com/semenovem/portal/internal/provider"
 	"github.com/semenovem/portal/pkg"
 )
 

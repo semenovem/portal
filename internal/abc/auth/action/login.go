@@ -3,7 +3,7 @@ package auth_action
 import (
 	"context"
 	"github.com/google/uuid"
-	"github.com/semenovem/portal/internal/provider"
+	"github.com/semenovem/portal/internal/abc/provider"
 	"github.com/semenovem/portal/pkg/it"
 )
 

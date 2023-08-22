@@ -7,29 +7,48 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/semenovem/portal/config"
-	"github.com/semenovem/portal/internal/abc/auth/auth_action"
+	"github.com/semenovem/portal/internal/abc/auth/action"
+	"github.com/semenovem/portal/internal/abc/auth/provider"
 	"github.com/semenovem/portal/internal/abc/media/action"
 	"github.com/semenovem/portal/internal/abc/media/provider"
 	"github.com/semenovem/portal/internal/abc/people/action"
 	"github.com/semenovem/portal/internal/abc/people/provider"
 	"github.com/semenovem/portal/internal/abc/store/action"
 	"github.com/semenovem/portal/internal/abc/store/provider"
-	"github.com/semenovem/portal/internal/provider/audit_provider"
-	"github.com/semenovem/portal/internal/provider/auth_provider"
+	"github.com/semenovem/portal/internal/audit"
 	"github.com/semenovem/portal/internal/rest/router"
 	"github.com/semenovem/portal/internal/zoo/conn"
 	"github.com/semenovem/portal/pkg"
-	"github.com/semenovem/portal/pkg/it"
+	"github.com/semenovem/portal/pkg/failing"
+	"github.com/semenovem/portal/pkg/jwtoken"
 	"math"
 	"time"
 )
 
 type appAPI struct {
-	ctx    context.Context
-	logger pkg.Logger
-	db     *pgxpool.Pool
-	redis  *redis.Client
-	router *router.Router
+	ctx            context.Context
+	logger         pkg.Logger
+	db             *pgxpool.Pool
+	redis          *redis.Client
+	router         *router.Router
+	config         *config.API
+	auditService   *audit.AuditProvider
+	failureService *failing.Service
+	jwtService     *jwtoken.Service
+
+	providers struct {
+		auth   *auth_provider.AuthProvider
+		people *people_provider.PeopleProvider
+		store  *store_provider.StoreProvider
+		media  *media_provider.MediaProvider
+	}
+
+	actions struct {
+		auth   *auth_action.AuthAction
+		people *people_action.PeopleAction
+		store  *store_action.StoreAction
+		media  *media_action.MediaAction
+	}
 }
 
 func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
@@ -38,6 +57,7 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 		app = appAPI{
 			ctx:    ctx,
 			logger: logger,
+			config: &cfg,
 		}
 		err error
 	)
@@ -77,57 +97,35 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 		return err
 	}
 
+	app.jwtService = jwtoken.New(&jwtoken.Config{
+		AccessTokenSecret:    cfg.JWT.AccessTokenSecret,
+		RefreshTokenSecret:   cfg.JWT.RefreshTokenSecret,
+		AccessTokenLifetime:  time.Minute * time.Duration(cfg.JWT.AccessTokenLifetimeMin),
+		RefreshTokenLifetime: time.Hour * 24 * time.Duration(cfg.JWT.RefreshTokenLifetimeDay),
+	})
+
+	app.auditService = audit.New(ctx, app.db, logger, cfg.GetGRPCAuditConfig())
+
 	// Провайдеры данных
-	var (
-		audit   = audit_provider.New(ctx, app.db, logger, cfg.GetGRPCAuditConfig())
-		authPvd = auth_provider.New(
-			logger,
-			app.db,
-			app.redis,
-			time.Minute*time.Duration(cfg.JWT.AccessTokenLifetimeMin),
-			time.Minute*time.Duration(cfg.Auth.OnetimeEntryLifetimeMin),
-		)
-		peoplePvd = people_provider.New(app.db, logger)
-
-		storePvd = store_provider.New(logger, app.db, app.redis, time.Minute, time.Minute)
-
-		mediaPvd = media_provider.New(logger, app.db, app.redis)
-	)
+	app.initProviders()
 
 	// Экшены
-	var (
-		authAct = auth_action.New(
-			logger,
-			it.NewUserPasswdAuth(cfg.UserPasswdSalt),
-			authPvd,
-			peoplePvd,
-		)
-
-		peopleAct = people_action.New(
-			logger,
-			peoplePvd,
-		)
-
-		storeAct = store_action.New(
-			logger,
-			storePvd,
-		)
-
-		mediaAct = media_action.New(logger, mediaPvd)
-	)
+	app.initActions()
 
 	// Router
 	if app.router, err = router.New(
 		ctx,
-		logger,
-		cfg,
-		audit,
-		authPvd,
-		peoplePvd,
-		authAct,
-		peopleAct,
-		storeAct,
-		mediaAct,
+		app.logger,
+		app.config,
+		app.auditService,
+		app.jwtService,
+		app.providers.auth,
+		app.providers.people,
+
+		app.actions.auth,
+		app.actions.people,
+		app.actions.store,
+		app.actions.media,
 	); err != nil {
 		ll.Named("router").Nested(err.Error())
 		return err
@@ -136,7 +134,7 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 	go app.router.Start()
 
 	// Проверки
-	t, err := authPvd.Now(ctx)
+	t, err := app.providers.auth.Now(ctx)
 	if err != nil {
 		ll.Named("authPvd.Now").Nested(err.Error())
 		return err

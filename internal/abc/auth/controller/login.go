@@ -2,8 +2,8 @@ package auth_controller
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/semenovem/portal/internal/abc/auth/auth_action"
-	"github.com/semenovem/portal/pkg/audit"
+	"github.com/semenovem/portal/internal/abc/auth/action"
+	"github.com/semenovem/portal/internal/audit"
 	"github.com/semenovem/portal/pkg/txt"
 	"net/http"
 

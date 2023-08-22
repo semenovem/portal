@@ -1,15 +1,31 @@
-package audit_provider
+package audit
 
 import (
 	"context"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/semenovem/portal/config"
 	"github.com/semenovem/portal/pkg"
-	"github.com/semenovem/portal/pkg/audit"
 	"github.com/semenovem/portal/proto/audit_grpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
+
+const (
+	Create Action = "create"
+	Delete Action = "delete"
+	Update Action = "update"
+)
+
+const (
+	Allow Decision = "allow" // Действие выполнено
+	Deny  Decision = "deny"  // Запрет на действие
+)
+
+type Action string   // Типы действий в аудите
+type Decision string // Решение на запрос
+type Cause string    // Причина если было Deny
+
+type P map[string]interface{}
 
 type AuditProvider struct {
 	ctx        context.Context
@@ -23,8 +39,9 @@ type AuditProvider struct {
 
 type auditPipe struct {
 	userID  uint32
-	code    audit.Code
-	cause   audit.Cause
+	code    Code
+	cause   Cause
+	action  Action
 	payload map[string]interface{}
 }
 

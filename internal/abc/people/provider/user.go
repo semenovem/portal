@@ -2,7 +2,7 @@ package people_provider
 
 import (
 	"context"
-	"github.com/semenovem/portal/internal/provider"
+	"github.com/semenovem/portal/internal/abc/provider"
 	"github.com/semenovem/portal/pkg/it"
 )
 

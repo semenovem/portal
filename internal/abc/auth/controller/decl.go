@@ -2,9 +2,9 @@ package auth_controller
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/semenovem/portal/internal/abc/auth/auth_action"
-	"github.com/semenovem/portal/internal/provider/audit_provider"
-	"github.com/semenovem/portal/internal/rest/controller"
+	"github.com/semenovem/portal/internal/abc/auth/action"
+	controller2 "github.com/semenovem/portal/internal/abc/controller"
+	"github.com/semenovem/portal/internal/audit"
 	"github.com/semenovem/portal/pkg"
 	"github.com/semenovem/portal/pkg/failing"
 	"github.com/semenovem/portal/pkg/it"
@@ -17,29 +17,28 @@ type Controller struct {
 	logger                    pkg.Logger
 	failing                   *failing.Service
 	jwt                       *jwtoken.Service
-	com                       *controller.Common
+	com                       *controller2.Common
 	authAct                   *auth_action.AuthAction
-	audit                     *audit_provider.AuditProvider
+	audit                     *audit.AuditProvider
 	jwtServedDomains          []string
 	jwtRefreshTokenLife       time.Duration
 	jwtRefreshTokenCookieName string
 }
 
 func New(
-	arg *controller.CntArgs,
+	arg *controller2.CntArgs,
 	jwt *jwtoken.Service,
 	authAct *auth_action.AuthAction,
-	audit *audit_provider.AuditProvider,
 	jwtServedDomains []string,
 	jwtRefreshTokenLife time.Duration,
 	jwtRefreshTokenCookieName string,
 ) *Controller {
 	return &Controller{
 		logger:                    arg.Logger.Named("auth-cnt"),
-		failing:                   arg.Failing,
+		failing:                   arg.FailureService,
 		com:                       arg.Common,
 		authAct:                   authAct,
-		audit:                     audit,
+		audit:                     arg.Audit,
 		jwt:                       jwt,
 		jwtServedDomains:          jwtServedDomains,
 		jwtRefreshTokenLife:       jwtRefreshTokenLife,

@@ -1,9 +1,9 @@
 package media_controller
 
 import (
+	controller2 "github.com/semenovem/portal/internal/abc/controller"
 	"github.com/semenovem/portal/internal/abc/media/action"
-	"github.com/semenovem/portal/internal/provider/audit_provider"
-	"github.com/semenovem/portal/internal/rest/controller"
+	"github.com/semenovem/portal/internal/audit"
 	"github.com/semenovem/portal/pkg"
 	"github.com/semenovem/portal/pkg/failing"
 )
@@ -11,21 +11,20 @@ import (
 type Controller struct {
 	logger   pkg.Logger
 	failing  *failing.Service
-	com      *controller.Common
+	com      *controller2.Common
 	mediaAct *media_action.MediaAction
-	audit    *audit_provider.AuditProvider
+	audit    *audit.AuditProvider
 }
 
 func New(
-	arg *controller.CntArgs,
+	arg *controller2.CntArgs,
 	mediaAct *media_action.MediaAction,
-	audit *audit_provider.AuditProvider,
 ) *Controller {
 	return &Controller{
 		logger:   arg.Logger.Named("auth-cnt"),
-		failing:  arg.Failing,
+		failing:  arg.FailureService,
+		audit:    arg.Audit,
 		com:      arg.Common,
 		mediaAct: mediaAct,
-		audit:    audit,
 	}
 }

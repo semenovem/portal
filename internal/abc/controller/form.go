@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"github.com/semenovem/portal/internal/audit"
 	"github.com/semenovem/portal/pkg"
 	"github.com/semenovem/portal/pkg/failing"
 )
@@ -27,7 +28,8 @@ func (f *PaginationForm) GetLimit() int {
 }
 
 type CntArgs struct {
-	Logger  pkg.Logger
-	Failing *failing.Service
-	Common  *Common
+	Logger         pkg.Logger
+	FailureService *failing.Service
+	Audit          *audit.AuditProvider
+	Common         *Common
 }

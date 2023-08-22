@@ -17,7 +17,7 @@ import (
 //	@Success	200		{object}	string
 //	@Failure	400		{object}	failing.Response
 //	@Router		/people/positions [GET]
-//	@Tags		peoples/position
+//	@Tags		people/position
 //	@Security	ApiKeyAuth
 func (cnt *Controller) Position(c echo.Context) error {
 	fmt.Println("!!!!!!!!!!!!!")

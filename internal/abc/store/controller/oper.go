@@ -3,7 +3,7 @@ package store_controller
 import (
 	"errors"
 	"github.com/labstack/echo/v4"
-	"github.com/semenovem/portal/internal/action"
+	"github.com/semenovem/portal/internal/abc/action"
 	"net/http"
 
 	_ "github.com/semenovem/portal/pkg/failing"

@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/google/uuid"
-	"github.com/semenovem/portal/internal/provider"
+	"github.com/semenovem/portal/internal/abc/provider"
 	"github.com/semenovem/portal/pkg/it"
 	"github.com/semenovem/portal/pkg/jwtoken"
 )

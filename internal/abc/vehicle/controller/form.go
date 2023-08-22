@@ -1,8 +1,8 @@
-package vehicle
+package vehicle_controller
 
 import (
 	"github.com/google/uuid"
-	"github.com/semenovem/portal/internal/rest/controller"
+	"github.com/semenovem/portal/internal/abc/controller"
 	"time"
 )
 

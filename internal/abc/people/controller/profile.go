@@ -2,7 +2,7 @@ package people_controller
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/semenovem/portal/internal/action"
+	"github.com/semenovem/portal/internal/abc/action"
 	"net/http"
 
 	_ "github.com/semenovem/portal/internal/rest/view"
@@ -16,8 +16,8 @@ import (
 //	@Produce	json
 //	@Success	200	{object}	userProfileView
 //	@Failure	400	{object}	failing.Response
-//	@Router		/peoples/self/profile [GET]
-//	@Tags		peoples
+//	@Router		/people/self/profile [GET]
+//	@Tags		people
 //	@Security	ApiKeyAuth
 func (cnt *Controller) SelfProfile(c echo.Context) error {
 	var (
@@ -25,7 +25,7 @@ func (cnt *Controller) SelfProfile(c echo.Context) error {
 		ctx = c.Request().Context()
 	)
 
-	thisUserID, nested := cnt.act.ExtractThisUser(c)
+	thisUserID, nested := cnt.com.ExtractThisUser(c)
 	if nested != nil {
 		ll.Named("ExtractThisUser").Nested(nested.Message())
 		return cnt.failing.SendNested(c, "", nested)
@@ -60,8 +60,8 @@ func (cnt *Controller) SelfProfile(c echo.Context) error {
 //	@Param		user_id	path		string	true	"id пользователя"
 //	@Success	200		{object}	userProfileView
 //	@Failure	400		{object}	failing.Response
-//	@Router		/peoples/:user_id/profile [GET]
-//	@Tags		peoples
+//	@Router		/people/:user_id/profile [GET]
+//	@Tags		people
 //	@Security	ApiKeyAuth
 func (cnt *Controller) Profile(c echo.Context) error {
 	var (
@@ -70,7 +70,7 @@ func (cnt *Controller) Profile(c echo.Context) error {
 		form = new(UserForm)
 	)
 
-	thisUserID, nested := cnt.act.ExtractUserAndForm(c, form)
+	thisUserID, nested := cnt.com.ExtractUserAndForm(c, form)
 	if nested != nil {
 		ll.Named("ExtractUserAndForm").Nested(nested.Message())
 		return cnt.failing.Send(c, "", http.StatusBadRequest)
@@ -81,10 +81,10 @@ func (cnt *Controller) Profile(c echo.Context) error {
 		ll = ll.Named("GetUserProfile").With("thisUserID", thisUserID)
 
 		switch err.(type) {
-		case action.NotFoundErr:
+		case *action.NotFoundErr:
 			ll.NotFoundTag().Info(err.Error())
 			return cnt.failing.Send(c, "", http.StatusNotFound, err)
-		case action.ForbiddenErr:
+		case *action.ForbiddenErr:
 			ll.DenyTag().Info(err.Error())
 			return cnt.failing.Send(c, "", http.StatusForbidden, err)
 		default:

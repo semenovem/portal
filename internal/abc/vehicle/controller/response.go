@@ -1,4 +1,4 @@
-package vehicle
+package vehicle_controller
 
 import (
 	"github.com/semenovem/portal/internal/rest/view"

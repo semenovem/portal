@@ -3,9 +3,9 @@ package auth_action
 import (
 	"context"
 	"github.com/google/uuid"
+	"github.com/semenovem/portal/internal/abc/auth/provider"
 	"github.com/semenovem/portal/internal/abc/people/provider"
-	"github.com/semenovem/portal/internal/provider"
-	"github.com/semenovem/portal/internal/provider/auth_provider"
+	"github.com/semenovem/portal/internal/abc/provider"
 	"github.com/semenovem/portal/pkg"
 	"github.com/semenovem/portal/pkg/it"
 	"github.com/semenovem/portal/pkg/jwtoken"
