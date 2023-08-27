@@ -144,7 +144,7 @@ case "$STAND_OPER" in
     func_stand_down && sleep 1 && func_clear || exit 1
   fi
 
-  func_create_network && func_build_if_not_exist_s3_mc_image || exit 1
+  func_create_network && func_build_if_not_exist_s3_mc_image && func_build_if_not_exist_tabix_gui_image || exit 1
 
   OPTS="$([ -n "$ARG_STAND_CLEAR" ] && echo "--force-recreate" || echo "--no-recreate")"
   if [ -z "$LOGS" ] || [ -n "$OPER" ]; then

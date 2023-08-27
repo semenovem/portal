@@ -96,6 +96,13 @@ func_build_if_not_exist_s3_mc_image() {
   docker build -f "${ROOT}/docker-files/s3mc.dockerfile" -t "$__DOCKER_S3_MC_IMAGE__" "$ROOT" || return 1
 }
 
+func_build_if_not_exist_tabix_gui_image() {
+  has=$(docker image ls --filter=reference="$__DOCKER_CLICKHOUSE_TABIX_GUI_IMAGE__" -q) || return 1
+  [ -n "$has" ] && return 0
+  docker build -f "${ROOT}/docker-files/tabix-gui.dockerfile" \
+    -t "$__DOCKER_CLICKHOUSE_TABIX_GUI_IMAGE__" "$ROOT" || return 1
+}
+
 func_get_work_image() {
   [ -n "$__ARG_MODE_DEBUG__" ] && echo "$__DOCKER_DLV_IMAGE__" || echo "$__DOCKER_GOLANG_IMAGE__"
 }
