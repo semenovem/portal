@@ -28,6 +28,7 @@ func (app *appAPI) initActions() {
 
 	app.actions.media = media_action.New(
 		app.logger,
+		app.s3,
 		app.providers.media,
 	)
 }

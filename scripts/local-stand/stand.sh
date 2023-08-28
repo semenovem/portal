@@ -151,9 +151,6 @@ case "$STAND_OPER" in
     OPTS="${OPTS} --detach"
   fi
 
-  echo ">>>> \$LOGS = $LOGS"
-  echo ">>>> \$OPER = $OPER"
-
   docker compose \
     -p "$__STAND_NAME__" \
     --project-directory "$ROOT" \
@@ -194,6 +191,14 @@ case "$OPER" in
     -v "${ROOT}/../../:/debugging:ro" \
     --env-file "${ROOT}/../../deployments/local.env" \
     -e "GRPC_AUDIT_CLIENT_HOST=audit:9090" \
+    \
+    -e "S3_URL=${__S3_URL__}" \
+    -e "S3_ACCESS_KEY=${__S3_ACCESS_KEY__}" \
+    -e "S3_SECRET_KEY=${__S3_SECRET_KEY__}" \
+    -e "S3_BUCKET_NAME=${__S3_BUCKET_NAME__}" \
+    -e "S3_USE_SSL=true" \
+    -e "S3_INSECURE_SKIP_VERIFY=true" \
+    \
     "$(func_get_work_image)" bash -c "$CMD"
   ;;
 

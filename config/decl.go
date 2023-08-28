@@ -22,8 +22,8 @@ type RedisConn struct {
 	DBName   uint16 `env:"REDIS_DB_NAME,required"`
 }
 
-func (c *RedisConn) ConvTo() *conn.RedisConfig {
-	return &conn.RedisConfig{
+func (c *RedisConn) ConvTo() *conn.RedisProps {
+	return &conn.RedisProps{
 		Host:     c.Host,
 		Password: c.Password,
 		DBName:   c.DBName,
@@ -45,8 +45,8 @@ type DatabaseCoreConn struct {
 	AppName            string `env:"DB_CORE_APPLICATION_NAME,required"`
 }
 
-func (c *DatabaseCoreConn) ConvTo() *conn.DBPGConfig {
-	return &conn.DBPGConfig{
+func (c *DatabaseCoreConn) ConvTo() *conn.DBPGProps {
+	return &conn.DBPGProps{
 		Host:            c.Host,
 		Port:            c.Port,
 		Name:            c.Name,
@@ -83,4 +83,13 @@ func (s *GrpcServer) GetMaxProcessingTimeSec() time.Duration {
 
 type GrpcClient struct {
 	Host string
+}
+
+type S3Conn struct {
+	URL                string `env:"S3_URL,required"`
+	AccessKey          string `env:"S3_ACCESS_KEY,required"`
+	SecretKey          string `env:"S3_SECRET_KEY,required"`
+	BucketName         string `env:"S3_BUCKET_NAME,required"`
+	UseSSL             bool   `env:"S3_USE_SSL,required"`
+	InsecureSkipVerify bool   `env:"S3_INSECURE_SKIP_VERIFY,required"`
 }

@@ -17,6 +17,7 @@ import (
 	"github.com/semenovem/portal/internal/abc/store/provider"
 	"github.com/semenovem/portal/internal/audit"
 	"github.com/semenovem/portal/internal/rest/router"
+	"github.com/semenovem/portal/internal/s3"
 	"github.com/semenovem/portal/internal/zoo/conn"
 	"github.com/semenovem/portal/pkg"
 	"github.com/semenovem/portal/pkg/failing"
@@ -30,6 +31,7 @@ type appAPI struct {
 	logger         pkg.Logger
 	db             *pgxpool.Pool
 	redis          *redis.Client
+	s3             *s3.Service
 	router         *router.Router
 	config         *config.API
 	auditService   *audit.AuditProvider
@@ -94,6 +96,16 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 	// Redis
 	if app.redis, err = conn.InitRedis(ctx, ll, cfg.RedisConn.ConvTo()); err != nil {
 		ll.Named("InitRedis").Nested(err.Error())
+		return err
+	}
+
+	// S3
+	if app.s3, err = s3.New(&s3.Props{
+		Ctx:    app.ctx,
+		Logger: app.logger,
+		S3Conn: &app.config.S3Conn,
+	}); err != nil {
+		ll.Named("s3").Nested(err.Error())
 		return err
 	}
 

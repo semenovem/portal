@@ -1,31 +1,67 @@
 package media_controller
 
 import (
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"net/http"
 
 	_ "github.com/semenovem/portal/pkg/failing"
 )
 
-// Store docs
+// Upload docs
 //
 //	@Summary		Сохранение произвольных клиентских данных
-//	@Description	Для возможности восстановления состоянии на клиенте
 //	@Description
 //	@Produce	json
 //	@Param		store_code	path	string		true	"code store"
 //	@Param		payload		body	storeForm	true	"Данные для сохранения"
+//	@Accept		multipart/form-data
 //	@Success	201			"no content"
 //	@Failure	400			{object}	failing.Response
-//	@Router		/store/:store_path [POST]
+//	@Router		/media/upload [POST]
 //	@Tags		store
 //	@Security	ApiKeyAuth
-func (cnt *Controller) Store(c echo.Context) error {
+func (cnt *Controller) Upload(c echo.Context) error {
 	var (
-	//ll   = cnt.logger.Named("Store")
-	//form = new(storeForm)
-	//ctx  = c.Request().Context()
+		ll  = cnt.logger.Named("Upload")
+		ctx = c.Request().Context()
 	)
+
+	thisUser, nested := cnt.com.ExtractThisUser(c)
+	if nested != nil {
+		ll.Named("ExtractThisUser").Nested(nested.Message())
+		return cnt.failing.SendNested(c, "", nested)
+	}
+
+	// TODO Проверить, может ли пользователь загружать файлы
+
+	form, err := c.MultipartForm()
+	if err != nil {
+		ll.Named("MultipartForm").Debug(err.Error())
+		return cnt.failing.Send(c, "", http.StatusBadRequest, err)
+	}
+
+	fmt.Println()
+
+	for k, v := range form.Value {
+		fmt.Printf(">>>>>> k = %s  v = %+v\n", k, v)
+	}
+
+	for name, files := range form.File {
+		fmt.Printf("> files >>>>> k = %s  v = %+v\n", name, files)
+
+		for _, fdata := range files {
+			// 1. проверить размер
+			// 2. тип
+
+			file, err := fdata.Open()
+			if err != nil {
+				//ll.Named()
+			}
+
+			cnt.mediaAct.Upload(ctx, thisUser, file)
+		}
+	}
 
 	//thisUserID, nested := cnt.com.ExtractUserAndForm(c, form)
 	//if nested != nil {
@@ -44,6 +80,8 @@ func (cnt *Controller) Store(c echo.Context) error {
 
 	return c.NoContent(http.StatusOK)
 }
+
+//func (cnt *Controller)
 
 //// Load docs
 ////
