@@ -20,18 +20,18 @@ func (a *AuthAction) NewLogin(
 		ll = ll.Named("GetUserByLogin")
 
 		if provider.IsNoRows(err) {
-			ll.AuthTag().Info(errUserNoFound.msg)
+			ll.AuthStr(errUserNoFound.msg)
 			return nil, errUserNoFound
 		}
 
-		ll.Nested(err.Error())
+		ll.Nested(err)
 		return nil, err
 	}
 
 	ll.With("userID", userAuth.ID)
 
 	if !a.passwdAuth.Matching(userAuth.PasswdHash, passwd) {
-		ll.Named("Matching").AuthTag().ClientTag().Debug(errPasswdIncorrect.msg)
+		ll.Named("PasswordMatching").AuthDebugStr(errPasswdIncorrect.msg)
 		return nil, errPasswdIncorrect
 	}
 
@@ -40,16 +40,16 @@ func (a *AuthAction) NewLogin(
 		ll = ll.Named("newSession")
 
 		if IsAuthErr(err) {
-			ll.AuthTag().Info(err.Error())
+			ll.Auth(err)
 			return nil, err
 		}
 
-		ll.Nested(err.Error())
+		ll.Nested(err)
 		return nil, err
 	}
 
-	ll.AuthTag().With("sessionID", session.ID).With("refreshID", session.RefreshID).
-		Debug("success")
+	ll.With("sessionID", session.ID).With("refreshID", session.RefreshID).
+		AuthDebugStr("user is logged")
 
 	return session, nil
 }

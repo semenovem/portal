@@ -31,14 +31,14 @@ func (cnt *Controller) Store(c echo.Context) error {
 
 	thisUserID, nested := cnt.com.ExtractUserAndForm(c, form)
 	if nested != nil {
-		ll.Named("ExtractForm").Nested(nested.Message())
+		ll.Named("ExtractForm").Nestedf(nested.Message())
 		return cnt.failing.SendNested(c, "", nested)
 	}
 
 	ll = ll.With("store_path", form.StorePath).With("thisUserID", thisUserID)
 
 	if err := cnt.storeAct.Store(ctx, thisUserID, form.StorePath, form.Payload); err != nil {
-		ll.Named("Store").Nested(err.Error())
+		ll.Named("Store").Nested(err)
 		return cnt.failing.SendInternalServerErr(c, "", err)
 	}
 
@@ -67,7 +67,7 @@ func (cnt *Controller) Load(c echo.Context) error {
 
 	thisUserID, nested := cnt.com.ExtractUserAndForm(c, form)
 	if nested != nil {
-		ll.Named("ExtractForm").Nested(nested.Message())
+		ll.Named("ExtractForm").Nestedf(nested.Message())
 		return cnt.failing.SendNested(c, "", nested)
 	}
 
@@ -75,7 +75,7 @@ func (cnt *Controller) Load(c echo.Context) error {
 
 	payload, err := cnt.storeAct.Load(ctx, thisUserID, form.StorePath)
 	if err != nil {
-		ll.Named("Load").Nested(err.Error())
+		ll.Named("Load").Nested(err)
 
 		if errors.Is(err, action.ErrNotFound) {
 			return cnt.failing.Send(c, "", http.StatusNotFound, err)
@@ -109,14 +109,14 @@ func (cnt *Controller) Delete(c echo.Context) error {
 
 	thisUserID, nested := cnt.com.ExtractUserAndForm(c, form)
 	if nested != nil {
-		ll.Named("ExtractForm").Nested(nested.Message())
+		ll.Named("ExtractForm").Nestedf(nested.Message())
 		return cnt.failing.SendNested(c, "", nested)
 	}
 
 	ll = ll.With("store_path", form.StorePath).With("thisUserID", thisUserID)
 
 	if err := cnt.storeAct.Delete(ctx, thisUserID, form.StorePath); err != nil {
-		ll.Named("Load").Nested(err.Error())
+		ll.Named("Load").Nested(err)
 
 		if errors.Is(err, action.ErrNotFound) {
 			return cnt.failing.Send(c, "", http.StatusNotFound, err)

@@ -29,7 +29,7 @@ func (cnt *Controller) CreateUser(c echo.Context) error {
 
 	thisUserID, nested := cnt.com.ExtractUserAndForm(c, form)
 	if nested != nil {
-		ll.Named("ExtractUserAndForm").Nested(nested.Message())
+		ll.Named("ExtractUserAndForm").Nestedf(nested.Message())
 		return cnt.failing.Send(c, "", http.StatusBadRequest)
 	}
 
@@ -45,7 +45,7 @@ func (cnt *Controller) CreateUser(c echo.Context) error {
 	//		ll.DenyTag().Info(err.Error())
 	//		return cnt.failing.Send(c, "", http.StatusForbidden, err)
 	//	default:
-	//		ll.Nested(err.Error())
+	//		ll.Nested(err)
 	//		return cnt.failing.SendInternalServerErr(c, "", err)
 	//	}
 	//}
@@ -81,7 +81,7 @@ func (cnt *Controller) DeleteUser(c echo.Context) error {
 
 	thisUserID, nested := cnt.com.ExtractUserAndForm(c, form)
 	if nested != nil {
-		ll.Named("ExtractUserAndForm").Nested(nested.Message())
+		ll.Named("ExtractUserAndForm").Nestedf(nested.Message())
 		return cnt.failing.Send(c, "", http.StatusBadRequest)
 	}
 
@@ -97,7 +97,7 @@ func (cnt *Controller) DeleteUser(c echo.Context) error {
 	//		ll.DenyTag().Info(err.Error())
 	//		return cnt.failing.Send(c, "", http.StatusForbidden, err)
 	//	default:
-	//		ll.Nested(err.Error())
+	//		ll.Nested(err)
 	//		return cnt.failing.SendInternalServerErr(c, "", err)
 	//	}
 	//}

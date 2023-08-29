@@ -89,7 +89,6 @@ type S3Conn struct {
 	URL                string `env:"S3_URL,required"`
 	AccessKey          string `env:"S3_ACCESS_KEY,required"`
 	SecretKey          string `env:"S3_SECRET_KEY,required"`
-	BucketName         string `env:"S3_BUCKET_NAME,required"`
 	UseSSL             bool   `env:"S3_USE_SSL,required"`
 	InsecureSkipVerify bool   `env:"S3_INSECURE_SKIP_VERIFY,required"`
 }

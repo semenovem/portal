@@ -11,5 +11,7 @@ func (a *MediaAction) Upload(
 	reader io.Reader,
 ) error {
 
+	// TODO Проверить, может ли пользователь загружать файлы
+
 	return nil
 }

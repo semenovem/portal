@@ -3,16 +3,30 @@ package it
 import "errors"
 
 var (
-	ern = errors.New
+	e = errors.New
 
-	ErrValidZeroValue   = ern("invalid: zero value")                  // Пустое значение
-	ErrValidPasswdWeak  = ern("invalid: password is weak")            // Простой пароль
-	ErrValidIllegalChar = ern("invalid: contains illegal characters") // Запрещенные символы
-	ErrValidShort       = ern("invalid: short")                       // Короткий
-	ErrValidLong        = ern("invalid: long")                        // Длинный
+	ErrValidZeroValue   = e("invalid: zero value")                  // Пустое значение
+	ErrValidPasswdWeak  = e("invalid: password is weak")            // Простой пароль
+	ErrValidIllegalChar = e("invalid: contains illegal characters") // Запрещенные символы
+	ErrValidShort       = e("invalid: short")                       // Короткий
+	ErrValidLong        = e("invalid: long")                        // Длинный
 
-	ErrUserExpired             = ern("user expired")
-	ErrUserFired               = ern("user fired")
-	ErrUserNotStartWork        = ern("user not start work")
-	ErrUserHaveNotActiveStatus = ern("user have not active status")
+	ErrUserExpired             = e("user expired")
+	ErrUserFired               = e("user fired")
+	ErrUserNotStartWork        = e("user not start work")
+	ErrUserHaveNotActiveStatus = e("user have not active status")
+)
+
+var (
+	ErrOverNote   = e("more than one note value passed")
+	ErrNoFile     = e("file not sent")
+	ErrOverFile   = e("more than one file sent")
+	ErrFileTooBig = e("file too big")
+	ErrFileEmpty  = e("file empty")
+
+	ErrAccessTokenExp  = e("access token expired")
+	ErrInvalidBearer   = e("invalid bearer token")
+	ErrAuthCookieEmpty = e("empty header [Authorization] token")
+
+	ErrUserLogouted = e("user is logouted")
 )

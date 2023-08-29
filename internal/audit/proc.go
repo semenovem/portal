@@ -40,7 +40,7 @@ func (a *AuditProvider) processing() {
 
 		if a.client == nil {
 			if err := a.connectGrpc(); err != nil {
-				ll.Named("connectGrpc").Nested(err.Error())
+				ll.Named("connectGrpc").Nested(err)
 				ll.Named("reserved.output").Debug(s)
 				continue
 			}

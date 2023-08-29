@@ -2,6 +2,7 @@ package logger
 
 import (
 	"fmt"
+	"github.com/pkg/errors"
 	"github.com/semenovem/portal/pkg"
 	"io"
 	"os"
@@ -46,12 +47,7 @@ func (p *pen) Named(n string) pkg.Logger {
 
 func (p *pen) With(k string, v interface{}) pkg.Logger {
 	a := p.copy()
-
-	if a.params == nil {
-		a.params = make([]string, 0)
-	}
-
-	a.params = append(a.params, fmt.Sprintf("%s:%+v", k, v))
+	a.with(k, fmt.Sprintf("%+v", v))
 
 	return a
 }
@@ -96,9 +92,33 @@ func (p *pen) DebugOrErrf(isDebug bool, format string, v ...any) {
 	}
 }
 
-func (p *pen) Nested(format string) {
+func (p *pen) Nested(err error) {
 	p.isNested = true
-	p.save(Debug, format)
+	p.save(Debug, err.Error())
+}
+
+func (p *pen) NestedWith(err error, msg string) error {
+	p.isNested = true
+
+	if err == nil && msg == "" {
+		p.save(Error, "logger argument is Nil (cause - developer)")
+		return nil
+	}
+
+	if msg == "" {
+		p.save(Debug, err.Error())
+	} else {
+		if err == nil {
+			err = errors.New(msg)
+		} else {
+			p.with(nesterErrMsg, " "+err.Error())
+			err = errors.WithMessage(err, msg)
+		}
+
+		p.save(Debug, msg)
+	}
+
+	return err
 }
 
 func (p *pen) Nestedf(format string, v ...any) {
@@ -116,28 +136,8 @@ func (p *pen) addTag(tags ...string) pkg.Logger {
 	return p
 }
 
-func (p *pen) DBTag() pkg.Logger {
-	return p.addTag(databaseTag)
-}
-
-func (p *pen) RedisTag() pkg.Logger {
-	return p.addTag(redisTag)
-}
-
 func (p *pen) AuthTag() pkg.Logger {
 	return p.addTag(authTag)
-}
-
-func (p *pen) ClientTag() pkg.Logger {
-	return p.addTag(clientTag)
-}
-
-func (p *pen) DenyTag() pkg.Logger {
-	return p.addTag(denyTag)
-}
-
-func (p *pen) NotFoundTag() pkg.Logger {
-	return p.addTag(notFound)
 }
 
 // ----------------------------------------
@@ -155,4 +155,84 @@ func (p *pen) DBStr(msg string) {
 func (p *pen) DBf(format string, v ...any) {
 	p.addTag(databaseTag)
 	p.save(Error, format, v...)
+}
+
+func (p *pen) Redis(err error) {
+	p.addTag(redisTag)
+	p.save(Error, err.Error())
+}
+
+func (p *pen) RedisStr(msg string) {
+	p.addTag(redisTag)
+	p.save(Error, msg)
+}
+
+func (p *pen) Redisf(format string, v ...any) {
+	p.addTag(redisTag)
+	p.save(Error, format, v...)
+}
+
+func (p *pen) Client(err error) {
+	p.addTag(clientTag)
+	p.save(Debug, err.Error())
+}
+
+func (p *pen) ClientStr(msg string) {
+	p.addTag(clientTag)
+	p.save(Debug, msg)
+}
+
+func (p *pen) Clientf(format string, v ...any) {
+	p.addTag(clientTag)
+	p.save(Debug, format, v...)
+}
+
+func (p *pen) BadRequest(err error) {
+	p.addTag(badRequestTag)
+	p.save(Debug, err.Error())
+}
+
+func (p *pen) BadRequestStr(msg string) {
+	p.addTag(badRequestTag)
+	p.save(Debug, msg)
+}
+
+func (p *pen) BadRequestStrRetErr(msg string) error {
+	p.BadRequestStr(msg)
+	return errors.New(msg)
+}
+
+func (p *pen) NotFound(err error) {
+	p.addTag(notFound)
+	p.save(Info, err.Error())
+}
+
+func (p *pen) NotFoundStr(msg string) {
+	p.addTag(notFound)
+	p.save(Info, msg)
+}
+
+func (p *pen) Deny(err error) {
+	p.addTag(denyTag)
+	p.save(Info, err.Error())
+}
+
+func (p *pen) Auth(err error) {
+	p.addTag(authTag)
+	p.save(Info, err.Error())
+}
+
+func (p *pen) AuthStr(msg string) {
+	p.addTag(authTag)
+	p.save(Info, msg)
+}
+
+func (p *pen) AuthDebug(err error) {
+	p.addTag(authTag)
+	p.save(Debug, err.Error())
+}
+
+func (p *pen) AuthDebugStr(msg string) {
+	p.addTag(authTag)
+	p.save(Debug, msg)
 }

@@ -101,3 +101,26 @@ func (p *pen) copy() *pen {
 
 	return &a
 }
+
+func (p *pen) with(k, v string) {
+	if p.params == nil {
+		p.params = make([]string, 0)
+	}
+
+	p.params = append(p.params, fmt.Sprintf("%s:%s", k, v))
+}
+
+func (p *pen) nestedArg(with any) {
+	var s string
+
+	switch t := with.(type) {
+	case string:
+		s = t
+	case error:
+		s = t.Error()
+	default:
+		s = fmt.Sprintf("%+v", with)
+	}
+
+	p.with(nesterErrMsg, s)
+}

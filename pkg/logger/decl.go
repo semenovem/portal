@@ -27,10 +27,15 @@ type Level int8
 type Tag string
 
 const (
-	databaseTag = "DATABASE"
-	redisTag    = "REDIS"
-	authTag     = "AUTH"
-	clientTag   = "CLIENT"
-	denyTag     = "DENY"
-	notFound    = "NOT_FOUND"
+	databaseTag   = "DATABASE"
+	redisTag      = "REDIS"
+	authTag       = "AUTH"
+	badRequestTag = "BAD_REQUEST"
+	notFound      = "NOT_FOUND"
+	clientTag     = "CLIENT"
+	denyTag       = "DENY"
+)
+
+const (
+	nesterErrMsg = "NESTED_ERR"
 )

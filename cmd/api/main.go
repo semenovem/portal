@@ -28,10 +28,10 @@ import (
 //	@host		localhost:8080
 //	@BasePath	/[v1]/
 
-//	@securityDefinitions.apikey	ApiKeyAuth
-//	@in							header
-//	@name						Authorization
-//	@description				Description for what is this security definition being used
+// @securityDefinitions.apikey	ApiKeyAuth
+// @in							header
+// @name						Authorization
+// @description				Description for what is this security definition being used
 func main() {
 	var (
 		ctx, cancel = context.WithCancel(context.Background())
@@ -65,7 +65,7 @@ func main() {
 	setter.SetLevel(cfg.Base.LogLevel)
 
 	if err := apiApp.New(ctx, ll, cfg); err != nil {
-		ll.Named("create.app").Nested(err.Error())
+		_ = ll.NestedWith(err, "can't start app")
 		//cancel()
 	}
 

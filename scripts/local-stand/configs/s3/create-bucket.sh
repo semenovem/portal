@@ -1,6 +1,5 @@
 #!/bin/sh
 
-[ -z "$S3_BUCKET_NAME" ] && echo "error: s3 bucket name not set" && exit 1
 [ -z "$S3_API_URL" ] && echo "error: s3 url not set" && exit 1
 [ -z "$S3_ACCESS_KEY" ] && echo "error: s3 access key not set" && exit 1
 [ -z "$S3_SECRET_KEY" ] && echo "error: s3 secret key not set" && exit 1

@@ -75,40 +75,38 @@ func (cnt *Controller) refreshTokenCookies(refreshToken string) []*http.Cookie {
 // Получить токен и проверить срок его действия
 func (cnt *Controller) extractRefreshToken(c echo.Context) (*jwtoken.RefreshPayload, failing.Nested) {
 	var (
-		ll = cnt.logger.Named("ExtractRefreshToken").AuthTag()
+		ll = cnt.logger.Named("ExtractRefreshToken")
 	)
 
 	refreshCookie, err := c.Cookie(cnt.jwtRefreshTokenCookieName)
 	if err != nil {
-		ll.Named("Cookie").Error(err.Error())
+		ll.Named("Cookie").Auth(err)
 		return nil, failing.NewNested(http.StatusUnauthorized, err)
 	}
 
 	payload, err := cnt.jwt.GetRefreshPayload(refreshCookie.Value)
 	if err != nil {
-		ll.Named("GetRefreshPayload").Error(err.Error())
+		ll.Named("GetRefreshPayload").Auth(err)
 		return nil, failing.NewNested(http.StatusUnauthorized, err)
 	}
 
 	if payload.IsExpired() {
-		ll.With("payload", payload).AuthTag().Info("refresh token is expired")
+		ll.With("payload", payload).AuthStr("refresh token is expired")
 		return nil, failing.NewNested(http.StatusUnauthorized, err)
 	}
 
 	return payload, nil
 }
 
-// ExtractRefreshToken получить токен и проверить срок его действия
+// ExtractRefreshToken выпустить новый токен
 func (cnt *Controller) pairToken(session *it.AuthSession) (*jwtoken.PairTokens, failing.Nested) {
-	ll := cnt.logger.Named("ExtractRefreshToken").AuthTag()
-
 	pair, err := cnt.jwt.NewPairTokens(&jwtoken.TokenParams{
 		SessionID: session.ID,
 		UserID:    session.UserID,
 		RefreshID: session.RefreshID,
 	})
 	if err != nil {
-		ll.Named("NewPairTokens").Error(err.Error())
+		cnt.logger.Named("pairToken").Auth(err)
 		return nil, failing.NewNested(http.StatusInternalServerError, err)
 	}
 

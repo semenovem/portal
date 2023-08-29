@@ -16,7 +16,7 @@ func (p *PeopleProvider) GetUserAuth(ctx context.Context, userID uint32) (*it.Us
 
 	u, err := p.getUserAuth(ctx, "", userID)
 	if err != nil {
-		p.logger.Named("GetUserAuth").Nested(err.Error())
+		p.logger.Named("GetUserAuth").Nested(err)
 		return nil, err
 	}
 
@@ -32,7 +32,7 @@ func (p *PeopleProvider) GetUserByLogin(ctx context.Context, login string) (*it.
 
 	u, err := p.getUserAuth(ctx, login, 0)
 	if err != nil {
-		p.logger.Named("GetUserByLogin").Nested(err.Error())
+		p.logger.Named("GetUserByLogin").Nested(err)
 		return nil, err
 	}
 

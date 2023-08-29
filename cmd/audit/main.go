@@ -46,7 +46,7 @@ func main() {
 	setter.SetLevel(cfg.Base.LogLevel)
 
 	if err := auditApp.New(ctx, ll, cfg); err != nil {
-		ll.Named("create.app").Nested(err.Error())
+		_ = ll.NestedWith(err, "can't start app")
 		cancel()
 	}
 

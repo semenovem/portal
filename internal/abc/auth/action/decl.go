@@ -83,11 +83,11 @@ func (a *AuthAction) getSessionByRefresh(
 		ll = ll.Named("GetSession")
 
 		if provider.IsNoRows(err) {
-			ll.Debug(errSessionNotFound.msg)
+			ll.AuthStr(errSessionNotFound.msg)
 			return nil, errSessionNotFound
 		}
 
-		ll.Named("GetSession").Nested(err.Error())
+		ll.Nested(err)
 		return nil, err
 	}
 
@@ -95,7 +95,7 @@ func (a *AuthAction) getSessionByRefresh(
 		ll.Named("refreshToken").
 			With("refreshID_from_user", payload.RefreshID).
 			With("refreshID_from_DB", session.RefreshID).
-			AuthTag().Info(errRefreshUnknown.msg)
+			AuthStr(errRefreshUnknown.msg)
 
 		return nil, errRefreshUnknown
 	}
@@ -112,13 +112,13 @@ func (a *AuthAction) newSession(
 	ll := a.logger.Named("newSession")
 
 	if err := a.canLogin(user); err != nil {
-		ll.Named("canLogin").Nested(err.Error())
+		ll.Named("canLogin").Nested(err)
 		return nil, err
 	}
 
 	session, err := a.authPvd.CreateSession(ctx, user.ID, deviceID)
 	if err != nil {
-		ll.Named("CreateSession").Nested(err.Error())
+		ll.Named("CreateSession").Nested(err)
 		return nil, err
 	}
 

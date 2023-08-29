@@ -35,11 +35,13 @@ func New(
 }
 
 func (p *AuthProvider) Now(ctx context.Context) (time.Time, error) {
-	var t time.Time
+	var (
+		t   time.Time
+		err = p.db.QueryRow(ctx, "SELECT now()").Scan(&t)
+	)
 
-	err := p.db.QueryRow(ctx, "SELECT now()").Scan(&t)
 	if err != nil {
-		p.logger.Named("Now").DBTag().Error(err.Error())
+		p.logger.Named("Now").DB(err)
 	}
 
 	return t, err

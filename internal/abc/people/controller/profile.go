@@ -27,7 +27,7 @@ func (cnt *Controller) SelfProfile(c echo.Context) error {
 
 	thisUserID, nested := cnt.com.ExtractThisUser(c)
 	if nested != nil {
-		ll.Named("ExtractThisUser").Nested(nested.Message())
+		ll.Named("ExtractThisUser").Nestedf(nested.Message())
 		return cnt.failing.SendNested(c, "", nested)
 	}
 
@@ -37,13 +37,13 @@ func (cnt *Controller) SelfProfile(c echo.Context) error {
 
 		switch err.(type) {
 		case action.NotFoundErr:
-			ll.NotFoundTag().Info(err.Error())
+			ll.NotFound(err)
 			return cnt.failing.Send(c, "", http.StatusNotFound, err)
 		case action.ForbiddenErr:
-			ll.DenyTag().Info(err.Error())
+			ll.Deny(err)
 			return cnt.failing.Send(c, "", http.StatusForbidden, err)
 		default:
-			ll.Nested(err.Error())
+			ll.Nested(err)
 			return cnt.failing.SendInternalServerErr(c, "", err)
 		}
 	}
@@ -72,7 +72,7 @@ func (cnt *Controller) Profile(c echo.Context) error {
 
 	thisUserID, nested := cnt.com.ExtractUserAndForm(c, form)
 	if nested != nil {
-		ll.Named("ExtractUserAndForm").Nested(nested.Message())
+		ll.Named("ExtractUserAndForm").Nestedf(nested.Message())
 		return cnt.failing.Send(c, "", http.StatusBadRequest)
 	}
 
@@ -82,13 +82,13 @@ func (cnt *Controller) Profile(c echo.Context) error {
 
 		switch err.(type) {
 		case *action.NotFoundErr:
-			ll.NotFoundTag().Info(err.Error())
+			ll.NotFound(err)
 			return cnt.failing.Send(c, "", http.StatusNotFound, err)
 		case *action.ForbiddenErr:
-			ll.DenyTag().Info(err.Error())
+			ll.Deny(err)
 			return cnt.failing.Send(c, "", http.StatusForbidden, err)
 		default:
-			ll.Nested(err.Error())
+			ll.Nested(err)
 			return cnt.failing.SendInternalServerErr(c, "", err)
 		}
 	}

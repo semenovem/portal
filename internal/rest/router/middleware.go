@@ -1,7 +1,6 @@
 package router
 
 import (
-	"errors"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -9,6 +8,7 @@ import (
 	"github.com/semenovem/portal/internal/abc/controller"
 	"github.com/semenovem/portal/pkg"
 	"github.com/semenovem/portal/pkg/failing"
+	"github.com/semenovem/portal/pkg/it"
 	"github.com/semenovem/portal/pkg/jwtoken"
 	"net/http"
 	"runtime"
@@ -69,56 +69,56 @@ func tokenMiddleware(
 			tokenFromHeader := c.Request().Header.Get("Authorization")
 
 			if tokenFromHeader == "" {
-				ll.AuthTag().Debug("empty header [Authorization] token")
+				ll.Auth(it.ErrAuthCookieEmpty)
 				return fail.Send(
 					c,
 					"",
 					http.StatusUnauthorized,
-					errors.New("empty header [Authorization] token"),
+					it.ErrAuthCookieEmpty,
 				)
 			}
 
 			split := strings.Fields(tokenFromHeader)
 			if len(split) != 2 {
-				ll.AuthTag().Debug("invalid bearer token")
+				ll.Auth(it.ErrInvalidBearer)
 				return fail.Send(
 					c,
 					"",
 					http.StatusUnauthorized,
-					errors.New("invalid bearer token"),
+					it.ErrInvalidBearer,
 				)
 			}
 
 			payload, err := jwtService.GetAccessPayload(split[1])
 			if err != nil {
-				ll.AuthTag().Named("GetAccessPayload").Info(err.Error())
+				ll.Named("GetAccessPayload").Auth(err)
 				return fail.Send(c, "", http.StatusUnauthorized, err)
 			}
 
 			if payload.IsExpired() {
-				ll.AuthTag().Debug("access token expired")
+				ll.AuthDebug(it.ErrAccessTokenExp)
 				return fail.Send(
 					c,
 					"",
 					http.StatusUnauthorized,
-					errors.New("access token expired"),
+					it.ErrAccessTokenExp,
 				)
 			}
 
 			// Проверить отозванные сессии
 			isCancel, err := authPvd.IsSessionCanceled(c.Request().Context(), payload.SessionID)
 			if err != nil {
-				ll.Named("IsSessionCanceled").Nested(err.Error())
+				ll.Named("IsSessionCanceled").Nested(err)
 				return fail.SendInternalServerErr(c, "", err)
 			}
 
 			if isCancel {
-				ll.Debug("user is logouted")
+				ll.AuthDebug(it.ErrUserLogouted)
 				return fail.Send(
 					c,
 					"",
 					http.StatusUnauthorized,
-					errors.New("user is logouted"),
+					it.ErrUserLogouted,
 				)
 			}
 

@@ -26,7 +26,7 @@ func (cnt *Controller) Refresh(c echo.Context) error {
 
 	payload, nested := cnt.extractRefreshToken(c)
 	if nested != nil {
-		ll.Named("ExtractRefreshToken").Nested(nested.Message())
+		ll.Named("ExtractRefreshToken").Nestedf(nested.Message())
 		return cnt.failing.SendNested(c, "", nested)
 	}
 
@@ -34,13 +34,13 @@ func (cnt *Controller) Refresh(c echo.Context) error {
 
 	session, err := cnt.authAct.Refresh(ctx, payload)
 	if err != nil {
-		ll.Named("Refresh").Nested(err.Error())
+		ll.Named("Refresh").Nested(err)
 		return cnt.failing.Send(c, "", http.StatusOK, err)
 	}
 
 	pair, nested := cnt.pairToken(session)
 	if nested != nil {
-		ll.Named("pairToken").Nested(nested.Message())
+		ll.Named("pairToken").Nestedf(nested.Message())
 		return cnt.failing.SendNested(c, "", nested)
 	}
 

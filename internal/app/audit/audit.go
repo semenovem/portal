@@ -28,7 +28,7 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.Audit) error {
 
 	app.grpcServer, err = grpc_server.New(ctx, logger, &cfg.GrpcServer)
 	if err != nil {
-		ll.Named("server.New").Nested(err.Error())
+		ll.Named("server.New").Nested(err)
 		return err
 	}
 

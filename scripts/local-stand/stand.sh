@@ -195,7 +195,6 @@ case "$OPER" in
     -e "S3_URL=${__S3_URL__}" \
     -e "S3_ACCESS_KEY=${__S3_ACCESS_KEY__}" \
     -e "S3_SECRET_KEY=${__S3_SECRET_KEY__}" \
-    -e "S3_BUCKET_NAME=${__S3_BUCKET_NAME__}" \
     -e "S3_USE_SSL=true" \
     -e "S3_INSECURE_SKIP_VERIFY=true" \
     \

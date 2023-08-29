@@ -3,80 +3,88 @@ package media_controller
 import (
 	"fmt"
 	"github.com/labstack/echo/v4"
+	"github.com/semenovem/portal/pkg/it"
+	"mime/multipart"
 	"net/http"
 
 	_ "github.com/semenovem/portal/pkg/failing"
 )
 
-// Upload docs
+// FileUpload docs
 //
-//	@Summary		Сохранение произвольных клиентских данных
+//	@Summary		Сохранение файлов
+//	@Description	note - подпись к файлу (опционально)
+//	@Description	file - файл
 //	@Description
 //	@Produce	json
-//	@Param		store_code	path	string		true	"code store"
-//	@Param		payload		body	storeForm	true	"Данные для сохранения"
 //	@Accept		multipart/form-data
-//	@Success	201			"no content"
+//	@Success	201			{object}	fileUploadResponse
 //	@Failure	400			{object}	failing.Response
-//	@Router		/media/upload [POST]
-//	@Tags		store
+//	@Router		/media/file [POST]
+//	@Tags		media
 //	@Security	ApiKeyAuth
-func (cnt *Controller) Upload(c echo.Context) error {
+func (cnt *Controller) FileUpload(c echo.Context) error {
 	var (
-		ll  = cnt.logger.Named("Upload")
-		ctx = c.Request().Context()
+		ll         = cnt.logger.Named("FileUpload")
+		ctx        = c.Request().Context()
+		note       string
+		fileHeader *multipart.FileHeader
 	)
 
-	thisUser, nested := cnt.com.ExtractThisUser(c)
+	thisUserID, nested := cnt.com.ExtractThisUser(c)
 	if nested != nil {
-		ll.Named("ExtractThisUser").Nested(nested.Message())
+		ll.Named("ExtractThisUser").Nestedf(nested.Message())
 		return cnt.failing.SendNested(c, "", nested)
 	}
 
-	// TODO Проверить, может ли пользователь загружать файлы
-
 	form, err := c.MultipartForm()
 	if err != nil {
-		ll.Named("MultipartForm").Debug(err.Error())
+		ll.Named("MultipartForm").Errorf(err.Error())
 		return cnt.failing.Send(c, "", http.StatusBadRequest, err)
 	}
 
-	fmt.Println()
-
-	for k, v := range form.Value {
-		fmt.Printf(">>>>>> k = %s  v = %+v\n", k, v)
-	}
-
-	for name, files := range form.File {
-		fmt.Printf("> files >>>>> k = %s  v = %+v\n", name, files)
-
-		for _, fdata := range files {
-			// 1. проверить размер
-			// 2. тип
-
-			file, err := fdata.Open()
-			if err != nil {
-				//ll.Named()
-			}
-
-			cnt.mediaAct.Upload(ctx, thisUser, file)
+	if notes := form.Value[uploadNoteKey]; len(notes) != 0 {
+		switch len(notes) {
+		case 1:
+			note = notes[0]
+		default:
+			ll.With("notes", notes).Client(it.ErrOverNote)
+			return cnt.failing.Send(c, "", http.StatusBadRequest, it.ErrOverNote)
 		}
 	}
 
-	//thisUserID, nested := cnt.com.ExtractUserAndForm(c, form)
-	//if nested != nil {
-	//	ll.Named("ExtractForm").Nested(nested.Message())
-	//	return cnt.failing.SendNested(c, "", nested)
-	//}
-	//
-	//ll = ll.With("store_path", form.StorePath).With("thisUserID", thisUserID)
-	//
-	//if err := cnt.storeAct.Store(ctx, thisUserID, form.StorePath, form.Payload); err != nil {
-	//	ll.Named("Store").Nested(err.Error())
-	//	return cnt.failing.SendInternalServerErr(c, "", err)
-	//}
-	//
-	//ll.Debug("stored")
+	if files := form.File[fileUploadKey]; len(files) == 0 {
+		ll.Client(it.ErrNoFile)
+		return cnt.failing.Send(c, "", http.StatusBadRequest, it.ErrNoFile)
+	} else if len(files) > 1 {
+		ll.Client(it.ErrOverFile)
+		return cnt.failing.Send(c, "", http.StatusBadRequest, it.ErrOverFile)
+	} else {
+		fileHeader = files[0]
+	}
+
+	file, err := fileHeader.Open()
+	if err != nil {
+		ll.Named("fileOpen").Errorf(err.Error())
+		return cnt.failing.SendInternalServerErr(c, "", err)
+	}
+
+	if fileHeader.Size > cnt.maxUpload {
+		ll.With("size", fileHeader.Size).Client(it.ErrFileTooBig)
+		return cnt.failing.Send(c, "", http.StatusBadRequest, it.ErrFileTooBig)
+	}
+
+	if fileHeader.Size == 0 {
+		ll.With("size", fileHeader.Size).Client(it.ErrFileEmpty)
+		return cnt.failing.Send(c, "", http.StatusBadRequest, it.ErrFileEmpty)
+	}
+
+	//fileName := fileHeader.Filename
+
+	fmt.Printf(">>>>>>>>>>> %+v\n", note)
+	fmt.Printf(">>>>>>>>>>> %+v\n", fileHeader.Header)
+
+	cnt.mediaAct.Upload(ctx, thisUserID, file)
 
 	return c.NoContent(http.StatusOK)
 }
@@ -103,7 +111,7 @@ func (cnt *Controller) Upload(c echo.Context) error {
 //
 //	thisUserID, nested := cnt.com.ExtractUserAndForm(c, form)
 //	if nested != nil {
-//		ll.Named("ExtractForm").Nested(nested.Message())
+//		ll.Named("ExtractForm").Nestedf(nested.Message())
 //		return cnt.failing.SendNested(c, "", nested)
 //	}
 //
@@ -111,7 +119,7 @@ func (cnt *Controller) Upload(c echo.Context) error {
 //
 //	payload, err := cnt.storeAct.Load(ctx, thisUserID, form.StorePath)
 //	if err != nil {
-//		ll.Named("Load").Nested(err.Error())
+//		ll.Named("Load").Nested(err)
 //
 //		if errors.Is(err, action.ErrNotFound) {
 //			return cnt.failing.Send(c, "", http.StatusNotFound, err)
@@ -145,14 +153,14 @@ func (cnt *Controller) Upload(c echo.Context) error {
 //
 //	thisUserID, nested := cnt.com.ExtractUserAndForm(c, form)
 //	if nested != nil {
-//		ll.Named("ExtractForm").Nested(nested.Message())
+//		ll.Named("ExtractForm").Nestedf(nested.Message())
 //		return cnt.failing.SendNested(c, "", nested)
 //	}
 //
 //	ll = ll.With("store_path", form.StorePath).With("thisUserID", thisUserID)
 //
 //	if err := cnt.storeAct.Delete(ctx, thisUserID, form.StorePath); err != nil {
-//		ll.Named("Load").Nested(err.Error())
+//		ll.Named("Load").Nested(err)
 //
 //		if errors.Is(err, action.ErrNotFound) {
 //			return cnt.failing.Send(c, "", http.StatusNotFound, err)

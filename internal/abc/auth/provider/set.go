@@ -22,8 +22,7 @@ func (p *AuthProvider) CreateSession(
 	)
 
 	if err := p.db.QueryRow(ctx, sq, userID, deviceID, refreshID).Scan(&sessionID); err != nil {
-		p.logger.DBTag().Named("CreateSession.QueryRow").
-			With("userID", userID).Error(err.Error())
+		p.logger.Named("CreateSession.QueryRow").With("userID", userID).DB(err)
 		return nil, err
 	}
 
@@ -42,14 +41,14 @@ func (p *AuthProvider) LogoutSession(ctx context.Context, sessionID uint32) erro
 	)
 
 	if result, err := p.db.Exec(ctx, sq, sessionID); err != nil {
-		ll.Named("Exec").DBTag().Error(err.Error())
+		ll.Named("Exec").DB(err)
 		return err
 	} else if result.RowsAffected() == 0 {
-		ll.Named("Exec").AuthTag().Info("auth session id (not logouted) not found")
+		ll.AuthStr("auth session id not found (possible already logouted)")
 	}
 
 	if err := p.sessionCanceled(ctx, sessionID); err != nil {
-		ll.Named("sessionCanceled").Nested(err.Error())
+		ll.Named("sessionCanceled").Nested(err)
 		return err
 	}
 
@@ -62,24 +61,20 @@ func (p *AuthProvider) UpdateRefreshSession(
 	refreshOldID uuid.UUID,
 	refreshNewID uuid.UUID,
 ) error {
-	var (
-		ll = p.logger.Named("UpdateRefreshSession").
-			With("sessionID", sessionID).
-			With("refreshOldID", refreshOldID).
-			With("refreshNewID", refreshNewID)
-
-		sq = `UPDATE auth.sessions SET refresh_id = $3
+	sq := `UPDATE auth.sessions SET refresh_id = $3
 				WHERE logouted = false AND refresh_id = $2 AND id = $1`
-	)
 
 	result, err := p.db.Exec(ctx, sq, sessionID, refreshOldID, refreshNewID)
 	if err != nil {
-		ll.Named("Exec").DBTag().Error(err.Error())
+		p.logger.Named("UpdateRefreshSession").
+			With("sessionID", sessionID).
+			With("refreshOldID", refreshOldID).
+			With("refreshNewID", refreshNewID).DB(err)
+
 		return err
 	}
 
 	if result.RowsAffected() == 0 {
-		ll.Named("RowsAffected").Debug(err.Error())
 		return pgx.ErrNoRows
 	}
 

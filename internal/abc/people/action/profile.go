@@ -17,7 +17,7 @@ func (a *PeopleAction) GetUserProfile(
 
 	profile, err := a.peoplePvd.GetUserProfile(ctx, userID)
 	if err != nil {
-		ll.Named("GetUserProfile").Nested(err.Error())
+		ll.Named("GetUserProfile").Nested(err)
 
 		if provider.IsNoRows(err) {
 			return nil, action.ErrNotFound

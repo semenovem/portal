@@ -14,17 +14,15 @@ func (r *Router) addRoutes() {
 	auth.POST("/auth/onetime", r.authCnt.CreateOnetimeLink)
 
 	// ----------------- Media -----------------
-	auth.POST("/media/upload", r.mediaCnt.Upload)
+	auth.POST("/media/file", r.mediaCnt.FileUpload)
+	auth.GET("/media/file/:file_id", r.mediaCnt.FileUpload)
+	auth.DELETE("/media/file/:file_id", r.mediaCnt.FileUpload)
 
 	// Media box
-	auth.POST("/media/box", r.mediaCnt.Upload)
-	auth.GET("/media/box/:box_id", r.mediaCnt.Upload)
-	auth.PUT("/media/box/:box_id", r.mediaCnt.Upload)
-	auth.DELETE("/media/box/:box_id", r.mediaCnt.Upload)
-
-	auth.POST("/media/file", r.mediaCnt.Upload)
-	auth.GET("/media/file/:file_id", r.mediaCnt.Upload)
-	auth.DELETE("/media/file/:file_id", r.mediaCnt.Upload)
+	auth.POST("/media/box", r.mediaCnt.FileUpload)
+	auth.GET("/media/box/:box_id", r.mediaCnt.FileUpload)
+	auth.PUT("/media/box/:box_id", r.mediaCnt.FileUpload)
+	auth.DELETE("/media/box/:box_id", r.mediaCnt.FileUpload)
 
 	// ----------------- People -----------------
 	auth.POST("/people", r.peopleCnt.CreateUser)

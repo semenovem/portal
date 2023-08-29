@@ -3,7 +3,6 @@ package s3
 import (
 	"context"
 	"crypto/tls"
-	"fmt"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/semenovem/portal/config"
 	"github.com/semenovem/portal/pkg"
@@ -11,6 +10,13 @@ import (
 	"time"
 
 	"github.com/minio/minio-go/v7"
+)
+
+const (
+	docsBucketName    = "docs"
+	imagesBucketName  = "images"
+	videosBucketName  = "videos"
+	preloadBucketName = "preload"
 )
 
 type Props struct {
@@ -52,53 +58,32 @@ func New(config *Props) (*Service, error) {
 	defer cancel()
 
 	if o.s3Client, err = minio.New(conn.URL, options); err != nil {
-		ll.Named("minio.New").Error(err.Error())
-		return nil, err
+		return nil, ll.NestedWith(err, "can't create s3 minio-client")
 	}
 
-	exists, err := o.s3Client.BucketExists(ctx, conn.BucketName)
-	if err != nil {
-		return nil, err
-	}
-
-	if !exists {
-		return nil, fmt.Errorf("bucket %s does not exists", conn.BucketName)
-	}
-
-	if err = o.createBuckets(ctx); err != nil {
-		ll.Named("createBuckets").Error(err.Error())
-		return nil, err
+	buckets := []string{docsBucketName, imagesBucketName, videosBucketName, preloadBucketName}
+	for _, n := range buckets {
+		if err = o.createBucket(ctx, n); err != nil {
+			return nil, ll.NestedWith(err, "can't create s3 buckets")
+		}
 	}
 
 	return o, nil
 }
 
-func (s *Service) createBuckets(ctx context.Context) error {
-	var (
-		ll  = s.logger.Named("createBuckets")
-		opt = minio.MakeBucketOptions{
-			Region:        "",
-			ObjectLocking: false,
-		}
-	)
+func (s *Service) createBucket(ctx context.Context, name string) error {
+	ll := s.logger.Named("createBucket").With("bucketName", name)
 
-	if err := s.s3Client.MakeBucket(ctx, "images", opt); err != nil {
-		ll.Named("MakeBucket").With("name", "images")
+	if exists, err := s.s3Client.BucketExists(ctx, name); err != nil {
+		ll.Named("BucketExists").Error(err.Error())
 		return err
+	} else if exists {
+		return nil
 	}
 
-	if err := s.s3Client.MakeBucket(ctx, "videos", opt); err != nil {
-		ll.Named("MakeBucket").With("name", "videos")
-		return err
-	}
-
-	if err := s.s3Client.MakeBucket(ctx, "docs", opt); err != nil {
-		ll.Named("MakeBucket").With("name", "docs")
-		return err
-	}
-
-	if err := s.s3Client.MakeBucket(ctx, "preload", opt); err != nil {
-		ll.Named("MakeBucket").With("name", "preload")
+	err := s.s3Client.MakeBucket(ctx, name, minio.MakeBucketOptions{})
+	if err != nil {
+		ll.Named("MakeBucket").Error(err.Error())
 		return err
 	}
 

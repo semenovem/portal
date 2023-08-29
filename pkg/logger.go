@@ -11,16 +11,37 @@ type Logger interface {
 	Debugf(format string, v ...any)
 	DebugOrErr(isErr bool, format string)
 	DebugOrErrf(isErr bool, format string, v ...any)
-	Nested(format string)
+	Nested(err error)
+	NestedWith(err error, msg string) error
 	Nestedf(format string, v ...any)
-	DBTag() Logger // Все методы тегирования не создают новый объект, а мутирует текущий
-	RedisTag() Logger
+
+	/* методы тегирования не создают новый объект, а мутирует текущий */
+
 	AuthTag() Logger
-	ClientTag() Logger
-	DenyTag() Logger
-	NotFoundTag() Logger
 
 	DB(err error)
 	DBStr(msg string)
 	DBf(format string, v ...any)
+
+	Redis(err error)
+	RedisStr(msg string)
+	Redisf(format string, v ...any)
+
+	Client(err error)
+	ClientStr(msg string)
+	Clientf(format string, v ...any)
+
+	BadRequest(err error)
+	BadRequestStr(msg string)
+	BadRequestStrRetErr(msg string) error
+
+	NotFound(err error)
+	NotFoundStr(msg string)
+
+	Deny(err error)
+
+	Auth(err error)
+	AuthStr(msg string)
+	AuthDebug(err error)
+	AuthDebugStr(msg string)
 }

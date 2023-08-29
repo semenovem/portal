@@ -16,20 +16,20 @@ func (a *AuthAction) Logout(ctx context.Context, payload *jwtoken.RefreshPayload
 	session, err := a.getSessionByRefresh(ctx, payload)
 	if err != nil {
 		if IsAuthErr(err) {
-			ll.Named("getSessionByRefresh").AuthTag().Info(err.Error())
+			ll.Named("getSessionByRefresh").Auth(err)
 			return 0, err
 		}
 
-		ll.Named("getSessionByRefresh").Nested(err.Error())
+		ll.Named("getSessionByRefresh").Nested(err)
 		return 0, err
 	}
 
 	if err = a.authPvd.LogoutSession(ctx, payload.SessionID); err != nil {
-		ll.Named("LogoutSession").Nested(err.Error())
+		ll.Named("LogoutSession").Nested(err)
 		return 0, err
 	}
 
-	ll.AuthTag().With("userID", session.UserID).Debug("success")
+	ll.With("userID", session.UserID).AuthDebugStr("user is logouted")
 
 	return session.UserID, nil
 }
@@ -43,7 +43,7 @@ func (a *AuthAction) Refresh(
 
 	sessionOld, err := a.getSessionByRefresh(ctx, payload)
 	if err != nil {
-		ll.Named("getSessionByRefresh").Nested(err.Error())
+		ll.Named("getSessionByRefresh").Nested(err)
 		return nil, err
 	}
 
@@ -52,7 +52,7 @@ func (a *AuthAction) Refresh(
 	// Проверить актуальность сотрудника
 	userAuth, err := a.peoplePvd.GetUserAuth(ctx, sessionOld.UserID)
 	if err != nil {
-		ll.Named("GetUserAuth").Nested(err.Error())
+		ll.Named("GetUserAuth").Nested(err)
 
 		if provider.IsNoRows(err) {
 			return nil, errUserNoFound
@@ -62,7 +62,7 @@ func (a *AuthAction) Refresh(
 	}
 
 	if err = a.canLogin(userAuth); err != nil {
-		ll.Named("canLogin").Nested(err.Error())
+		ll.Named("canLogin").Nested(err)
 		return nil, err
 	}
 
@@ -71,16 +71,16 @@ func (a *AuthAction) Refresh(
 		ll = ll.Named("UpdateRefreshSession")
 
 		if provider.IsNoRows(err) {
-			err = errors.New("authorized session could not be updated")
+			err = errors.New("no auth session with the specified refresh token - could not be updated")
 
 			ll.With("refreshID_old", payload.RefreshID).
 				With("refreshID_new", refreshID).
-				AuthTag().Info(err.Error())
+				Auth(err)
 
 			return nil, err
 		}
 
-		ll.Nested(err.Error())
+		ll.Nested(err)
 		return nil, err
 	}
 

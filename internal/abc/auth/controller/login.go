@@ -29,7 +29,7 @@ func (cnt *Controller) Login(c echo.Context) error {
 	)
 
 	if nested := cnt.com.ExtractForm(c, form); nested != nil {
-		ll.Named("ExtractForm").Nested(nested.Message())
+		ll.Named("ExtractForm").Nestedf(nested.Message())
 		return cnt.failing.SendNested(c, "", nested)
 	}
 
@@ -42,7 +42,7 @@ func (cnt *Controller) Login(c echo.Context) error {
 		form.DeviceID,
 	)
 	if err != nil {
-		ll.Named("NewLogin").Nested(err.Error())
+		ll.Named("NewLogin").Nested(err)
 
 		if auth_action.IsAuthErr(err) {
 			return cnt.failing.Send(c, "", http.StatusBadRequest, txt.AuthInvalidLogoPasswd, err)
@@ -53,7 +53,7 @@ func (cnt *Controller) Login(c echo.Context) error {
 
 	pair, nested := cnt.pairToken(session)
 	if nested != nil {
-		ll.Named("pairToken").Nested(nested.Message())
+		ll.Named("pairToken").Nestedf(nested.Message())
 		return cnt.failing.SendNested(c, "", nested)
 	}
 
@@ -98,7 +98,7 @@ func (cnt *Controller) Logout(c echo.Context) error {
 
 	payload, nested := cnt.extractRefreshToken(c)
 	if nested != nil {
-		ll.Named("GetRefreshPayload").Nested(nested.Message())
+		ll.Named("GetRefreshPayload").Nestedf(nested.Message())
 		return cnt.failing.SendNested(c, "", nested)
 	}
 
@@ -106,7 +106,7 @@ func (cnt *Controller) Logout(c echo.Context) error {
 
 	userID, err := cnt.authAct.Logout(ctx, payload)
 	if err != nil {
-		ll.Named("Logout").Nested(err.Error())
+		ll.Named("Logout").Nested(err)
 
 		if auth_action.IsAuthErr(err) {
 			return cnt.failing.Send(c, "", http.StatusUnauthorized, err)

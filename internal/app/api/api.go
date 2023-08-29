@@ -85,17 +85,18 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 
 		db, err := conn.ConnectDBPostgresSQL(ctxnest, ll, cfg.DBCoreConn.ConvTo())
 		if err != nil {
-			ll.Named("ConnectDBPostgresSQL").DBTag().Error(err.Error())
+			ll.Named("ConnectDBPostgresSQL").DB(err)
+			return
 		}
 
 		if err = conn.Migrate(ll, db, cfg.DBMigrationsDir); err != nil {
-			ll.Named("Migrate").Nested(err.Error())
+			ll.Named("Migrate").Nested(err)
 		}
 	}()
 
 	// Redis
 	if app.redis, err = conn.InitRedis(ctx, ll, cfg.RedisConn.ConvTo()); err != nil {
-		ll.Named("InitRedis").Nested(err.Error())
+		ll.Named("InitRedis").Nested(err)
 		return err
 	}
 
@@ -105,8 +106,7 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 		Logger: app.logger,
 		S3Conn: &app.config.S3Conn,
 	}); err != nil {
-		ll.Named("s3").Nested(err.Error())
-		return err
+		return ll.Named("s3").NestedWith(err, "can't create new S3 service")
 	}
 
 	app.jwtService = jwtoken.New(&jwtoken.Config{
@@ -139,7 +139,7 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 		app.actions.store,
 		app.actions.media,
 	); err != nil {
-		ll.Named("router").Nested(err.Error())
+		ll.Named("router").Nested(err)
 		return err
 	}
 
@@ -148,7 +148,7 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 	// Проверки
 	t, err := app.providers.auth.Now(ctx)
 	if err != nil {
-		ll.Named("authPvd.Now").Nested(err.Error())
+		ll.Named("authPvd.Now").Nested(err)
 		return err
 	}
 

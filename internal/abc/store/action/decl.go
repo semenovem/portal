@@ -25,7 +25,7 @@ func (a *StoreAction) Load(ctx context.Context, thisUserID uint32, path string) 
 
 	payload, err := a.storePvd.LoadArbitraryData(ctx, thisUserID, path)
 	if err != nil {
-		ll.Named("LoadArbitraryData").Nested(err.Error())
+		ll.Named("LoadArbitraryData").Nested(err)
 
 		if provider.IsNoRec(err) {
 			return "", action.ErrNotFound
@@ -42,7 +42,7 @@ func (a *StoreAction) Store(ctx context.Context, thisUserID uint32, path, payloa
 
 	err := a.storePvd.StoreArbitraryData(ctx, thisUserID, path, payload)
 	if err != nil {
-		ll.Named("StoreArbitraryData").Nested(err.Error())
+		ll.Named("StoreArbitraryData").Nested(err)
 	}
 
 	return err
@@ -53,7 +53,7 @@ func (a *StoreAction) Delete(ctx context.Context, thisUserID uint32, path string
 
 	err := a.storePvd.DeleteArbitraryData(ctx, thisUserID, path)
 	if err != nil {
-		ll.Named("DeleteArbitraryData").Nested(err.Error())
+		ll.Named("DeleteArbitraryData").Nested(err)
 
 		if provider.IsNoRec(err) {
 			return action.ErrNotFound

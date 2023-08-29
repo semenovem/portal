@@ -30,7 +30,7 @@ func (cnt *Controller) CreateOnetimeLink(c echo.Context) error {
 
 	thisUserID, nested := cnt.com.ExtractUserAndForm(c, form)
 	if nested != nil {
-		ll.Named("ExtractUserAndForm").Nested(nested.Message())
+		ll.Named("ExtractUserAndForm").Nestedf(nested.Message())
 		return cnt.failing.SendNested(c, "", nested)
 	}
 
@@ -38,7 +38,7 @@ func (cnt *Controller) CreateOnetimeLink(c echo.Context) error {
 
 	entryID, err := cnt.authAct.CreateOnetimeEntry(ctx, form.UserID)
 	if err != nil {
-		ll.Named("CreateOnetimeEntry").Nested(err.Error())
+		ll.Named("CreateOnetimeEntry").Nested(err)
 
 		if auth_action.IsAuthErr(err) {
 			return cnt.failing.Send(c, "", http.StatusBadRequest, err)
@@ -77,7 +77,7 @@ func (cnt *Controller) LoginOnetimeLink(c echo.Context) error {
 	)
 
 	if nested := cnt.com.ExtractForm(c, form); nested != nil {
-		ll.Named("ExtractForm").Nested(nested.Message())
+		ll.Named("ExtractForm").Nestedf(nested.Message())
 		return cnt.failing.SendNested(c, "", nested)
 	}
 
@@ -85,7 +85,7 @@ func (cnt *Controller) LoginOnetimeLink(c echo.Context) error {
 
 	session, err := cnt.authAct.LoginByOnetimeEntryID(ctx, form.EntryID)
 	if err != nil {
-		ll.Named("LoginByOnetimeEntryID").Nested(err.Error())
+		ll.Named("LoginByOnetimeEntryID").Nested(err)
 		if auth_action.IsAuthErr(err) {
 			return cnt.failing.Send(c, "", http.StatusNotFound, err)
 		}
@@ -100,7 +100,7 @@ func (cnt *Controller) LoginOnetimeLink(c echo.Context) error {
 
 	pair, nested := cnt.pairToken(session)
 	if nested != nil {
-		ll.Named("pairToken").Nested(nested.Message())
+		ll.Named("pairToken").Nestedf(nested.Message())
 		return cnt.failing.SendNested(c, "", nested)
 	}
 

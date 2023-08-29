@@ -6,11 +6,12 @@ type loadResponse struct {
 
 type fileUploadView struct {
 	ID      uint32 `json:"id"`
+	Name    uint32 `json:"name"`
 	Type    string `json:"type"`
 	Preview string `json:"preview"` // base64
 }
 
-type uploadResponse struct {
+type fileUploadResponse struct {
 	Files []fileUploadView
 }
 
