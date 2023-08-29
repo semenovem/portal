@@ -114,12 +114,7 @@ func tokenMiddleware(
 
 			if isCancel {
 				ll.AuthDebug(it.ErrUserLogouted)
-				return fail.Send(
-					c,
-					"",
-					http.StatusUnauthorized,
-					it.ErrUserLogouted,
-				)
+				return fail.Send(c, "", http.StatusUnauthorized, it.ErrUserLogouted)
 			}
 
 			c.Set(controller.ThisUserID, payload.UserID)

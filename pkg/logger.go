@@ -4,6 +4,7 @@ type Logger interface {
 	Named(string) Logger
 	With(key string, val interface{}) Logger // Не создает новый объект, мутирует текущий
 	Error(msg string)
+	ErrorE(err error)
 	Errorf(format string, v ...any)
 	Info(msg string)
 	Infof(format string, v ...any)
@@ -15,10 +16,6 @@ type Logger interface {
 	NestedWith(err error, msg string) error
 	Nestedf(format string, v ...any)
 
-	/* методы тегирования не создают новый объект, а мутирует текущий */
-
-	AuthTag() Logger
-
 	DB(err error)
 	DBStr(msg string)
 	DBf(format string, v ...any)
@@ -26,10 +23,6 @@ type Logger interface {
 	Redis(err error)
 	RedisStr(msg string)
 	Redisf(format string, v ...any)
-
-	Client(err error)
-	ClientStr(msg string)
-	Clientf(format string, v ...any)
 
 	BadRequest(err error)
 	BadRequestStr(msg string)

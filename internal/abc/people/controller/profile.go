@@ -2,7 +2,7 @@ package people_controller
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/semenovem/portal/internal/abc/action"
+	"github.com/semenovem/portal/pkg/it"
 	"net/http"
 
 	_ "github.com/semenovem/portal/internal/rest/view"
@@ -36,10 +36,10 @@ func (cnt *Controller) SelfProfile(c echo.Context) error {
 		ll = ll.Named("GetUserProfile").With("thisUserID", thisUserID)
 
 		switch err.(type) {
-		case action.NotFoundErr:
+		case it.NotFoundErr:
 			ll.NotFound(err)
 			return cnt.failing.Send(c, "", http.StatusNotFound, err)
-		case action.ForbiddenErr:
+		case it.AccessErr:
 			ll.Deny(err)
 			return cnt.failing.Send(c, "", http.StatusForbidden, err)
 		default:
@@ -81,10 +81,10 @@ func (cnt *Controller) Profile(c echo.Context) error {
 		ll = ll.Named("GetUserProfile").With("thisUserID", thisUserID)
 
 		switch err.(type) {
-		case *action.NotFoundErr:
+		case it.NotFoundErr:
 			ll.NotFound(err)
 			return cnt.failing.Send(c, "", http.StatusNotFound, err)
-		case *action.ForbiddenErr:
+		case it.AccessErr:
 			ll.Deny(err)
 			return cnt.failing.Send(c, "", http.StatusForbidden, err)
 		default:

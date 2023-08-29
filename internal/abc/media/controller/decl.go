@@ -11,6 +11,8 @@ import (
 const (
 	uploadNoteKey = "note"
 	fileUploadKey = "file"
+
+	contentTypeKey = "Content-Type"
 )
 
 type Controller struct {
@@ -36,3 +38,11 @@ func New(
 		maxUpload: 1024 * 1024 * 10, // todo вынести в конфиг
 	}
 }
+
+var (
+	allowedContentTypes = map[string]struct{}{
+		"image/png":       {},
+		"image/jpeg":      {},
+		"application/pdf": {},
+	}
+)

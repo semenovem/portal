@@ -3,7 +3,7 @@ package store_controller
 import (
 	"errors"
 	"github.com/labstack/echo/v4"
-	"github.com/semenovem/portal/internal/abc/action"
+	"github.com/semenovem/portal/pkg/it"
 	"net/http"
 
 	_ "github.com/semenovem/portal/pkg/failing"
@@ -77,7 +77,7 @@ func (cnt *Controller) Load(c echo.Context) error {
 	if err != nil {
 		ll.Named("Load").Nested(err)
 
-		if errors.Is(err, action.ErrNotFound) {
+		if errors.Is(err, it.ErrNotFound) {
 			return cnt.failing.Send(c, "", http.StatusNotFound, err)
 		}
 
@@ -118,7 +118,7 @@ func (cnt *Controller) Delete(c echo.Context) error {
 	if err := cnt.storeAct.Delete(ctx, thisUserID, form.StorePath); err != nil {
 		ll.Named("Load").Nested(err)
 
-		if errors.Is(err, action.ErrNotFound) {
+		if errors.Is(err, it.ErrNotFound) {
 			return cnt.failing.Send(c, "", http.StatusNotFound, err)
 		}
 

@@ -56,6 +56,10 @@ func (p *pen) Error(format string) {
 	p.save(Error, format)
 }
 
+func (p *pen) ErrorE(err error) {
+	p.save(Error, err.Error())
+}
+
 func (p *pen) Errorf(format string, v ...any) {
 	p.save(Error, format, v...)
 }
@@ -126,7 +130,7 @@ func (p *pen) Nestedf(format string, v ...any) {
 	p.save(Debug, format, v...)
 }
 
-func (p *pen) addTag(tags ...string) pkg.Logger {
+func (p *pen) addTag(tags ...string) *pen {
 	if p.tags == nil {
 		p.tags = make([]string, 0)
 	}
@@ -136,103 +140,69 @@ func (p *pen) addTag(tags ...string) pkg.Logger {
 	return p
 }
 
-func (p *pen) AuthTag() pkg.Logger {
-	return p.addTag(authTag)
-}
-
 // ----------------------------------------
 
 func (p *pen) DB(err error) {
-	p.addTag(databaseTag)
-	p.save(Error, err.Error())
+	p.copy().addTag(databaseTag).save(Error, err.Error())
 }
 
 func (p *pen) DBStr(msg string) {
-	p.addTag(databaseTag)
-	p.save(Error, msg)
+	p.copy().addTag(databaseTag).save(Error, msg)
 }
 
 func (p *pen) DBf(format string, v ...any) {
-	p.addTag(databaseTag)
-	p.save(Error, format, v...)
+	p.copy().addTag(databaseTag).save(Error, format, v...)
 }
 
 func (p *pen) Redis(err error) {
-	p.addTag(redisTag)
-	p.save(Error, err.Error())
+	p.copy().addTag(redisTag).save(Error, err.Error())
 }
 
 func (p *pen) RedisStr(msg string) {
-	p.addTag(redisTag)
-	p.save(Error, msg)
+	p.copy().addTag(redisTag).save(Error, msg)
 }
 
 func (p *pen) Redisf(format string, v ...any) {
-	p.addTag(redisTag)
-	p.save(Error, format, v...)
-}
-
-func (p *pen) Client(err error) {
-	p.addTag(clientTag)
-	p.save(Debug, err.Error())
-}
-
-func (p *pen) ClientStr(msg string) {
-	p.addTag(clientTag)
-	p.save(Debug, msg)
-}
-
-func (p *pen) Clientf(format string, v ...any) {
-	p.addTag(clientTag)
-	p.save(Debug, format, v...)
+	p.copy().addTag(redisTag).save(Error, format, v...)
 }
 
 func (p *pen) BadRequest(err error) {
-	p.addTag(badRequestTag)
-	p.save(Debug, err.Error())
+	p.copy().addTag(badRequestTag).save(Debug, err.Error())
 }
 
 func (p *pen) BadRequestStr(msg string) {
-	p.addTag(badRequestTag)
-	p.save(Debug, msg)
+	p.copy().addTag(badRequestTag).save(Debug, msg)
 }
 
 func (p *pen) BadRequestStrRetErr(msg string) error {
-	p.BadRequestStr(msg)
+	p.copy().addTag(badRequestTag).BadRequestStr(msg)
 	return errors.New(msg)
 }
 
 func (p *pen) NotFound(err error) {
-	p.addTag(notFound)
-	p.save(Info, err.Error())
+	p.copy().addTag(notFound).save(Info, err.Error())
 }
 
 func (p *pen) NotFoundStr(msg string) {
-	p.addTag(notFound)
-	p.save(Info, msg)
+	p.copy().addTag(notFound).save(Info, msg)
 }
 
 func (p *pen) Deny(err error) {
-	p.addTag(denyTag)
-	p.save(Info, err.Error())
+	p.copy().addTag(denyTag).save(Info, err.Error())
 }
 
 func (p *pen) Auth(err error) {
-	p.addTag(authTag)
-	p.save(Info, err.Error())
+	p.copy().addTag(authTag).save(Info, err.Error())
 }
 
 func (p *pen) AuthStr(msg string) {
-	p.addTag(authTag)
-	p.save(Info, msg)
+	p.copy().addTag(authTag).save(Info, msg)
 }
 
 func (p *pen) AuthDebug(err error) {
-	p.addTag(authTag)
-	p.save(Debug, err.Error())
+	p.copy().addTag(authTag).save(Debug, err.Error())
 }
 
 func (p *pen) AuthDebugStr(msg string) {
-	p.addTag(authTag)
-	p.save(Debug, msg)
+	p.copy().addTag(authTag).save(Debug, msg)
 }

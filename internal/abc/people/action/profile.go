@@ -2,7 +2,6 @@ package people_action
 
 import (
 	"context"
-	"github.com/semenovem/portal/internal/abc/action"
 	"github.com/semenovem/portal/internal/abc/provider"
 	"github.com/semenovem/portal/pkg/it"
 )
@@ -20,7 +19,7 @@ func (a *PeopleAction) GetUserProfile(
 		ll.Named("GetUserProfile").Nested(err)
 
 		if provider.IsNoRows(err) {
-			return nil, action.ErrNotFound
+			return nil, it.ErrNotFound
 		}
 
 		return nil, err

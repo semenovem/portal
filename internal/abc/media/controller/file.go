@@ -1,7 +1,6 @@
 package media_controller
 
 import (
-	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/semenovem/portal/pkg/it"
 	"mime/multipart"
@@ -48,45 +47,28 @@ func (cnt *Controller) FileUpload(c echo.Context) error {
 		case 1:
 			note = notes[0]
 		default:
-			ll.With("notes", notes).Client(it.ErrOverNote)
+			ll.With("notes", notes).BadRequest(it.ErrOverNote)
 			return cnt.failing.Send(c, "", http.StatusBadRequest, it.ErrOverNote)
 		}
 	}
 
 	if files := form.File[fileUploadKey]; len(files) == 0 {
-		ll.Client(it.ErrNoFile)
+		ll.BadRequest(it.ErrNoFile)
 		return cnt.failing.Send(c, "", http.StatusBadRequest, it.ErrNoFile)
 	} else if len(files) > 1 {
-		ll.Client(it.ErrOverFile)
+		ll.BadRequest(it.ErrOverFile)
 		return cnt.failing.Send(c, "", http.StatusBadRequest, it.ErrOverFile)
 	} else {
 		fileHeader = files[0]
 	}
 
-	file, err := fileHeader.Open()
-	if err != nil {
-		ll.Named("fileOpen").Errorf(err.Error())
-		return cnt.failing.SendInternalServerErr(c, "", err)
+	mediaFile, nested := cnt.processUploadingFile(ctx, thisUserID, fileHeader, note)
+	if nested != nil {
+		ll.Named("processUploadingFile").Nested(err)
+		return cnt.failing.SendNested(c, "", nested)
 	}
 
-	if fileHeader.Size > cnt.maxUpload {
-		ll.With("size", fileHeader.Size).Client(it.ErrFileTooBig)
-		return cnt.failing.Send(c, "", http.StatusBadRequest, it.ErrFileTooBig)
-	}
-
-	if fileHeader.Size == 0 {
-		ll.With("size", fileHeader.Size).Client(it.ErrFileEmpty)
-		return cnt.failing.Send(c, "", http.StatusBadRequest, it.ErrFileEmpty)
-	}
-
-	//fileName := fileHeader.Filename
-
-	fmt.Printf(">>>>>>>>>>> %+v\n", note)
-	fmt.Printf(">>>>>>>>>>> %+v\n", fileHeader.Header)
-
-	cnt.mediaAct.Upload(ctx, thisUserID, file)
-
-	return c.NoContent(http.StatusOK)
+	return c.JSON(http.StatusOK, newFileUploadResponse(mediaFile))
 }
 
 //func (cnt *Controller)
