@@ -20,7 +20,7 @@ import (
 	"github.com/semenovem/portal/internal/abc/vehicle/controller"
 	"github.com/semenovem/portal/internal/audit"
 	"github.com/semenovem/portal/pkg"
-	"github.com/semenovem/portal/pkg/failing"
+	"github.com/semenovem/portal/pkg/fail"
 	"github.com/semenovem/portal/pkg/jwtoken"
 	"github.com/semenovem/portal/pkg/txt"
 	"net/http"
@@ -105,14 +105,14 @@ func New(
 		return nil, err
 	}
 
-	failureService := failing.New(&failing.Config{
+	failureService := fail.New(&fail.Config{
 		IsDevMode:             config.IsDev(),
 		Logger:                logger,
 		Messages:              txt.GetMessages(),
 		ValidationMessageMap:  validators,
 		HTTPStatuses:          txt.GetHTTPStatuses(),
-		UnknownMessage:        unknownFailing,
-		InvalidRequestMessage: invalidFailing,
+		UnknownMessage:        unknownFail,
+		InvalidRequestMessage: invalidFail,
 	})
 
 	cntArg := &controller2.CntArgs{

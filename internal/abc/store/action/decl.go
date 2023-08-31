@@ -5,7 +5,7 @@ import (
 	"github.com/semenovem/portal/internal/abc/provider"
 	"github.com/semenovem/portal/internal/abc/store/provider"
 	"github.com/semenovem/portal/pkg"
-	"github.com/semenovem/portal/pkg/it"
+	"github.com/semenovem/portal/pkg/throw"
 )
 
 type StoreAction struct {
@@ -28,7 +28,7 @@ func (a *StoreAction) Load(ctx context.Context, thisUserID uint32, path string) 
 		ll.Named("LoadArbitraryData").Nested(err)
 
 		if provider.IsNoRec(err) {
-			return "", it.ErrNotFound
+			return "", throw.Err404
 		}
 
 		return "", err
@@ -56,7 +56,7 @@ func (a *StoreAction) Delete(ctx context.Context, thisUserID uint32, path string
 		ll.Named("DeleteArbitraryData").Nested(err)
 
 		if provider.IsNoRec(err) {
-			return it.ErrNotFound
+			return throw.Err404
 		}
 	}
 

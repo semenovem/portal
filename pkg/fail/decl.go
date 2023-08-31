@@ -1,7 +1,7 @@
-package failing
+package fail
 
 const (
-	fieldNameErr       = "__error__" // Имя поля в которое добавляется содержимое ошибки в dev режиме
+	fieldNameErr = "__error__" // Имя поля в которое добавляется содержимое ошибки в dev режиме
 
 	invalidRequestText = "Invalid request parameters"
 )

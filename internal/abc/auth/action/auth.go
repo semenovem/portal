@@ -2,11 +2,11 @@ package auth_action
 
 import (
 	"context"
-	"errors"
 	"github.com/google/uuid"
 	"github.com/semenovem/portal/internal/abc/provider"
 	"github.com/semenovem/portal/pkg/it"
 	"github.com/semenovem/portal/pkg/jwtoken"
+	"github.com/semenovem/portal/pkg/throw"
 )
 
 // Logout разлогин авторизованной сессии пользователя
@@ -15,11 +15,6 @@ func (a *AuthAction) Logout(ctx context.Context, payload *jwtoken.RefreshPayload
 
 	session, err := a.getSessionByRefresh(ctx, payload)
 	if err != nil {
-		if IsAuthErr(err) {
-			ll.Named("getSessionByRefresh").Auth(err)
-			return 0, err
-		}
-
 		ll.Named("getSessionByRefresh").Nested(err)
 		return 0, err
 	}
@@ -55,7 +50,7 @@ func (a *AuthAction) Refresh(
 		ll.Named("GetUserAuth").Nested(err)
 
 		if provider.IsNoRows(err) {
-			return nil, errUserNoFound
+			return nil, throw.Err404User
 		}
 
 		return nil, err
@@ -71,7 +66,7 @@ func (a *AuthAction) Refresh(
 		ll = ll.Named("UpdateRefreshSession")
 
 		if provider.IsNoRows(err) {
-			err = errors.New("no auth session with the specified refresh token - could not be updated")
+			err = throw.NewAuthErr("no auth session with the specified refresh token - could not be updated")
 
 			ll.With("refreshID_old", payload.RefreshID).
 				With("refreshID_new", refreshID).

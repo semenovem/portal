@@ -6,7 +6,7 @@ import (
 	"github.com/semenovem/portal/pkg/it"
 	"net/http"
 
-	_ "github.com/semenovem/portal/pkg/failing"
+	_ "github.com/semenovem/portal/pkg/fail"
 )
 
 // CreateUser docs
@@ -16,7 +16,7 @@ import (
 //	@Produce	json
 //	@Param		user_id	path		string	true	"id пользователя"
 //	@Success	200		{object}	userProfileView
-//	@Failure	400		{object}	failing.Response
+//	@Failure	400		{object}	fail.Response
 //	@Router		/people [POST]
 //	@Tags		people
 //	@Security	ApiKeyAuth
@@ -30,7 +30,7 @@ func (cnt *Controller) CreateUser(c echo.Context) error {
 	thisUserID, nested := cnt.com.ExtractUserAndForm(c, form)
 	if nested != nil {
 		ll.Named("ExtractUserAndForm").Nestedf(nested.Message())
-		return cnt.failing.Send(c, "", http.StatusBadRequest)
+		return cnt.fail.Send(c, "", http.StatusBadRequest)
 	}
 
 	//profile, err := cnt.peopleAct.GetUserProfile(ctx, thisUserID, form.UserID)
@@ -40,13 +40,13 @@ func (cnt *Controller) CreateUser(c echo.Context) error {
 	//	switch err.(type) {
 	//	case *action.NotFoundErr:
 	//		ll.NotFoundTag().Info(err.Error())
-	//		return cnt.failing.Send(c, "", http.StatusNotFound, err)
+	//		return cnt.fail.Send(c, "", http.StatusNotFound, err)
 	//	case *action.ForbiddenErr:
 	//		ll.DenyTag().Info(err.Error())
-	//		return cnt.failing.Send(c, "", http.StatusForbidden, err)
+	//		return cnt.fail.Send(c, "", http.StatusForbidden, err)
 	//	default:
 	//		ll.Nested(err)
-	//		return cnt.failing.SendInternalServerErr(c, "", err)
+	//		return cnt.fail.SendInternalServerErr(c, "", err)
 	//	}
 	//}
 
@@ -68,7 +68,7 @@ func (cnt *Controller) CreateUser(c echo.Context) error {
 //	@Produce	json
 //	@Param		user_id	path		string	true	"id пользователя"
 //	@Success	200		{object}	userProfileView
-//	@Failure	400		{object}	failing.Response
+//	@Failure	400		{object}	fail.Response
 //	@Router		/people/:user_id [DELETE]
 //	@Tags		people
 //	@Security	ApiKeyAuth
@@ -82,7 +82,7 @@ func (cnt *Controller) DeleteUser(c echo.Context) error {
 	thisUserID, nested := cnt.com.ExtractUserAndForm(c, form)
 	if nested != nil {
 		ll.Named("ExtractUserAndForm").Nestedf(nested.Message())
-		return cnt.failing.Send(c, "", http.StatusBadRequest)
+		return cnt.fail.Send(c, "", http.StatusBadRequest)
 	}
 
 	//profile, err := cnt.peopleAct.GetUserProfile(ctx, thisUserID, form.UserID)
@@ -92,13 +92,13 @@ func (cnt *Controller) DeleteUser(c echo.Context) error {
 	//	switch err.(type) {
 	//	case *action.NotFoundErr:
 	//		ll.NotFoundTag().Info(err.Error())
-	//		return cnt.failing.Send(c, "", http.StatusNotFound, err)
+	//		return cnt.fail.Send(c, "", http.StatusNotFound, err)
 	//	case *action.ForbiddenErr:
 	//		ll.DenyTag().Info(err.Error())
-	//		return cnt.failing.Send(c, "", http.StatusForbidden, err)
+	//		return cnt.fail.Send(c, "", http.StatusForbidden, err)
 	//	default:
 	//		ll.Nested(err)
-	//		return cnt.failing.SendInternalServerErr(c, "", err)
+	//		return cnt.fail.SendInternalServerErr(c, "", err)
 	//	}
 	//}
 

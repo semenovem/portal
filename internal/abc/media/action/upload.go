@@ -9,17 +9,23 @@ import (
 func (a *MediaAction) Upload(
 	ctx context.Context,
 	thisUserID uint32,
+	mediaObj it.MediaObjectType,
 	reader io.Reader,
+	size int64,
 	note string,
-) (*it.MediaFile, error) {
+) (*it.MediaObject, error) {
 
 	// TODO Проверить, может ли пользователь загружать файлы
 
-	f := it.MediaFile{
+	f := it.MediaObject{
 		ID:          300,
 		PreviewLink: "asdasdasd",
 		Note:        "asdasfasdfsdf",
 	}
+
+	//err := throw.NewAccessErr("sdfsdfsf")
+
+	a.s3.UploadObject(ctx, reader, "images", "/11/1", size)
 
 	return &f, nil
 }

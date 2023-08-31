@@ -1,4 +1,4 @@
-package failing
+package fail
 
 import (
 	"regexp"

@@ -2,12 +2,12 @@ package auth_controller
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/semenovem/portal/internal/abc/auth/action"
 	"github.com/semenovem/portal/internal/audit"
+	"github.com/semenovem/portal/pkg/throw"
 	"github.com/semenovem/portal/pkg/txt"
 	"net/http"
 
-	_ "github.com/semenovem/portal/pkg/failing"
+	_ "github.com/semenovem/portal/pkg/fail"
 )
 
 // Login docs
@@ -17,7 +17,7 @@ import (
 //	@Produce	json
 //	@Param		payload	body		loginForm	true	"Логин/пароль"
 //	@Success	200		{object}	loginResponse
-//	@Failure	400		{object}	failing.Response
+//	@Failure	400		{object}	fail.Response
 //	@Router		/auth/login [POST]
 //	@Tags		auth
 //	@Security	ApiKeyAuth
@@ -30,7 +30,7 @@ func (cnt *Controller) Login(c echo.Context) error {
 
 	if nested := cnt.com.ExtractForm(c, form); nested != nil {
 		ll.Named("ExtractForm").Nestedf(nested.Message())
-		return cnt.failing.SendNested(c, "", nested)
+		return cnt.fail.SendNested(c, "", nested)
 	}
 
 	ll = ll.With("login", form.Login)
@@ -44,17 +44,18 @@ func (cnt *Controller) Login(c echo.Context) error {
 	if err != nil {
 		ll.Named("NewLogin").Nested(err)
 
-		if auth_action.IsAuthErr(err) {
-			return cnt.failing.Send(c, "", http.StatusBadRequest, txt.AuthInvalidLogoPasswd, err)
+		switch err.(type) {
+		case throw.AuthErr, throw.NotFoundErr:
+			return cnt.fail.Send(c, "", http.StatusBadRequest, txt.AuthInvalidLogoPasswd, err)
 		}
 
-		return cnt.failing.SendInternalServerErr(c, "", err)
+		return cnt.fail.SendInternalServerErr(c, "", err)
 	}
 
 	pair, nested := cnt.pairToken(session)
 	if nested != nil {
 		ll.Named("pairToken").Nestedf(nested.Message())
-		return cnt.failing.SendNested(c, "", nested)
+		return cnt.fail.SendNested(c, "", nested)
 	}
 
 	cnt.audit.Auth(session.UserID, audit.UserLogin, audit.P{
@@ -82,7 +83,7 @@ func (cnt *Controller) Login(c echo.Context) error {
 //	@Produce	json
 //	@Param		refresh-token	header		string	true	"refresh токен"
 //	@Success	200				{object}	loginResponse
-//	@Failure	400				{object}	failing.Response
+//	@Failure	400				{object}	fail.Response
 //	@Router		/auth/logout [POST]
 //	@Tags		auth
 //	@Security	ApiKeyAuth
@@ -99,7 +100,7 @@ func (cnt *Controller) Logout(c echo.Context) error {
 	payload, nested := cnt.extractRefreshToken(c)
 	if nested != nil {
 		ll.Named("GetRefreshPayload").Nestedf(nested.Message())
-		return cnt.failing.SendNested(c, "", nested)
+		return cnt.fail.SendNested(c, "", nested)
 	}
 
 	ll = ll.With("payload", payload)
@@ -108,11 +109,12 @@ func (cnt *Controller) Logout(c echo.Context) error {
 	if err != nil {
 		ll.Named("Logout").Nested(err)
 
-		if auth_action.IsAuthErr(err) {
-			return cnt.failing.Send(c, "", http.StatusUnauthorized, err)
+		switch err.(type) {
+		case throw.AuthErr, throw.NotFoundErr:
+			return cnt.fail.Send(c, "", http.StatusUnauthorized, err)
 		}
 
-		return cnt.failing.SendInternalServerErr(c, "", err)
+		return cnt.fail.SendInternalServerErr(c, "", err)
 	}
 
 	cnt.audit.Auth(userID, audit.UserLogout, audit.P{

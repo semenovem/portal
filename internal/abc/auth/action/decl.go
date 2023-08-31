@@ -9,6 +9,7 @@ import (
 	"github.com/semenovem/portal/pkg"
 	"github.com/semenovem/portal/pkg/it"
 	"github.com/semenovem/portal/pkg/jwtoken"
+	"github.com/semenovem/portal/pkg/throw"
 )
 
 type AuthAction struct {
@@ -32,40 +33,12 @@ func New(
 	}
 }
 
-var (
-	errUserNoFound          = newAuthErr("user no found")
-	errPasswdIncorrect      = newAuthErr("password is incorrect")
-	errUserNotWorks         = newAuthErr("user not works")
-	errSessionNotFound      = newAuthErr("auth session not found")
-	errRefreshUnknown       = newAuthErr("refresh token data does not match")
-	errOnetimeEntryNotFound = newAuthErr("onetime entry not found")
-)
-
-type AuthErr struct {
-	msg string
-}
-
-func (e AuthErr) Error() string {
-	return e.msg
-}
-
-func IsAuthErr(err error) bool {
-	_, ok := err.(*AuthErr)
-	return ok
-}
-
-func newAuthErr(msg string) *AuthErr {
-	return &AuthErr{
-		msg: msg,
-	}
-}
-
 func (a *AuthAction) canLogin(user *it.UserAuth) error {
 	if err := user.CanLogging(); err != nil {
-		s := errUserNotWorks.msg + "(" + err.Error() + ")"
-		a.logger.Named("canLogin").With("user", user).Debug(s)
+		err = throw.NewAuthErr(throw.MsgUserCantLogin, err.Error())
+		a.logger.Named("canLogin").With("user", user).Auth(err)
 
-		return errUserNotWorks
+		return err
 	}
 
 	return nil
@@ -83,8 +56,8 @@ func (a *AuthAction) getSessionByRefresh(
 		ll = ll.Named("GetSession")
 
 		if provider.IsNoRows(err) {
-			ll.AuthStr(errSessionNotFound.msg)
-			return nil, errSessionNotFound
+			ll.Auth(throw.Err404AuthSession)
+			return nil, throw.Err404AuthSession
 		}
 
 		ll.Nested(err)
@@ -95,9 +68,9 @@ func (a *AuthAction) getSessionByRefresh(
 		ll.Named("refreshToken").
 			With("refreshID_from_user", payload.RefreshID).
 			With("refreshID_from_DB", session.RefreshID).
-			AuthStr(errRefreshUnknown.msg)
+			Auth(throw.ErrAuthRefreshUnknown)
 
-		return nil, errRefreshUnknown
+		return nil, throw.ErrAuthRefreshUnknown
 	}
 
 	return session, nil

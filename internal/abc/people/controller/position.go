@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/labstack/echo/v4"
 
-	_ "github.com/semenovem/portal/pkg/failing"
+	_ "github.com/semenovem/portal/pkg/fail"
 )
 
 // Position docs
@@ -15,7 +15,7 @@ import (
 //	@Produce	json
 //	@Param		user_id	path		string	true	"id пользователя"
 //	@Success	200		{object}	string
-//	@Failure	400		{object}	failing.Response
+//	@Failure	400		{object}	fail.Response
 //	@Router		/people/positions [GET]
 //	@Tags		people/position
 //	@Security	ApiKeyAuth

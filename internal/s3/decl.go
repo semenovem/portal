@@ -13,10 +13,11 @@ import (
 )
 
 const (
-	docsBucketName    = "docs"
-	imagesBucketName  = "images"
-	videosBucketName  = "videos"
-	preloadBucketName = "preload"
+	UploadedBucketName = "uploaded"
+	docsBucketName     = "docs"
+	imagesBucketName   = "images"
+	videosBucketName   = "videos"
+	preloadBucketName  = "preload"
 )
 
 type Props struct {
@@ -61,7 +62,13 @@ func New(config *Props) (*Service, error) {
 		return nil, ll.NestedWith(err, "can't create s3 minio-client")
 	}
 
-	buckets := []string{docsBucketName, imagesBucketName, videosBucketName, preloadBucketName}
+	buckets := []string{
+		UploadedBucketName,
+		docsBucketName,
+		imagesBucketName,
+		videosBucketName,
+		preloadBucketName,
+	}
 	for _, n := range buckets {
 		if err = o.createBucket(ctx, n); err != nil {
 			return nil, ll.NestedWith(err, "can't create s3 buckets")

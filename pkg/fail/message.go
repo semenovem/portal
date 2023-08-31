@@ -1,4 +1,4 @@
-package failing
+package fail
 
 type Message struct {
 	Code         int               // Код ошибки

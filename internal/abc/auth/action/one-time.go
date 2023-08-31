@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/semenovem/portal/internal/abc/provider"
 	"github.com/semenovem/portal/pkg/it"
+	"github.com/semenovem/portal/pkg/throw"
 )
 
 // CreateOnetimeEntry создание одноразовой точки авторизации
@@ -14,10 +15,7 @@ func (a *AuthAction) CreateOnetimeEntry(ctx context.Context, userID uint32) (uui
 	userAuth, err := a.peoplePvd.GetUserAuth(ctx, userID)
 	if err != nil {
 		ll.Named("CreateOnetimeEntry").Nested(err)
-
-		if provider.IsNoRows(err) {
-			return uuid.Nil, errUserNoFound
-		}
+		return uuid.Nil, err
 	}
 
 	if err = a.canLogin(userAuth); err != nil {
@@ -42,7 +40,7 @@ func (a *AuthAction) LoginByOnetimeEntryID(ctx context.Context, entryID uuid.UUI
 		ll.Named("GetDelOnetimeEntry").Nested(err)
 
 		if provider.IsNoRec(err) {
-			return nil, errOnetimeEntryNotFound
+			return nil, throw.Err404OnetimeEntry
 		}
 
 		return nil, err
@@ -53,7 +51,7 @@ func (a *AuthAction) LoginByOnetimeEntryID(ctx context.Context, entryID uuid.UUI
 		ll.Named("GetUserAuth").Nested(err)
 
 		if provider.IsNoRows(err) {
-			return nil, errUserNoFound
+			return nil, throw.Err404User
 		}
 	}
 

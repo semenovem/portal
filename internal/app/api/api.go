@@ -20,23 +20,23 @@ import (
 	"github.com/semenovem/portal/internal/s3"
 	"github.com/semenovem/portal/internal/zoo/conn"
 	"github.com/semenovem/portal/pkg"
-	"github.com/semenovem/portal/pkg/failing"
+	"github.com/semenovem/portal/pkg/fail"
 	"github.com/semenovem/portal/pkg/jwtoken"
 	"math"
 	"time"
 )
 
 type appAPI struct {
-	ctx            context.Context
-	logger         pkg.Logger
-	db             *pgxpool.Pool
-	redis          *redis.Client
-	s3             *s3.Service
-	router         *router.Router
-	config         *config.API
-	auditService   *audit.AuditProvider
-	failureService *failing.Service
-	jwtService     *jwtoken.Service
+	ctx          context.Context
+	logger       pkg.Logger
+	db           *pgxpool.Pool
+	redis        *redis.Client
+	s3           *s3.Service
+	router       *router.Router
+	config       *config.API
+	auditService *audit.AuditProvider
+	failService  *fail.Service
+	jwtService   *jwtoken.Service
 
 	providers struct {
 		auth   *auth_provider.AuthProvider

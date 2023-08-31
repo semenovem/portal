@@ -5,7 +5,7 @@ import (
 	"github.com/semenovem/portal/internal/abc/media/action"
 	"github.com/semenovem/portal/internal/audit"
 	"github.com/semenovem/portal/pkg"
-	"github.com/semenovem/portal/pkg/failing"
+	"github.com/semenovem/portal/pkg/fail"
 )
 
 const (
@@ -17,7 +17,7 @@ const (
 
 type Controller struct {
 	logger   pkg.Logger
-	failing  *failing.Service
+	fail     *fail.Service
 	com      *controller2.Common
 	mediaAct *media_action.MediaAction
 	audit    *audit.AuditProvider
@@ -30,8 +30,8 @@ func New(
 	mediaAct *media_action.MediaAction,
 ) *Controller {
 	return &Controller{
-		logger:    arg.Logger.Named("auth-cnt"),
-		failing:   arg.FailureService,
+		logger:    arg.Logger.Named("media-cnt"),
+		fail:      arg.FailureService,
 		audit:     arg.Audit,
 		com:       arg.Common,
 		mediaAct:  mediaAct,

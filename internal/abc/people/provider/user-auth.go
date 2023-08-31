@@ -16,7 +16,7 @@ func (p *PeopleProvider) GetUserAuth(ctx context.Context, userID uint32) (*it.Us
 
 	u, err := p.getUserAuth(ctx, "", userID)
 	if err != nil {
-		p.logger.Named("GetUserAuth").Nested(err)
+		p.logger.Named("getUserAuth").Nested(err)
 		return nil, err
 	}
 
@@ -66,8 +66,12 @@ func (p *PeopleProvider) getUserAuth(
 
 	err := p.db.QueryRow(ctx, sq, arg).Scan(&u.ID, &u.Status, &u.Roles, &u.ExpiredAt, &u.PasswdHash)
 	if err != nil {
-		if !provider.IsNoRows(err) {
-			p.logger.Named("getUserByLogin").DB(err)
+		ll := p.logger.Named("getUserByLogin")
+
+		if provider.IsNoRows(err) {
+			ll.NotFound(err)
+		} else {
+			ll.DB(err)
 		}
 
 		return nil, err

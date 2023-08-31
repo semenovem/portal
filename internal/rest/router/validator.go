@@ -4,7 +4,13 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/semenovem/portal/pkg/it"
-	"github.com/semenovem/portal/pkg/vld"
+)
+
+/* Теги валидаторов */
+const (
+	userLoginTag    = "user-login-vld-tag"
+	userPasswordTag = "user-password-vld-tag"
+	userEmailTag    = "user-email-vld-tag"
 )
 
 type customValidator struct {
@@ -16,8 +22,8 @@ func (cv *customValidator) Validate(i interface{}) error {
 }
 
 var strValidators = map[string]func(string) error{
-	vld.UserLoginTag:    it.ValidateUserLogin,
-	vld.UserPasswordTag: it.ValidateUserPassword,
+	userLoginTag:    it.ValidateUserLogin,
+	userPasswordTag: it.ValidateUserPassword,
 }
 
 func newValidation() (echo.Validator, error) {

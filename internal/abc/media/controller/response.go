@@ -16,7 +16,7 @@ type fileUploadResponse struct {
 	File fileUploadView `json:"file"`
 }
 
-func newFileUploadResponse(f *it.MediaFile) *fileUploadResponse {
+func newFileUploadResponse(f *it.MediaObject) *fileUploadResponse {
 	return &fileUploadResponse{
 		File: fileUploadView{
 			ID:          f.ID,

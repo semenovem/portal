@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/semenovem/portal/internal/abc/provider"
 	"github.com/semenovem/portal/pkg/it"
+	"github.com/semenovem/portal/pkg/throw"
 )
 
 // NewLogin авторизация пользователя по логопасу
@@ -20,8 +21,8 @@ func (a *AuthAction) NewLogin(
 		ll = ll.Named("GetUserByLogin")
 
 		if provider.IsNoRows(err) {
-			ll.AuthStr(errUserNoFound.msg)
-			return nil, errUserNoFound
+			ll.Auth(throw.Err404User)
+			return nil, throw.Err404User
 		}
 
 		ll.Nested(err)
@@ -31,15 +32,15 @@ func (a *AuthAction) NewLogin(
 	ll.With("userID", userAuth.ID)
 
 	if !a.passwdAuth.Matching(userAuth.PasswdHash, passwd) {
-		ll.Named("PasswordMatching").AuthDebugStr(errPasswdIncorrect.msg)
-		return nil, errPasswdIncorrect
+		ll.Named("PasswordMatching").AuthDebug(throw.ErrAuthPasswdIncorrect)
+		return nil, throw.ErrAuthPasswdIncorrect
 	}
 
 	session, err := a.newSession(ctx, userAuth.ToUserAuth(), deviceID)
 	if err != nil {
 		ll = ll.Named("newSession")
 
-		if IsAuthErr(err) {
+		if throw.IsAuthErr(err) {
 			ll.Auth(err)
 			return nil, err
 		}

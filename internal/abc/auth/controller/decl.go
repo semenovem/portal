@@ -6,7 +6,7 @@ import (
 	controller2 "github.com/semenovem/portal/internal/abc/controller"
 	"github.com/semenovem/portal/internal/audit"
 	"github.com/semenovem/portal/pkg"
-	"github.com/semenovem/portal/pkg/failing"
+	"github.com/semenovem/portal/pkg/fail"
 	"github.com/semenovem/portal/pkg/it"
 	"github.com/semenovem/portal/pkg/jwtoken"
 	"net/http"
@@ -15,7 +15,7 @@ import (
 
 type Controller struct {
 	logger                    pkg.Logger
-	failing                   *failing.Service
+	fail                      *fail.Service
 	jwt                       *jwtoken.Service
 	com                       *controller2.Common
 	authAct                   *auth_action.AuthAction
@@ -35,7 +35,7 @@ func New(
 ) *Controller {
 	return &Controller{
 		logger:                    arg.Logger.Named("auth-cnt"),
-		failing:                   arg.FailureService,
+		fail:                      arg.FailureService,
 		com:                       arg.Common,
 		authAct:                   authAct,
 		audit:                     arg.Audit,
@@ -73,7 +73,7 @@ func (cnt *Controller) refreshTokenCookies(refreshToken string) []*http.Cookie {
 }
 
 // Получить токен и проверить срок его действия
-func (cnt *Controller) extractRefreshToken(c echo.Context) (*jwtoken.RefreshPayload, failing.Nested) {
+func (cnt *Controller) extractRefreshToken(c echo.Context) (*jwtoken.RefreshPayload, fail.Nested) {
 	var (
 		ll = cnt.logger.Named("ExtractRefreshToken")
 	)
@@ -81,25 +81,25 @@ func (cnt *Controller) extractRefreshToken(c echo.Context) (*jwtoken.RefreshPayl
 	refreshCookie, err := c.Cookie(cnt.jwtRefreshTokenCookieName)
 	if err != nil {
 		ll.Named("Cookie").Auth(err)
-		return nil, failing.NewNested(http.StatusUnauthorized, err)
+		return nil, fail.NewNested(http.StatusUnauthorized, err)
 	}
 
 	payload, err := cnt.jwt.GetRefreshPayload(refreshCookie.Value)
 	if err != nil {
 		ll.Named("GetRefreshPayload").Auth(err)
-		return nil, failing.NewNested(http.StatusUnauthorized, err)
+		return nil, fail.NewNested(http.StatusUnauthorized, err)
 	}
 
 	if payload.IsExpired() {
 		ll.With("payload", payload).AuthStr("refresh token is expired")
-		return nil, failing.NewNested(http.StatusUnauthorized, err)
+		return nil, fail.NewNested(http.StatusUnauthorized, err)
 	}
 
 	return payload, nil
 }
 
 // ExtractRefreshToken выпустить новый токен
-func (cnt *Controller) pairToken(session *it.AuthSession) (*jwtoken.PairTokens, failing.Nested) {
+func (cnt *Controller) pairToken(session *it.AuthSession) (*jwtoken.PairTokens, fail.Nested) {
 	pair, err := cnt.jwt.NewPairTokens(&jwtoken.TokenParams{
 		SessionID: session.ID,
 		UserID:    session.UserID,
@@ -107,7 +107,7 @@ func (cnt *Controller) pairToken(session *it.AuthSession) (*jwtoken.PairTokens, 
 	})
 	if err != nil {
 		cnt.logger.Named("pairToken").Auth(err)
-		return nil, failing.NewNested(http.StatusInternalServerError, err)
+		return nil, fail.NewNested(http.StatusInternalServerError, err)
 	}
 
 	return pair, nil

@@ -3,10 +3,10 @@ package store_controller
 import (
 	"errors"
 	"github.com/labstack/echo/v4"
-	"github.com/semenovem/portal/pkg/it"
+	"github.com/semenovem/portal/pkg/throw"
 	"net/http"
 
-	_ "github.com/semenovem/portal/pkg/failing"
+	_ "github.com/semenovem/portal/pkg/fail"
 )
 
 // Store docs
@@ -18,7 +18,7 @@ import (
 //	@Param		store_code	path	string		true	"code store"
 //	@Param		payload		body	storeForm	true	"Данные для сохранения"
 //	@Success	201			"no content"
-//	@Failure	400			{object}	failing.Response
+//	@Failure	400			{object}	fail.Response
 //	@Router		/store/:store_path [POST]
 //	@Tags		store
 //	@Security	ApiKeyAuth
@@ -32,14 +32,14 @@ func (cnt *Controller) Store(c echo.Context) error {
 	thisUserID, nested := cnt.com.ExtractUserAndForm(c, form)
 	if nested != nil {
 		ll.Named("ExtractForm").Nestedf(nested.Message())
-		return cnt.failing.SendNested(c, "", nested)
+		return cnt.fail.SendNested(c, "", nested)
 	}
 
 	ll = ll.With("store_path", form.StorePath).With("thisUserID", thisUserID)
 
 	if err := cnt.storeAct.Store(ctx, thisUserID, form.StorePath, form.Payload); err != nil {
 		ll.Named("Store").Nested(err)
-		return cnt.failing.SendInternalServerErr(c, "", err)
+		return cnt.fail.SendInternalServerErr(c, "", err)
 	}
 
 	ll.Debug("stored")
@@ -54,7 +54,7 @@ func (cnt *Controller) Store(c echo.Context) error {
 //	@Produce	json
 //	@Param		store_code	path		string	true	"code store"
 //	@Success	200			{object}	loadView
-//	@Failure	400			{object}	failing.Response
+//	@Failure	400			{object}	fail.Response
 //	@Router		/store/:store_path [GET]
 //	@Tags		store
 //	@Security	ApiKeyAuth
@@ -68,7 +68,7 @@ func (cnt *Controller) Load(c echo.Context) error {
 	thisUserID, nested := cnt.com.ExtractUserAndForm(c, form)
 	if nested != nil {
 		ll.Named("ExtractForm").Nestedf(nested.Message())
-		return cnt.failing.SendNested(c, "", nested)
+		return cnt.fail.SendNested(c, "", nested)
 	}
 
 	ll = ll.With("store_path", form.StorePath).With("thisUserID", thisUserID)
@@ -77,11 +77,11 @@ func (cnt *Controller) Load(c echo.Context) error {
 	if err != nil {
 		ll.Named("Load").Nested(err)
 
-		if errors.Is(err, it.ErrNotFound) {
-			return cnt.failing.Send(c, "", http.StatusNotFound, err)
+		if errors.Is(err, throw.Err404) {
+			return cnt.fail.Send(c, "", http.StatusNotFound, err)
 		}
 
-		return cnt.failing.SendInternalServerErr(c, "", err)
+		return cnt.fail.SendInternalServerErr(c, "", err)
 	}
 
 	ll.Debug("loaded")
@@ -96,7 +96,7 @@ func (cnt *Controller) Load(c echo.Context) error {
 //	@Produce	json
 //	@Param		store_code	path	string	true	"code store"
 //	@Success	204			"no content"
-//	@Failure	400			{object}	failing.Response
+//	@Failure	400			{object}	fail.Response
 //	@Router		/store/:store_path [DELETE]
 //	@Tags		store
 //	@Security	ApiKeyAuth
@@ -110,7 +110,7 @@ func (cnt *Controller) Delete(c echo.Context) error {
 	thisUserID, nested := cnt.com.ExtractUserAndForm(c, form)
 	if nested != nil {
 		ll.Named("ExtractForm").Nestedf(nested.Message())
-		return cnt.failing.SendNested(c, "", nested)
+		return cnt.fail.SendNested(c, "", nested)
 	}
 
 	ll = ll.With("store_path", form.StorePath).With("thisUserID", thisUserID)
@@ -118,11 +118,11 @@ func (cnt *Controller) Delete(c echo.Context) error {
 	if err := cnt.storeAct.Delete(ctx, thisUserID, form.StorePath); err != nil {
 		ll.Named("Load").Nested(err)
 
-		if errors.Is(err, it.ErrNotFound) {
-			return cnt.failing.Send(c, "", http.StatusNotFound, err)
+		if errors.Is(err, throw.Err404) {
+			return cnt.fail.Send(c, "", http.StatusNotFound, err)
 		}
 
-		return cnt.failing.SendInternalServerErr(c, "", err)
+		return cnt.fail.SendInternalServerErr(c, "", err)
 	}
 
 	ll.Debug("deleted")

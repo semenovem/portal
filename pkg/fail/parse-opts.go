@@ -1,4 +1,4 @@
-package failing
+package fail
 
 type parsedOpt struct {
 	message          *Message
@@ -52,7 +52,7 @@ func (s *Service) parseOpts(opts []interface{}) *parsedOpt {
 		case nil:
 
 		default:
-			s.logger.Errorf("failing: use only allowed types. type = %T value = %s", val, val)
+			s.logger.Errorf("fail: use only allowed types. type = %T value = %s", val, val)
 		}
 	}
 
@@ -60,10 +60,10 @@ func (s *Service) parseOpts(opts []interface{}) *parsedOpt {
 		if opt.message == nil {
 			var ok bool
 			if opt.message, ok = s.messages[msgKey]; !ok {
-				s.logger.Errorf("failing: message not found by key [%s]", msgKey)
+				s.logger.Errorf("fail: message not found by key [%s]", msgKey)
 			}
 		} else {
-			s.logger.Errorf("failing: simultaneous use of the Message and message Key parameters is not allowed")
+			s.logger.Errorf("fail: simultaneous use of the Message and message Key parameters is not allowed")
 		}
 	}
 

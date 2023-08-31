@@ -7,26 +7,29 @@ import (
 	"io"
 )
 
-func (s *Service) UploadImage(
+func (s *Service) UploadObject(
 	ctx context.Context,
 	file io.Reader,
+	bucket string,
 	objectPath string,
 	fileSize int64,
 ) error {
 	uploadInfo, err := s.s3Client.PutObject(
 		ctx,
-		"images",
+		bucket,
 		objectPath,
 		file,
 		fileSize,
 		minio.PutObjectOptions{},
 	)
 	if err != nil {
-		s.logger.Named("UploadImage").With("objectPath", objectPath).Error(err.Error())
+		s.logger.Named("UploadObject").With("objectPath", objectPath).Error(err.Error())
 		return err
 	}
 
-	fmt.Println(">>>>>>>>> ", uploadInfo.Size)
+	fmt.Println(">>>>>>>>> ", objectPath)
+	fmt.Println(">>>>>>>>> ", uploadInfo.ChecksumSHA256)
+	fmt.Println(">>>>>>>>> ", uploadInfo.ChecksumSHA1)
 
 	return nil
 }
