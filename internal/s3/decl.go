@@ -20,6 +20,13 @@ const (
 	preloadBucketName  = "preload"
 )
 
+const (
+	accessDenied      = "AccessDenied"
+	noSuchBucket      = "NoSuchBucket"
+	invalidBucketName = "InvalidBucketName"
+	noSuchKey         = "NoSuchKey"
+)
+
 type Props struct {
 	Ctx    context.Context
 	Logger pkg.Logger

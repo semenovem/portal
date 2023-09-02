@@ -2,30 +2,41 @@ package media_action
 
 import (
 	"context"
+	"crypto/sha1"
+	"encoding/hex"
+	"github.com/semenovem/portal/internal/s3"
 	"github.com/semenovem/portal/pkg/it"
-	"io"
 )
 
 func (a *MediaAction) Upload(
 	ctx context.Context,
 	thisUserID uint32,
 	mediaObj it.MediaObjectType,
-	reader io.Reader,
-	size int64,
+	binary []byte,
 	note string,
-) (*it.MediaObject, error) {
+) (uint32, error) {
+	var (
+		ll = a.logger.Named("Upload")
+	)
 
 	// TODO Проверить, может ли пользователь загружать файлы
 
-	f := it.MediaObject{
-		ID:          300,
-		PreviewLink: "asdasdasd",
-		Note:        "asdasfasdfsdf",
+	var (
+		hash       = sha1.Sum(binary)
+		objectPath = hex.EncodeToString(hash[:]) + "." + string(mediaObj)
+	)
+
+	if err := a.s3.UploadFile(ctx, binary, s3.UploadedBucketName, objectPath); err != nil {
+		ll.Named("UploadFile").With("bucket", s3.UploadedBucketName).With("objectPath", objectPath)
+		return 0, err
 	}
 
-	//err := throw.NewAccessErr("sdfsdfsf")
+	//
+	uploadedFileID, err := a.mediaPvd.CreateUploadedFile(ctx, objectPath, note, mediaObj)
+	if err != nil {
+		ll.Named("CreateUploadedFile").Nested(err)
+		return 0, err
+	}
 
-	a.s3.UploadObject(ctx, reader, "images", "/11/1", size)
-
-	return &f, nil
+	return uploadedFileID, nil
 }

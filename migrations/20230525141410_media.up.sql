@@ -5,11 +5,22 @@
 -- типы файлов
 CREATE TYPE media.file_kind AS ENUM ('jpg', 'png', 'webp', 'pdf', 'video');
 
--- картинки
+-- предварительно загруженные файлы
+CREATE TABLE IF NOT EXISTS media.upload_files
+(
+  id          serial PRIMARY KEY,
+  note        text default NULL,
+  deleted     bool default false NOT NULL,
+  kind        media.file_kind    NOT NULL,
+  s3_path     varchar            NOT NULL  -- путь сохранения в S3
+);
+
+
+-- файлы
 CREATE TABLE IF NOT EXISTS media.files
 (
   id          serial PRIMARY KEY,
-  hash_sha256 varchar            NOT NULL, -- хеш оригинала картинки TODO указать точный размер
+  hash_sha256 varchar            NOT NULL,
   note        text default NULL,
   deleted     bool default false NOT NULL,
   kind        media.file_kind    NOT NULL

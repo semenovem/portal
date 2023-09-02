@@ -3,9 +3,9 @@ package it
 import "errors"
 
 const (
-	MediaObjectPNG  = "png"
-	MediaObjectJPEG = "jpeg"
-	MediaObjectPDF  = "pdf"
+	MediaObjectPNG  MediaObjectType = "png"
+	MediaObjectJPEG MediaObjectType = "jpeg"
+	MediaObjectPDF  MediaObjectType = "pdf"
 )
 
 var (
@@ -23,7 +23,14 @@ var (
 type MediaObjectType string
 type MediaContentType string
 
-type MediaObject struct {
+type MediaUploaObj struct {
+	ID          uint32
+	Typ         MediaObjectType
+	PreviewLink string
+	Note        string
+}
+
+type MediaUploadFile struct {
 	ID          uint32
 	Typ         MediaObjectType
 	PreviewLink string

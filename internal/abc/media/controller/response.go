@@ -8,7 +8,6 @@ type loadResponse struct {
 
 type fileUploadView struct {
 	ID          uint32 `json:"id"`
-	Note        string `json:"note"`
 	PreviewLink string `json:"preview_link"` // uri
 }
 
@@ -16,11 +15,10 @@ type fileUploadResponse struct {
 	File fileUploadView `json:"file"`
 }
 
-func newFileUploadResponse(f *it.MediaObject) *fileUploadResponse {
+func newFileUploadResponse(f *it.MediaUploadFile) *fileUploadResponse {
 	return &fileUploadResponse{
 		File: fileUploadView{
 			ID:          f.ID,
-			Note:        f.Note,
 			PreviewLink: f.PreviewLink,
 		},
 	}

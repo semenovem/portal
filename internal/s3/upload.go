@@ -1,35 +1,68 @@
 package s3
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"github.com/minio/minio-go/v7"
-	"io"
 )
 
-func (s *Service) UploadObject(
+func (s *Service) ExistsFile(
 	ctx context.Context,
-	file io.Reader,
 	bucket string,
-	objectPath string,
-	fileSize int64,
+	object string,
+) (bool, error) {
+	_, err := s.s3Client.StatObject(ctx, bucket, object, minio.StatObjectOptions{})
+
+	if err != nil {
+		errResponse := minio.ToErrorResponse(err)
+
+		switch errResponse.Code {
+		//case accessDenied, noSuchBucket, invalidBucketName:
+		//	return false, fmt.Errorf("no exists: code=%s, message=%s", errResponse.Code, errResponse.Message)
+		case noSuchKey:
+			return false, nil
+		}
+
+		return false, fmt.Errorf("no exists: code=%s, message=%s", errResponse.Code, errResponse.Message)
+	}
+
+	return true, nil
+}
+
+func (s *Service) UploadFile(
+	ctx context.Context,
+	byt []byte,
+	bucket string,
+	object string,
 ) error {
-	uploadInfo, err := s.s3Client.PutObject(
+	if exists, err := s.ExistsFile(ctx, bucket, object); err != nil {
+		return err
+	} else if exists {
+		return nil
+	}
+
+	return s.uploadFile(ctx, byt, bucket, object)
+}
+
+func (s *Service) uploadFile(
+	ctx context.Context,
+	byt []byte,
+	bucket string,
+	object string,
+) error {
+	_, err := s.s3Client.PutObject(
 		ctx,
 		bucket,
-		objectPath,
-		file,
-		fileSize,
+		object,
+		bytes.NewReader(byt),
+		int64(len(byt)),
 		minio.PutObjectOptions{},
 	)
 	if err != nil {
-		s.logger.Named("UploadObject").With("objectPath", objectPath).Error(err.Error())
+		s.logger.Named("UploadFile").With("objectPath", object).Error(err.Error())
 		return err
 	}
-
-	fmt.Println(">>>>>>>>> ", objectPath)
-	fmt.Println(">>>>>>>>> ", uploadInfo.ChecksumSHA256)
-	fmt.Println(">>>>>>>>> ", uploadInfo.ChecksumSHA1)
 
 	return nil
 }

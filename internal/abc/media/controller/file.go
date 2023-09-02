@@ -45,6 +45,7 @@ func (cnt *Controller) FileUpload(c echo.Context) error {
 	if notes := form.Value[uploadNoteKey]; len(notes) != 0 {
 		switch len(notes) {
 		case 1:
+			// TODO экранировать HTML сущности
 			note = notes[0]
 		default:
 			ll.With("notes", notes).BadRequest(throw.ErrOverNote)
@@ -62,15 +63,15 @@ func (cnt *Controller) FileUpload(c echo.Context) error {
 		fileHeader = files[0]
 	}
 
-	mediaFile, nested := cnt.processUploadingFile(ctx, thisUserID, fileHeader, note)
+	mediaObject, nested := cnt.processUploadingFile(ctx, thisUserID, fileHeader, note)
 	if nested != nil {
 		ll.Named("processUploadingFile").Nestedf(nested.Message())
 		return cnt.fail.SendNested(c, "", nested)
 	}
 
-	ll.With("id", mediaFile.ID).Debug("file uploaded")
+	ll.With("id", mediaObject.ID).Debug("file uploaded")
 
-	return c.JSON(http.StatusOK, newFileUploadResponse(mediaFile))
+	return c.JSON(http.StatusOK, newFileUploadResponse(mediaObject))
 }
 
 //func (cnt *Controller)

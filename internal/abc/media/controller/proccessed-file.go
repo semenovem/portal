@@ -14,7 +14,7 @@ func (cnt *Controller) processUploadingFile(
 	thisUserID uint32,
 	fh *multipart.FileHeader,
 	note string,
-) (*it.MediaObject, fail.Nested) {
+) (*it.MediaUploadFile, fail.Nested) {
 	var (
 		ll = cnt.logger.Named("FileUpload")
 	)
@@ -36,40 +36,15 @@ func (cnt *Controller) processUploadingFile(
 		return nil, fail.NewNested(http.StatusBadRequest, throw.ErrUnsupportedContent)
 	}
 
-	f, err := fh.Open()
+	binary, err := readFileHeader(fh)
 	if err != nil {
-		ll.Named("fileOpen").ErrorE(err)
+		ll.Named("readFileHeader").ErrorE(err)
 		return nil, fail.NewNested(http.StatusInternalServerError, err)
 	}
 
-	defer f.Close()
-
-	// Проверка фактического типа файла
-	imgBuff := make([]byte, 512)
-	if _, err = f.Read(imgBuff); err != nil {
-		ll.Named("fileRead").ErrorE(err)
-		return nil, fail.NewNested(http.StatusInternalServerError, err)
-	}
-
-	insideContentType := http.DetectContentType(imgBuff)
-
-	if _, ok := allowedContentTypes[insideContentType]; !ok {
-		ll.Named("DetectContentType").BadRequest(throw.ErrUnsupportedContent)
-		return nil, fail.NewNested(http.StatusBadRequest, throw.ErrUnsupportedContent)
-	}
-
-	if contentType != insideContentType {
-		err = ll.With("http_content_type", contentTypeKey).
-			With("insideContentType", insideContentType).
-			BadRequestStrRetErr("fake content type")
-
-		return nil, fail.NewNested(http.StatusBadRequest, err)
-	}
-
-	_, err = f.Seek(0, 0)
-	if err != nil {
-		ll.Named("Seek").ErrorE(err)
-		return nil, fail.NewNested(http.StatusInternalServerError, err)
+	if nested := cnt.detectFactContentType(binary, contentType); nested != nil {
+		ll.Named("detectFactContentType").Nestedf(nested.Message())
+		return nil, nested
 	}
 
 	objType, err := it.MediaObjectByContentType(contentType)
@@ -78,12 +53,15 @@ func (cnt *Controller) processUploadingFile(
 		return nil, fail.NewNested(http.StatusBadRequest, err)
 	}
 
-	mf, err := cnt.mediaAct.Upload(ctx, thisUserID, objType, f, fh.Size, note)
+	uploadedFileID, err := cnt.mediaAct.Upload(ctx, thisUserID, objType, binary, note)
 	if err != nil {
-		ll.Named("Upload")
+		ll.Named("Upload").Nested(err)
+
 		switch err.(type) {
 		case throw.AccessErr:
 			return nil, fail.NewNested(http.StatusForbidden, err)
+		case throw.BadRequestErr:
+			return nil, fail.NewNested(http.StatusBadRequest, err)
 		}
 
 		return nil, fail.NewNested(http.StatusInternalServerError, err)
