@@ -5,23 +5,37 @@ import (
 )
 
 // Общедоступный профиль пользователя
-type userProfileView struct {
+type userPublicProfileView struct {
 	ID        uint32 `json:"id"`
-	FirstName string `json:"first_name,omitempty"`
-	SurName   string `json:"sur_name,omitempty"`
-	Position  string `json:"position,omitempty"`
-	Avatar    string `json:"avatar,omitempty"` // TODO нужно собрать uri на загрузку аватара
+	Firstname string `json:"firstname,omitempty"`
+	Surname   string `json:"surname,omitempty"`
+	Avatar    string `json:"avatar,omitempty"`
+}
+
+func newUserPublicProfileView(u *it.UserProfile) *userPublicProfileView {
+	r := &userPublicProfileView{
+		ID:        u.ID,
+		Firstname: u.FirstName,
+		Surname:   u.Surname,
+	}
+	if u.AvatarID != 0 {
+		r.Avatar = "asdfasf/asdfasdf/"
+	}
+
+	return r
+}
+
+type userProfileView struct {
+	userPublicProfileView
+	Note      string `json:"note,omitempty"`
+	ExpiredAt string `json:"expired_at"`
 }
 
 func newUserProfileView(u *it.UserProfile) *userProfileView {
 	r := &userProfileView{
-		ID:        u.ID,
-		FirstName: u.FirstName,
-		SurName:   u.Surname,
-		Position:  u.PositionTitle,
-	}
-	if u.Avatar != nil {
-		r.Avatar = *u.Avatar
+		userPublicProfileView: *newUserPublicProfileView(u),
+		Note:                  u.Note,
+		ExpiredAt:             u.ExpiredAtToString(),
 	}
 
 	return r

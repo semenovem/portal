@@ -6,16 +6,16 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/semenovem/portal/config"
-	auth_action "github.com/semenovem/portal/internal/abc/auth/action"
+	"github.com/semenovem/portal/internal/abc/auth/action"
 	"github.com/semenovem/portal/internal/abc/auth/controller"
-	auth_provider "github.com/semenovem/portal/internal/abc/auth/provider"
-	controller2 "github.com/semenovem/portal/internal/abc/controller"
-	media_action "github.com/semenovem/portal/internal/abc/media/action"
+	"github.com/semenovem/portal/internal/abc/auth/provider"
+	"github.com/semenovem/portal/internal/abc/controller"
+	"github.com/semenovem/portal/internal/abc/media/action"
 	"github.com/semenovem/portal/internal/abc/media/controller"
-	people_action "github.com/semenovem/portal/internal/abc/people/action"
+	"github.com/semenovem/portal/internal/abc/people/action"
 	"github.com/semenovem/portal/internal/abc/people/controller"
-	people_provider "github.com/semenovem/portal/internal/abc/people/provider"
-	store_action "github.com/semenovem/portal/internal/abc/store/action"
+	"github.com/semenovem/portal/internal/abc/people/provider"
+	"github.com/semenovem/portal/internal/abc/store/action"
 	"github.com/semenovem/portal/internal/abc/store/controller"
 	"github.com/semenovem/portal/internal/abc/vehicle/controller"
 	"github.com/semenovem/portal/internal/audit"
@@ -26,6 +26,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/labstack/echo-contrib/echoprometheus"
 )
 
 type Router struct {
@@ -66,6 +68,9 @@ func New(
 			Message: "method didn't exists",
 		})
 	}
+
+	e.Use(echoprometheus.NewMiddleware("myapp"))
+	e.GET("/metrics", echoprometheus.NewHandler())
 
 	corsConfig := middleware.CORSConfig{
 		Skipper:          middleware.DefaultSkipper,
@@ -115,11 +120,11 @@ func New(
 		InvalidRequestMessage: invalidFail,
 	})
 
-	cntArg := &controller2.CntArgs{
+	cntArg := &controller.CntArgs{
 		Logger:         logger,
 		FailureService: failureService,
 		Audit:          auditService,
-		Common: controller2.NewAction(
+		Common: controller.NewAction(
 			logger,
 			failureService,
 			authPvd,

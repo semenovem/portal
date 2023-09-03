@@ -3,14 +3,8 @@ package router
 import (
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
+	"github.com/semenovem/portal/internal/abc/controller"
 	"github.com/semenovem/portal/pkg/it"
-)
-
-/* Теги валидаторов */
-const (
-	userLoginTag    = "user-login-vld-tag"
-	userPasswordTag = "user-password-vld-tag"
-	userEmailTag    = "user-email-vld-tag"
 )
 
 type customValidator struct {
@@ -22,8 +16,15 @@ func (cv *customValidator) Validate(i interface{}) error {
 }
 
 var strValidators = map[string]func(string) error{
-	userLoginTag:    it.ValidateUserLogin,
-	userPasswordTag: it.ValidateUserPassword,
+	controller.UserLoginVldTag:  it.ValidateUserLogin,
+	controller.UserPasswordTag:  it.ValidateUserPassword,
+	controller.UserNameVldTag:   it.ValidateUserName,
+	controller.UserStatusVldTag: it.ValidateUserStatus,
+	controller.UserRoleVldTag:   it.ValidateUserRole,
+}
+
+var arrStrValidators = map[string]func([]string) error{
+	controller.UserRolesVldTag: it.ValidateUserRoles,
 }
 
 func newValidation() (echo.Validator, error) {
@@ -31,8 +32,14 @@ func newValidation() (echo.Validator, error) {
 
 	// Строковые валидаторы
 	for k, v := range strValidators {
-		err := val.RegisterValidation(k, buildStrValidator(v))
-		if err != nil {
+		if err := val.RegisterValidation(k, buildStrValidator(v)); err != nil {
+			return nil, err
+		}
+	}
+
+	//  Валидаторы массива строк
+	for k, v := range arrStrValidators {
+		if err := val.RegisterValidation(k, buildArrStrValidator(v)); err != nil {
 			return nil, err
 		}
 	}
@@ -43,6 +50,16 @@ func newValidation() (echo.Validator, error) {
 func buildStrValidator(h func(string) error) func(fl validator.FieldLevel) bool {
 	return func(fl validator.FieldLevel) bool {
 		if s, ok := fl.Field().Interface().(string); ok {
+			return h(s) == nil
+		}
+
+		return false
+	}
+}
+
+func buildArrStrValidator(h func([]string) error) func(fl validator.FieldLevel) bool {
+	return func(fl validator.FieldLevel) bool {
+		if s, ok := fl.Field().Interface().([]string); ok {
 			return h(s) == nil
 		}
 

@@ -22,14 +22,14 @@ func (r *Router) addRoutes() {
 	auth.POST("/media/box", r.mediaCnt.FileUpload)
 	auth.GET("/media/box/:box_id", r.mediaCnt.FileUpload)
 	auth.PUT("/media/box/:box_id", r.mediaCnt.FileUpload)
-	auth.DELETE("/media/box/:box_id", r.mediaCnt.FileUpload)
+	//auth.DELETE("/media/box/:box_id", r.mediaCnt.FileUpload)
 
 	// ----------------- People -----------------
 	auth.POST("/people", r.peopleCnt.CreateUser)
 
 	auth.GET("/people/self/profile", r.peopleCnt.SelfProfile)
-
 	auth.GET("/people/:user_id/profile", r.peopleCnt.Profile)
+
 	auth.DELETE("/people/:user_id", r.peopleCnt.DeleteUser)
 
 	// People Position

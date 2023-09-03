@@ -2,6 +2,7 @@ package media_controller
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/semenovem/portal/pkg/it"
 	"github.com/semenovem/portal/pkg/throw"
 	"mime/multipart"
 	"net/http"
@@ -63,15 +64,20 @@ func (cnt *Controller) FileUpload(c echo.Context) error {
 		fileHeader = files[0]
 	}
 
-	mediaObject, nested := cnt.processUploadingFile(ctx, thisUserID, fileHeader, note)
+	mediaObjectID, nested := cnt.processUploadingFile(ctx, thisUserID, fileHeader, note)
 	if nested != nil {
 		ll.Named("processUploadingFile").Nestedf(nested.Message())
 		return cnt.fail.SendNested(c, "", nested)
 	}
 
-	ll.With("id", mediaObject.ID).Debug("file uploaded")
+	ll.With("id", mediaObjectID).Debug("file uploaded")
 
-	return c.JSON(http.StatusOK, newFileUploadResponse(mediaObject))
+	return c.JSON(http.StatusOK, newFileUploadResponse(&it.MediaUploadFile{
+		ID:          mediaObjectID,
+		Typ:         "",
+		PreviewLink: "",
+		Note:        "",
+	}))
 }
 
 //func (cnt *Controller)

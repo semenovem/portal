@@ -2,9 +2,10 @@ package people_controller
 
 import (
 	"github.com/labstack/echo/v4"
+	people_action "github.com/semenovem/portal/internal/abc/people/action"
 	"github.com/semenovem/portal/internal/audit"
-	"github.com/semenovem/portal/pkg/it"
 	"net/http"
+	"time"
 
 	_ "github.com/semenovem/portal/pkg/fail"
 )
@@ -14,51 +15,49 @@ import (
 //	@Summary	Создает пользователя
 //	@Description
 //	@Produce	json
-//	@Param		user_id	path		string	true	"id пользователя"
-//	@Success	200		{object}	userProfileView
+//	@Param		payload	body		createUserForm	true	"данные создаваемого пользователя"
+//	@Success	200		{object}	userPublicProfileView
 //	@Failure	400		{object}	fail.Response
 //	@Router		/people [POST]
 //	@Tags		people
 //	@Security	ApiKeyAuth
 func (cnt *Controller) CreateUser(c echo.Context) error {
 	var (
-		ll = cnt.logger.Named("CreateUser")
-		//ctx  = c.Request().Context()
-		form = new(CreateUserForm)
+		ll   = cnt.logger.Named("CreateUser")
+		ctx  = c.Request().Context()
+		form = new(createUserForm)
 	)
 
 	thisUserID, nested := cnt.com.ExtractUserAndForm(c, form)
 	if nested != nil {
 		ll.Named("ExtractUserAndForm").Nestedf(nested.Message())
-		return cnt.fail.Send(c, "", http.StatusBadRequest)
+		return cnt.fail.SendNested(c, "", nested)
 	}
 
-	//profile, err := cnt.peopleAct.GetUserProfile(ctx, thisUserID, form.UserID)
-	//if err != nil {
-	//	ll = ll.Named("GetUserProfile").With("thisUserID", thisUserID)
-	//
-	//	switch err.(type) {
-	//	case *action.NotFoundErr:
-	//		ll.NotFoundTag().Info(err.Error())
-	//		return cnt.fail.Send(c, "", http.StatusNotFound, err)
-	//	case *action.ForbiddenErr:
-	//		ll.DenyTag().Info(err.Error())
-	//		return cnt.fail.Send(c, "", http.StatusForbidden, err)
-	//	default:
-	//		ll.Nested(err)
-	//		return cnt.fail.SendInternalServerErr(c, "", err)
-	//	}
-	//}
+	model := &people_action.CreateUserDTO{
+		FirstName:  form.FirstName,
+		Surname:    form.Surname,
+		Note:       form.Note,
+		Status:     form.getStatus(),
+		Roles:      form.getRoles(),
+		ExpiredAt:  time.Time{},
+		Login:      form.Login,
+		PasswdHash: form.Passwd,
+	}
 
-	userProfile := it.UserProfile{}
+	profile, err := cnt.peopleAct.CreateUser(ctx, thisUserID, model)
+	if err != nil {
+		ll.Named("CreateUser").Nested(err)
+		return cnt.com.Response(c, err)
+	}
 
 	cnt.audit.Oper(thisUserID, audit.EntityUser, audit.Create, audit.P{
-		"userID": userProfile.ID,
+		"userID": profile.ID,
 	})
 
 	ll.With("userID", 0).Debug("user created")
 
-	return c.JSON(http.StatusOK, newUserProfileView(&userProfile))
+	return c.JSON(http.StatusOK, newUserProfileView(profile))
 }
 
 // DeleteUser docs
@@ -67,7 +66,7 @@ func (cnt *Controller) CreateUser(c echo.Context) error {
 //	@Description
 //	@Produce	json
 //	@Param		user_id	path		string	true	"id пользователя"
-//	@Success	200		{object}	userProfileView
+//	@Success	200		{object}	userPublicProfileView
 //	@Failure	400		{object}	fail.Response
 //	@Router		/people/:user_id [DELETE]
 //	@Tags		people
@@ -82,7 +81,7 @@ func (cnt *Controller) DeleteUser(c echo.Context) error {
 	thisUserID, nested := cnt.com.ExtractUserAndForm(c, form)
 	if nested != nil {
 		ll.Named("ExtractUserAndForm").Nestedf(nested.Message())
-		return cnt.fail.Send(c, "", http.StatusBadRequest)
+		return cnt.fail.SendNested(c, "", nested)
 	}
 
 	//profile, err := cnt.peopleAct.GetUserProfile(ctx, thisUserID, form.UserID)

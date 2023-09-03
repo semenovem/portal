@@ -2,12 +2,28 @@ package it
 
 import (
 	"regexp"
+	"strings"
 	"unicode"
 	"unicode/utf8"
 )
 
+const (
+	// Размерность пароля
+	maxUserEmailLen = 256 // Максимальная длина
+
+	minUserPasswordLen = 6   // Минимальная длина
+	maxUserPasswordLen = 128 // Максимальная длина
+
+	minUserLoginLen = 6
+	maxUserLoginLen = 64 // TODO синхронизировать с типом столбца хранения
+
+	minUserNameLen = 2
+	maxUserNameLen = 128
+)
+
 var (
 	regValidateUserLogin = regexp.MustCompile(`(?i)^[a-z]+[\w_-]*[^_-]$`)
+	regValidateUserName  = regexp.MustCompile(`^[a-zа-яёй0-9_-]*$`)
 )
 
 func ValidateUserLogin(login string) error {
@@ -74,4 +90,40 @@ func ValidateUserEmail(email string) error {
 	}
 
 	return nil
+}
+
+func ValidateUserName(name string) error {
+	var (
+		n = strings.TrimSpace(strings.ToLower(name))
+		l = utf8.RuneCountInString(n)
+	)
+
+	if l > maxUserNameLen {
+		return ErrValidLong
+	}
+
+	if l < minUserNameLen {
+		return ErrValidShort
+	}
+
+	if !regValidateUserName.MatchString(n) {
+		return ErrValidIllegalChar
+	}
+
+	return nil
+}
+
+func ValidateUserStatus(status string) error {
+	_, err := ParseUserStatus(status)
+	return err
+}
+
+func ValidateUserRole(role string) error {
+	_, err := ParseUserRole(role)
+	return err
+}
+
+func ValidateUserRoles(roles []string) error {
+	_, err := ParseUserRoles(roles)
+	return err
 }

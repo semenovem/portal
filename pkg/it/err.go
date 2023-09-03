@@ -15,4 +15,6 @@ var (
 	ErrUserFired               = e("user fired")
 	ErrUserNotStartWork        = e("user not start work")
 	ErrUserHaveNotActiveStatus = e("user have not active status")
+	msgErrUserStatusInvalid    = "user status [%s] invalid"
+	msgErrUserRoleInvalid      = "user role [%s] invalid"
 )

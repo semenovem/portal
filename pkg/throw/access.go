@@ -1,23 +1,19 @@
 package throw
 
 // AccessErr ошибки в результате нарушения доступа
-type AccessErr interface {
-	Error() string
-}
-
-type accessErr struct {
+type AccessErr struct {
 	msg string
 }
 
-func (e accessErr) Error() string {
+func (e AccessErr) Error() string {
 	return e.msg
 }
 
 func NewAccessErr(msg string) error {
-	return &accessErr{msg: msg}
+	return &AccessErr{msg: msg}
 }
 
 func IsAccessErr(err error) bool {
-	_, ok := err.(*accessErr)
+	_, ok := err.(*AccessErr)
 	return ok
 }

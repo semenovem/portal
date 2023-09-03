@@ -1,23 +1,23 @@
 package throw
 
-// BadRequestErr ошибки в результате проверок и валидации
-type BadRequestErr interface {
-	Error() string
-}
+var (
+	ErrBadRequestDuplicateLogin = NewBadRequestErr("duplicate user login")
+	ErrBadRequestDuplicateEmail = NewBadRequestErr("duplicate user email")
+)
 
-type badRequestErr struct {
+// BadRequestErr ошибки в результате проверок и валидации
+type BadRequestErr struct {
 	msg string
 }
 
-func (e badRequestErr) Error() string {
+func (e BadRequestErr) Error() string {
 	return e.msg
 }
 
-func NewBadRequestErr(msg string) error {
-	return &badRequestErr{msg: msg}
+func (e BadRequestErr) IsBadRequestErr() bool {
+	return true
 }
 
-func IsBadRequestErr(err error) bool {
-	_, ok := err.(*badRequestErr)
-	return ok
+func NewBadRequestErr(msg string) error {
+	return &BadRequestErr{msg: msg}
 }

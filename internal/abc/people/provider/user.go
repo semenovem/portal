@@ -2,6 +2,7 @@ package people_provider
 
 import (
 	"context"
+	"fmt"
 	"github.com/semenovem/portal/internal/abc/provider"
 	"github.com/semenovem/portal/pkg/it"
 )
@@ -13,29 +14,37 @@ func (p *PeopleProvider) GetUserProfile(ctx context.Context, userID uint32) (*it
 					u.roles,
 					u.firstname,
 					u.surname,
-					u.avatar,
-					u.note,
-					u.position,
-					COALESCE(em.position_id, 0)
+					u.avatar_id,
+					u.note
        		FROM people.users* AS u
        		LEFT JOIN people.employees AS em ON em.user_id = u.id
        		WHERE u.id = $1 AND u.deleted = false`
 
-		u          = it.UserProfile{}
-		positionID uint16
+		m = UserModel{
+			id:         0,
+			firstname:  "",
+			surname:    "",
+			deleted:    false,
+			status:     "",
+			note:       nil,
+			roles:      nil,
+			avatarID:   nil,
+			expiredAt:  nil,
+			login:      nil,
+			passwdHash: nil,
+			props:      nil,
+		}
 	)
 
 	err := p.db.QueryRow(ctx, sq, userID).
 		Scan(
-			&u.ID,
-			&u.Status,
-			&u.Roles,
-			&u.FirstName,
-			&u.Surname,
-			&u.Avatar,
-			&u.Note,
-			&u.PositionTitle,
-			&positionID,
+			&m.id,
+			&m.status,
+			&m.roles,
+			&m.firstname,
+			&m.surname,
+			&m.avatarID,
+			&m.note,
 		)
 	if err != nil {
 		if !provider.IsNoRows(err) {
@@ -45,17 +54,54 @@ func (p *PeopleProvider) GetUserProfile(ctx context.Context, userID uint32) (*it
 		return nil, err
 	}
 
-	if positionID != 0 {
-		pos, err := p.GetPosition(ctx, positionID)
-		if err != nil {
-			if !provider.IsNoRows(err) {
-				p.logger.Named("GetUserProfile.GetPosition").DB(err)
-			}
-			return nil, err
-		}
+	return &it.UserProfile{
+		UserCore: it.UserCore{
+			ID:     m.id,
+			Status: m.status,
+			Roles:  m.Roles(),
+		},
+		AvatarID:  m.AvatarID(),
+		FirstName: m.Firstname(),
+		Surname:   m.surname,
+		Note:      m.Note(),
+		ExpiredAt: m.expiredAt,
+	}, nil
+}
 
-		u.PositionTitle = pos.Title
+func (p *PeopleProvider) CreateUser(ctx context.Context, m *UserModel) (userID uint32, err error) {
+	var (
+		sq = `INSERT INTO people.users (
+			  firstname,
+			  surname,
+			  login,
+			  note,
+			  status,
+			  roles,
+			  avatar_id,
+			  expired_at,
+			  passwd_hash,
+			  props
+			  ) VALUES (LOWER($1), LOWER($2), LOWER($3), $4, $5, $6, $7, $8, $9, $10) returning id`
+	)
+
+	fmt.Println(">>>>>>>>>>>>>>>>> id ", m.ExpiredAt())
+	fmt.Println(">>>>>>>>>>>>>>>>> ExpiredAt = ", m.ExpiredAt())
+
+	err = p.db.QueryRow(ctx, sq,
+		m.firstname,
+		m.surname,
+		m.login,
+		m.note,
+		m.status,
+		m.roles,
+		m.avatarID,
+		m.expiredAt,
+		m.passwdHash,
+		m.props,
+	).Scan(&userID)
+	if err != nil && !provider.IsDuplicateKeyError(err) {
+		p.logger.Named("CreateUser").DB(err)
 	}
 
-	return &u, nil
+	return userID, err
 }

@@ -14,7 +14,7 @@ import (
 //	@Summary	Получить свой профиль
 //	@Description
 //	@Produce	json
-//	@Success	200	{object}	userProfileView
+//	@Success	200	{object}	userPublicProfileView
 //	@Failure	400	{object}	fail.Response
 //	@Router		/people/self/profile [GET]
 //	@Tags		people
@@ -39,7 +39,7 @@ func (cnt *Controller) SelfProfile(c echo.Context) error {
 		case throw.NotFoundErr:
 			ll.NotFound(err)
 			return cnt.fail.Send(c, "", http.StatusNotFound, err)
-		case throw.AccessErr:
+		case *throw.AccessErr:
 			ll.Deny(err)
 			return cnt.fail.Send(c, "", http.StatusForbidden, err)
 		default:
@@ -48,7 +48,7 @@ func (cnt *Controller) SelfProfile(c echo.Context) error {
 		}
 	}
 
-	return c.JSON(http.StatusOK, newUserProfileView(profile))
+	return c.JSON(http.StatusOK, newUserPublicProfileView(profile))
 }
 
 // Profile docs
@@ -58,7 +58,7 @@ func (cnt *Controller) SelfProfile(c echo.Context) error {
 //	@Description
 //	@Produce	json
 //	@Param		user_id	path		string	true	"id пользователя"
-//	@Success	200		{object}	userProfileView
+//	@Success	200		{object}	userPublicProfileView
 //	@Failure	400		{object}	fail.Response
 //	@Router		/people/:user_id/profile [GET]
 //	@Tags		people
@@ -73,7 +73,7 @@ func (cnt *Controller) Profile(c echo.Context) error {
 	thisUserID, nested := cnt.com.ExtractUserAndForm(c, form)
 	if nested != nil {
 		ll.Named("ExtractUserAndForm").Nestedf(nested.Message())
-		return cnt.fail.Send(c, "", http.StatusBadRequest)
+		return cnt.fail.SendNested(c, "", nested)
 	}
 
 	profile, err := cnt.peopleAct.GetUserProfile(ctx, thisUserID, form.UserID)
@@ -84,7 +84,7 @@ func (cnt *Controller) Profile(c echo.Context) error {
 		case throw.NotFoundErr:
 			ll.NotFound(err)
 			return cnt.fail.Send(c, "", http.StatusNotFound, err)
-		case throw.AccessErr:
+		case *throw.AccessErr:
 			ll.Deny(err)
 			return cnt.fail.Send(c, "", http.StatusForbidden, err)
 		default:
@@ -93,5 +93,5 @@ func (cnt *Controller) Profile(c echo.Context) error {
 		}
 	}
 
-	return c.JSON(http.StatusOK, newUserProfileView(profile))
+	return c.JSON(http.StatusOK, newUserPublicProfileView(profile))
 }

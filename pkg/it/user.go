@@ -1,18 +1,9 @@
 package it
 
 import (
+	"fmt"
+	"strings"
 	"time"
-)
-
-const (
-	// Размерность пароля
-	maxUserEmailLen = 256 // Максимальная длина
-
-	minUserPasswordLen = 6   // Минимальная длина
-	maxUserPasswordLen = 128 // Максимальная длина
-
-	minUserLoginLen = 6
-	maxUserLoginLen = 50 // TODO синхронизировать с типом столбца хранения
 )
 
 // UserCore основные данные сущности
@@ -24,20 +15,19 @@ type UserCore struct {
 
 type UserProfile struct {
 	UserCore
-	Avatar        *string
-	FirstName     string
-	Surname       string
-	PositionTitle string
-	Note          string
+	AvatarID  uint32
+	FirstName string
+	Surname   string
+	Note      string
+	ExpiredAt *time.Time // Время автоматической блокировки
 }
 
 type EmployeeProfile struct {
 	UserProfile
 	Position    UserPosition // должность
 	Boss        *UserBoss    // Руководитель
-	StartWorkAt *time.Time   // Дата начала работы
+	StartWorkAt time.Time    // Дата начала работы
 	FiredAt     *time.Time   // Дата увольнения
-	ExpiredAt   *time.Time   // Время автоматической блокировки
 }
 
 type UserBoss struct {
@@ -45,4 +35,80 @@ type UserBoss struct {
 	Firstname string
 	Surname   string
 	UserPosition
+}
+
+func (u *UserProfile) ExpiredAtToString() string {
+	if u.ExpiredAt == nil {
+		return ""
+	}
+
+	return u.ExpiredAt.Format(time.RFC3339)
+}
+
+// ------------------------------------------------
+
+type UserRole string
+type UserStatus string
+
+const (
+	UserRoleAdmin UserRole = "super-admin"
+	UserRoleUser  UserRole = "user"
+)
+
+const (
+	UserStatusInactive UserStatus = "inactive"
+	UserStatusActive   UserStatus = "active"
+	UserStatusBlocked  UserStatus = "blocked"
+)
+
+type UserProps struct {
+	Contacts []struct {
+		Line1 string
+		Note1 string
+	}
+}
+
+func ParseUserStatus(s string) (UserStatus, error) {
+	switch strings.ToLower(strings.TrimSpace(s)) {
+	case string(UserStatusInactive):
+		return UserStatusInactive, nil
+	case string(UserStatusActive):
+		return UserStatusActive, nil
+	case string(UserStatusBlocked):
+		return UserStatusBlocked, nil
+	}
+
+	return "", fmt.Errorf(msgErrUserStatusInvalid, s)
+}
+
+func ParseUserRole(s string) (UserRole, error) {
+	switch strings.ToLower(strings.TrimSpace(s)) {
+	case string(UserRoleAdmin):
+		return UserRoleAdmin, nil
+	case string(UserRoleUser):
+		return UserRoleUser, nil
+	}
+
+	return "", fmt.Errorf(msgErrUserRoleInvalid, s)
+}
+
+func ParseUserRoles(roles []string) ([]UserRole, error) {
+	var (
+		errs   = make([]string, 0)
+		result = make([]UserRole, 0)
+	)
+
+	for _, role := range roles {
+		if r, err := ParseUserRole(role); err != nil {
+			errs = append(errs, err.Error())
+		} else {
+			result = append(result, r)
+		}
+	}
+
+	if len(errs) != 0 {
+		return nil, fmt.Errorf(strings.Join(errs, "; "))
+	}
+
+	return result, nil
 }

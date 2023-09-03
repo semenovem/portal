@@ -2,37 +2,9 @@ package controller
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/semenovem/portal/internal/abc/auth/provider"
-	"github.com/semenovem/portal/internal/abc/people/provider"
-	"github.com/semenovem/portal/pkg"
 	"github.com/semenovem/portal/pkg/fail"
 	"net/http"
 )
-
-const (
-	ThisUserID = "this_user_id"
-)
-
-type Common struct {
-	logger    pkg.Logger
-	fail      *fail.Service
-	authPvd   *auth_provider.AuthProvider
-	peoplePvd *people_provider.PeopleProvider
-}
-
-func NewAction(
-	logger pkg.Logger,
-	fail *fail.Service,
-	authPvd *auth_provider.AuthProvider,
-	peoplePvd *people_provider.PeopleProvider,
-) *Common {
-	return &Common{
-		logger:    logger.Named("Common"),
-		fail:      fail,
-		authPvd:   authPvd,
-		peoplePvd: peoplePvd,
-	}
-}
 
 // ExtractForm получить данные из запроса
 func (a *Common) ExtractForm(c echo.Context, form interface{}) fail.Nested {

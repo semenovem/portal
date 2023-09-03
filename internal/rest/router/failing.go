@@ -1,13 +1,14 @@
 package router
 
 import (
+	"github.com/semenovem/portal/internal/abc/controller"
 	"github.com/semenovem/portal/pkg/fail"
 	"github.com/semenovem/portal/pkg/txt"
 )
 
 var validators = map[string]string{
-	userLoginTag:    txt.ValidUserLogin,
-	userPasswordTag: txt.ValidatePasswordWeak,
+	controller.UserLoginVldTag: txt.ValidUserLogin,
+	controller.UserPasswordTag: txt.ValidatePasswordWeak,
 }
 
 var (

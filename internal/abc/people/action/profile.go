@@ -11,9 +11,15 @@ func (a *PeopleAction) GetUserProfile(
 	ctx context.Context,
 	thisUserID, userID uint32,
 ) (*it.UserProfile, error) {
-	ll := a.logger.Named("GetUserProfile")
+	//ll := a.logger.Named("GetUserProfile")
 
 	// TODO тут делать проверку права на просмотр данных пользователя
+
+	return a.getUserProfile(ctx, userID)
+}
+
+func (a *PeopleAction) getUserProfile(ctx context.Context, userID uint32) (*it.UserProfile, error) {
+	ll := a.logger.Named("getUserProfile")
 
 	profile, err := a.peoplePvd.GetUserProfile(ctx, userID)
 	if err != nil {

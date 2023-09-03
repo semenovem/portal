@@ -11,4 +11,6 @@ const (
 	AuthSession     Code = "auth-session"      // Создана новая авторизованная сессия
 
 	EntityUser Code = "entity-user"
+
+	UserToEmployee Code = "user-to-employee"
 )
