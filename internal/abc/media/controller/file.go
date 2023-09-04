@@ -26,11 +26,11 @@ import (
 //	@Security	ApiKeyAuth
 func (cnt *Controller) FileUpload(c echo.Context) error {
 	var (
-		ll         = cnt.logger.Named("FileUpload")
+		thisUserID = controller.ExtractThisUserID(c)
+		ll         = cnt.logger.Named("FileUpload").With("thisUserID", thisUserID)
 		ctx        = c.Request().Context()
 		note       string
 		fileHeader *multipart.FileHeader
-		thisUserID = controller.ExtractThisUserID(c)
 	)
 
 	form, err := c.MultipartForm()

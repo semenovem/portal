@@ -21,14 +21,14 @@ import (
 //	@Security	ApiKeyAuth
 func (cnt *Controller) SelfProfile(c echo.Context) error {
 	var (
-		ll         = cnt.logger.Named("SelfProfile")
-		ctx        = c.Request().Context()
 		thisUserID = controller.ExtractThisUserID(c)
+		ll         = cnt.logger.Named("SelfProfile").With("thisUserID", thisUserID)
+		ctx        = c.Request().Context()
 	)
 
 	profile, err := cnt.peopleAct.GetUserProfile(ctx, thisUserID, thisUserID)
 	if err != nil {
-		ll = ll.Named("GetUserProfile").With("thisUserID", thisUserID)
+		ll = ll.Named("GetUserProfile")
 		return cnt.com.Response(c, err, ll)
 	}
 
@@ -49,10 +49,10 @@ func (cnt *Controller) SelfProfile(c echo.Context) error {
 //	@Security	ApiKeyAuth
 func (cnt *Controller) UserProfile(c echo.Context) error {
 	var (
-		ll         = cnt.logger.Named("UserPublicProfile")
+		thisUserID = controller.ExtractThisUserID(c)
+		ll         = cnt.logger.Named("UserPublicProfile").With("thisUserID", thisUserID)
 		ctx        = c.Request().Context()
 		form       = new(userForm)
-		thisUserID = controller.ExtractThisUserID(c)
 	)
 
 	if err := cnt.com.ExtractForm(c, ll, form); err != nil {
@@ -61,7 +61,7 @@ func (cnt *Controller) UserProfile(c echo.Context) error {
 
 	profile, err := cnt.peopleAct.GetUserProfile(ctx, thisUserID, form.UserID)
 	if err != nil {
-		ll = ll.Named("GetUserProfile").With("thisUserID", thisUserID)
+		ll = ll.Named("GetUserProfile").With("user", form.UserID)
 		return cnt.com.Response(c, err, ll)
 	}
 
@@ -81,10 +81,10 @@ func (cnt *Controller) UserProfile(c echo.Context) error {
 //	@Security	ApiKeyAuth
 func (cnt *Controller) UserPublicProfile(c echo.Context) error {
 	var (
-		ll         = cnt.logger.Named("UserPublicProfile")
+		thisUserID = controller.ExtractThisUserID(c)
+		ll         = cnt.logger.Named("UserPublicProfile").With("thisUserID", thisUserID)
 		ctx        = c.Request().Context()
 		form       = new(userForm)
-		thisUserID = controller.ExtractThisUserID(c)
 	)
 
 	if err := cnt.com.ExtractForm(c, ll, form); err != nil {
@@ -93,7 +93,7 @@ func (cnt *Controller) UserPublicProfile(c echo.Context) error {
 
 	profile, err := cnt.peopleAct.GetUserProfile(ctx, thisUserID, form.UserID)
 	if err != nil {
-		ll = ll.Named("GetUserProfile").With("thisUserID", thisUserID)
+		ll = ll.Named("GetUserProfile")
 		return cnt.com.Response(c, err, ll)
 	}
 

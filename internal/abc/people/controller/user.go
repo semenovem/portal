@@ -23,10 +23,10 @@ import (
 //	@Security	ApiKeyAuth
 func (cnt *Controller) CheckLogin(c echo.Context) error {
 	var (
-		ll         = cnt.logger.Named("CheckLogin")
+		thisUserID = controller.ExtractThisUserID(c)
+		ll         = cnt.logger.Named("CheckLogin").With("thisUserID", thisUserID)
 		ctx        = c.Request().Context()
 		form       = new(freeLoginNameForm)
-		thisUserID = controller.ExtractThisUserID(c)
 	)
 
 	if err := cnt.com.ExtractForm(c, ll, form); err != nil {
@@ -67,10 +67,10 @@ func (cnt *Controller) CheckLogin(c echo.Context) error {
 //	@Security	ApiKeyAuth
 func (cnt *Controller) CreateUser(c echo.Context) error {
 	var (
-		ll         = cnt.logger.Named("CreateUser")
+		thisUserID = controller.ExtractThisUserID(c)
+		ll         = cnt.logger.Named("CreateUser").With("thisUserID", thisUserID)
 		ctx        = c.Request().Context()
 		form       = new(createUserForm)
-		thisUserID = controller.ExtractThisUserID(c)
 	)
 
 	if err := cnt.com.ExtractForm(c, ll, form); err != nil {
@@ -117,10 +117,10 @@ func (cnt *Controller) CreateUser(c echo.Context) error {
 //	@Security	ApiKeyAuth
 func (cnt *Controller) DeleteUser(c echo.Context) error {
 	var (
-		ll         = cnt.logger.Named("DeleteUser")
+		thisUserID = controller.ExtractThisUserID(c)
+		ll         = cnt.logger.Named("DeleteUser").With("thisUserID", thisUserID)
 		ctx        = c.Request().Context()
 		form       = new(userForm)
-		thisUserID = controller.ExtractThisUserID(c)
 	)
 
 	if err := cnt.com.ExtractForm(c, ll, form); err != nil {
