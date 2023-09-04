@@ -5,16 +5,43 @@ import "errors"
 var (
 	e = errors.New
 
-	ErrValidZeroValue   = e("invalid: zero value")                  // Пустое значение
-	ErrValidPasswdWeak  = e("invalid: password is weak")            // Простой пароль
-	ErrValidIllegalChar = e("invalid: contains illegal characters") // Запрещенные символы
-	ErrValidShort       = e("invalid: short")                       // Короткий
-	ErrValidLong        = e("invalid: long")                        // Длинный
+	ErrValidZeroValue   = NewValidateErr("zero value")         // Пустое значение
+	ErrValidPasswdWeak  = NewValidateErr("password is weak")   // Простой пароль
+	ErrValidIllegalChar = NewValidateErr("illegal characters") // Запрещенные символы
+	ErrValidShort       = NewValidateErr("short")              // Короткий
+	ErrValidLong        = NewValidateErr("long")               // Длинный
 
-	ErrUserExpired             = e("user expired")
-	ErrUserFired               = e("user fired")
-	ErrUserNotStartWork        = e("user not start work")
-	ErrUserHaveNotActiveStatus = e("user have not active status")
-	msgErrUserStatusInvalid    = "user status [%s] invalid"
-	msgErrUserRoleInvalid      = "user role [%s] invalid"
+	ErrUserExpired      = e("user expired")
+	ErrUserFired        = e("user fired")
+	ErrUserNotStartWork = e("user not start work")
+	ErrUserNotActive    = e("user have not active status")
+
+	msgErrUnknownUserStatus = "unknown user status [%s]"
+	msgErrUnknownUserRole   = "unknown user role [%s]"
 )
+
+type ValidateErr interface {
+	Error() string
+	isValidateErr() bool
+}
+
+type validateErr struct {
+	msg string
+}
+
+func (e validateErr) Error() string {
+	return e.msg
+}
+
+func (e validateErr) isAccessErr() bool {
+	return true
+}
+
+func NewValidateErr(msg string) error {
+	return &validateErr{msg: msg}
+}
+
+func IsValidateErr(err error) bool {
+	_, ok := err.(*validateErr)
+	return ok
+}

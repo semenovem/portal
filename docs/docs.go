@@ -60,7 +60,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_fail.Response"
                         }
                     }
                 }
@@ -99,7 +99,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_fail.Response"
                         }
                     }
                 }
@@ -140,7 +140,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_fail.Response"
                         }
                     }
                 }
@@ -179,7 +179,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_fail.Response"
                         }
                     }
                 }
@@ -218,7 +218,41 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_fail.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/media/file": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "note - подпись к файлу (опционально)\nfile - файл\n",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "media"
+                ],
+                "summary": "Сохранение файлов",
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/internal_abc_media_controller.fileUploadResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_fail.Response"
                         }
                     }
                 }
@@ -231,6 +265,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
+                "description": "` + "`" + `expired_at` + "`" + ` в формате ` + "`" + `2001-03-24T00:00:00Z` + "`" + `\nвведенный login нужно проверить, что он допустим ` + "`" + `/people/free-login/:login_name` + "`" + `\n",
                 "produces": [
                     "application/json"
                 ],
@@ -240,24 +275,26 @@ const docTemplate = `{
                 "summary": "Создает пользователя",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "id пользователя",
-                        "name": "user_id",
-                        "in": "path",
-                        "required": true
+                        "description": "данные создаваемого пользователя",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_abc_people_controller.createUserForm"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_abc_people_controller.userProfileView"
+                            "$ref": "#/definitions/internal_abc_people_controller.userPublicProfileView"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_fail.Response"
                         }
                     }
                 }
@@ -287,16 +324,13 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/internal_abc_people_controller.userProfileView"
-                        }
+                    "204": {
+                        "description": "no-content"
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_fail.Response"
                         }
                     }
                 }
@@ -330,13 +364,91 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_abc_people_controller.userProfileView"
+                            "$ref": "#/definitions/internal_abc_people_controller.userPublicProfileView"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_fail.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/people/:user_id/profile/public": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "people"
+                ],
+                "summary": "Получить публичный профиль пользователя по его ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id пользователя",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_abc_people_controller.userPublicProfileView"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_fail.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/people/free-login/:login_name": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "people"
+                ],
+                "summary": "Проверяет, свободен ли указанный логин",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "проверяемый логин",
+                        "name": "login",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_abc_people_controller.freeLoginNameResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_fail.Response"
                         }
                     }
                 }
@@ -376,7 +488,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_fail.Response"
                         }
                     }
                 }
@@ -400,13 +512,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_abc_people_controller.userProfileView"
+                            "$ref": "#/definitions/internal_abc_people_controller.userPublicProfileView"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_fail.Response"
                         }
                     }
                 }
@@ -445,7 +557,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_fail.Response"
                         }
                     }
                 }
@@ -489,7 +601,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_fail.Response"
                         }
                     }
                 }
@@ -523,7 +635,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_fail.Response"
                         }
                     }
                 }
@@ -594,7 +706,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_fail.Response"
                         }
                     }
                 }
@@ -627,13 +739,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_semenovem_portal_internal_rest_view.Vehicle"
+                            "$ref": "#/definitions/internal_abc_vehicle_controller.vehicleView"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_fail.Response"
                         }
                     }
                 }
@@ -664,13 +776,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_semenovem_portal_internal_rest_view.Vehicle"
+                            "$ref": "#/definitions/internal_abc_vehicle_controller.vehicleView"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_fail.Response"
                         }
                     }
                 }
@@ -704,7 +816,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.Response"
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_fail.Response"
                         }
                     }
                 }
@@ -712,17 +824,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "github_com_semenovem_portal_internal_rest_view.Vehicle": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "integer"
-                }
-            }
-        },
         "github_com_semenovem_portal_internal_rest_view.VehicleShort": {
             "type": "object",
             "properties": {
@@ -734,7 +835,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_semenovem_portal_pkg_failing.Response": {
+        "github_com_semenovem_portal_pkg_fail.Response": {
             "type": "object",
             "properties": {
                 "additional_fields": {
@@ -750,12 +851,12 @@ const docTemplate = `{
                 "validation_errors": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_semenovem_portal_pkg_failing.ValidationError"
+                        "$ref": "#/definitions/github_com_semenovem_portal_pkg_fail.ValidationError"
                     }
                 }
             }
         },
-        "github_com_semenovem_portal_pkg_failing.ValidationError": {
+        "github_com_semenovem_portal_pkg_fail.ValidationError": {
             "type": "object",
             "properties": {
                 "message": {
@@ -833,38 +934,89 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_abc_media_controller.storeForm": {
+        "internal_abc_media_controller.fileUploadResponse": {
             "type": "object",
-            "required": [
-                "payload",
-                "storePath"
-            ],
             "properties": {
-                "payload": {
-                    "type": "string"
+                "file": {
+                    "$ref": "#/definitions/internal_abc_media_controller.fileUploadView"
+                }
+            }
+        },
+        "internal_abc_media_controller.fileUploadView": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
                 },
-                "storePath": {
+                "preview_link": {
+                    "description": "uri",
                     "type": "string"
                 }
             }
         },
-        "internal_abc_people_controller.userProfileView": {
+        "internal_abc_people_controller.createUserForm": {
+            "type": "object",
+            "required": [
+                "firstname",
+                "surname"
+            ],
+            "properties": {
+                "avatar_id": {
+                    "type": "integer"
+                },
+                "expired_at": {
+                    "type": "string"
+                },
+                "firstname": {
+                    "type": "string"
+                },
+                "login": {
+                    "type": "string"
+                },
+                "note": {
+                    "type": "string"
+                },
+                "passwd": {
+                    "type": "string"
+                },
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "status": {
+                    "type": "string"
+                },
+                "surname": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_abc_people_controller.freeLoginNameResponse": {
+            "type": "object",
+            "properties": {
+                "free": {
+                    "type": "boolean"
+                },
+                "validate_err": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_abc_people_controller.userPublicProfileView": {
             "type": "object",
             "properties": {
                 "avatar": {
-                    "description": "TODO нужно собрать uri на загрузку аватара",
                     "type": "string"
                 },
-                "first_name": {
+                "firstname": {
                     "type": "string"
                 },
                 "id": {
                     "type": "integer"
                 },
-                "position": {
-                    "type": "string"
-                },
-                "sur_name": {
+                "surname": {
                     "type": "string"
                 }
             }
@@ -905,6 +1057,9 @@ const docTemplate = `{
                     "type": "integer"
                 }
             }
+        },
+        "internal_abc_vehicle_controller.vehicleView": {
+            "type": "object"
         }
     },
     "securityDefinitions": {

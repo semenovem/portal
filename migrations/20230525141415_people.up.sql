@@ -40,25 +40,13 @@ CREATE TABLE IF NOT EXISTS people.employees
   fired_at    timestamp default NULL                            -- дата увольнения (последний день работы)
 );
 
--- Наборы документов для пользователей
+-- Наборы документов пользователей
 CREATE TABLE IF NOT EXISTS people.user_media_boxes
 (
   user_id     int PRIMARY KEY REFERENCES people.users NOT NULL,
   position_id int REFERENCES people.positions         NOT NULL,
   worked_at   timestamp default now()                 NOT NULL, -- дата начала работы
   fired_at    timestamp default NULL                  NULL      -- дата увольнения (последний день работы)
-);
-
-
--- Дополнительные поля пользователя TODO - нет необходимости, вероятно нужно удалить
-CREATE TABLE IF NOT EXISTS people.user_additional_fields
-(
-  id         serial PRIMARY KEY,
-  user_id    int REFERENCES people.users       NOT NULL,
-  value      varchar   default ''              NOT NULL,
-  kind       people.additional_field_kind_enum NOT NULL, -- тип поля
-  sort       smallint  default 0               NOT NULL,
-  deleted_at timestamp default NULL            NULL
 );
 
 

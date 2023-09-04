@@ -3,7 +3,7 @@ package auth_controller
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/semenovem/portal/internal/abc/auth/action"
-	controller2 "github.com/semenovem/portal/internal/abc/controller"
+	"github.com/semenovem/portal/internal/abc/controller"
 	"github.com/semenovem/portal/internal/audit"
 	"github.com/semenovem/portal/pkg"
 	"github.com/semenovem/portal/pkg/fail"
@@ -17,7 +17,7 @@ type Controller struct {
 	logger                    pkg.Logger
 	fail                      *fail.Service
 	jwt                       *jwtoken.Service
-	com                       *controller2.Common
+	com                       *controller.Common
 	authAct                   *auth_action.AuthAction
 	audit                     *audit.AuditProvider
 	jwtServedDomains          []string
@@ -26,7 +26,7 @@ type Controller struct {
 }
 
 func New(
-	arg *controller2.CntArgs,
+	arg *controller.CntArgs,
 	jwt *jwtoken.Service,
 	authAct *auth_action.AuthAction,
 	jwtServedDomains []string,

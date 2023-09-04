@@ -3,6 +3,7 @@ package auth_controller
 import (
 	"fmt"
 	"github.com/labstack/echo/v4"
+	"github.com/semenovem/portal/internal/abc/controller"
 	"github.com/semenovem/portal/internal/audit"
 	"github.com/semenovem/portal/pkg/throw"
 	"net/http"
@@ -23,15 +24,14 @@ import (
 //	@Security	ApiKeyAuth
 func (cnt *Controller) CreateOnetimeLink(c echo.Context) error {
 	var (
-		ll   = cnt.logger.Named("LoginOnetimeLink")
-		form = new(onetimeAuthForm)
-		ctx  = c.Request().Context()
+		ll         = cnt.logger.Named("LoginOnetimeLink")
+		form       = new(onetimeAuthForm)
+		ctx        = c.Request().Context()
+		thisUserID = controller.ExtractThisUserID(c)
 	)
 
-	thisUserID, nested := cnt.com.ExtractUserAndForm(c, form)
-	if nested != nil {
-		ll.Named("ExtractUserAndForm").Nestedf(nested.Message())
-		return cnt.fail.SendNested(c, "", nested)
+	if err := cnt.com.ExtractForm(c, ll, form); err != nil {
+		return err
 	}
 
 	ll = ll.With("userID", form.UserID)
@@ -39,13 +39,7 @@ func (cnt *Controller) CreateOnetimeLink(c echo.Context) error {
 	entryID, err := cnt.authAct.CreateOnetimeEntry(ctx, form.UserID)
 	if err != nil {
 		ll.Named("CreateOnetimeEntry").Nested(err)
-
-		switch err.(type) {
-		case throw.AuthErr, throw.NotFoundErr:
-			return cnt.fail.Send(c, "", http.StatusBadRequest, err)
-		}
-
-		return cnt.fail.SendInternalServerErr(c, "", err)
+		return cnt.com.Response(c, err, ll)
 	}
 
 	cnt.audit.Auth(thisUserID, audit.CreateOnetimeEntry, audit.P{
@@ -77,9 +71,8 @@ func (cnt *Controller) LoginOnetimeLink(c echo.Context) error {
 		ctx  = c.Request().Context()
 	)
 
-	if nested := cnt.com.ExtractForm(c, form); nested != nil {
-		ll.Named("ExtractForm").Nestedf(nested.Message())
-		return cnt.fail.SendNested(c, "", nested)
+	if err := cnt.com.ExtractForm(c, ll, form); err != nil {
+		return err
 	}
 
 	ll = ll.With("sessionID", form.EntryID)

@@ -13,4 +13,6 @@ const (
 	EntityUser Code = "entity-user"
 
 	UserToEmployee Code = "user-to-employee"
+
+	FreeLoginNameCheck Code = "free-login-name-check" // Проверить, свободен ли логин
 )

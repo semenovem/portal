@@ -11,9 +11,10 @@ import (
 )
 
 const (
-	Create Action = "create"
-	Delete Action = "delete"
-	Update Action = "update"
+	Create    Action = "create"
+	Delete    Action = "delete"
+	Update    Action = "update"
+	actionGet Action = "get"
 )
 
 const (

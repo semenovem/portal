@@ -21,22 +21,24 @@ import (
 	"github.com/semenovem/portal/internal/zoo/conn"
 	"github.com/semenovem/portal/pkg"
 	"github.com/semenovem/portal/pkg/fail"
+	"github.com/semenovem/portal/pkg/it"
 	"github.com/semenovem/portal/pkg/jwtoken"
 	"math"
 	"time"
 )
 
 type appAPI struct {
-	ctx          context.Context
-	logger       pkg.Logger
-	db           *pgxpool.Pool
-	redis        *redis.Client
-	s3           *s3.Service
-	router       *router.Router
-	config       *config.API
-	auditService *audit.AuditProvider
-	failService  *fail.Service
-	jwtService   *jwtoken.Service
+	ctx            context.Context
+	logger         pkg.Logger
+	db             *pgxpool.Pool
+	redis          *redis.Client
+	s3             *s3.Service
+	router         *router.Router
+	config         *config.API
+	auditService   *audit.AuditProvider
+	failService    *fail.Service
+	jwtService     *jwtoken.Service
+	userPasswdAuth it.UserPasswdAuthenticator
 
 	providers struct {
 		auth   *auth_provider.AuthProvider
@@ -57,9 +59,10 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 	var (
 		ll  = logger.Named("appAPI.New")
 		app = appAPI{
-			ctx:    ctx,
-			logger: logger,
-			config: &cfg,
+			ctx:            ctx,
+			logger:         logger,
+			config:         &cfg,
+			userPasswdAuth: it.NewUserPasswdAuth(cfg.UserPasswdSalt),
 		}
 		err error
 	)
@@ -131,6 +134,7 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 		app.config,
 		app.auditService,
 		app.jwtService,
+
 		app.providers.auth,
 		app.providers.people,
 

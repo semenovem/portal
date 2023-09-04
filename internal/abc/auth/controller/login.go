@@ -28,9 +28,8 @@ func (cnt *Controller) Login(c echo.Context) error {
 		ctx  = c.Request().Context()
 	)
 
-	if nested := cnt.com.ExtractForm(c, form); nested != nil {
-		ll.Named("ExtractForm").Nestedf(nested.Message())
-		return cnt.fail.SendNested(c, "", nested)
+	if err := cnt.com.ExtractForm(c, ll, form); err != nil {
+		return err
 	}
 
 	ll = ll.With("login", form.Login)

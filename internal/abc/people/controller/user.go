@@ -2,17 +2,61 @@ package people_controller
 
 import (
 	"github.com/labstack/echo/v4"
-	people_action "github.com/semenovem/portal/internal/abc/people/action"
+	"github.com/semenovem/portal/internal/abc/controller"
+	"github.com/semenovem/portal/internal/abc/people/action"
 	"github.com/semenovem/portal/internal/audit"
-	"net/http"
-	"time"
-
 	_ "github.com/semenovem/portal/pkg/fail"
+	"github.com/semenovem/portal/pkg/it"
+	"net/http"
 )
+
+// CheckLogin docs
+//
+//	@Summary	Проверяет, свободен ли указанный логин
+//	@Description
+//	@Produce	json
+//	@Param		login	path		string	true	"проверяемый логин"
+//	@Success	200		{object}	freeLoginNameResponse
+//	@Failure	400		{object}	fail.Response
+//	@Router		/people/free-login/:login_name [GET]
+//	@Tags		people
+//	@Security	ApiKeyAuth
+func (cnt *Controller) CheckLogin(c echo.Context) error {
+	var (
+		ll         = cnt.logger.Named("CheckLogin")
+		ctx        = c.Request().Context()
+		form       = new(freeLoginNameForm)
+		thisUserID = controller.ExtractThisUserID(c)
+	)
+
+	if err := cnt.com.ExtractForm(c, ll, form); err != nil {
+		return err
+	}
+
+	exists, err := cnt.peopleAct.CheckLoginName(ctx, thisUserID, form.LoginName)
+	if err != nil && !it.IsValidateErr(err) {
+		ll = ll.Named("peopleAct.CheckLoginName")
+		return cnt.com.Response(c, err, ll)
+	}
+
+	var validateErr string
+	if err != nil {
+		validateErr = err.Error()
+	}
+
+	ll.With("free", exists).With("validateErr", validateErr).Debug("checked")
+
+	return c.JSON(http.StatusOK, freeLoginNameResponse{
+		Free:        exists,
+		ValidateErr: validateErr,
+	})
+}
 
 // CreateUser docs
 //
-//	@Summary	Создает пользователя
+//	@Summary		Создает пользователя
+//	@Description	`expired_at` в формате `2001-03-24T00:00:00Z`
+//	@Description	введенный login нужно проверить, что он допустим `/people/free-login/:login_name`
 //	@Description
 //	@Produce	json
 //	@Param		payload	body		createUserForm	true	"данные создаваемого пользователя"
@@ -23,41 +67,41 @@ import (
 //	@Security	ApiKeyAuth
 func (cnt *Controller) CreateUser(c echo.Context) error {
 	var (
-		ll   = cnt.logger.Named("CreateUser")
-		ctx  = c.Request().Context()
-		form = new(createUserForm)
+		ll         = cnt.logger.Named("CreateUser")
+		ctx        = c.Request().Context()
+		form       = new(createUserForm)
+		thisUserID = controller.ExtractThisUserID(c)
 	)
 
-	thisUserID, nested := cnt.com.ExtractUserAndForm(c, form)
-	if nested != nil {
-		ll.Named("ExtractUserAndForm").Nestedf(nested.Message())
-		return cnt.fail.SendNested(c, "", nested)
+	if err := cnt.com.ExtractForm(c, ll, form); err != nil {
+		return err
 	}
 
 	model := &people_action.CreateUserDTO{
-		FirstName:  form.FirstName,
-		Surname:    form.Surname,
-		Note:       form.Note,
-		Status:     form.getStatus(),
-		Roles:      form.getRoles(),
-		ExpiredAt:  time.Time{},
-		Login:      form.Login,
-		PasswdHash: form.Passwd,
+		FirstName: form.FirstName,
+		Surname:   form.Surname,
+		Note:      form.getNote(),
+		Status:    form.getStatus(),
+		Roles:     form.getRoles(),
+		ExpiredAt: form.ExpiredAt,
+		Login:     form.getLogin(),
+		Passwd:    form.Passwd,
+		AvatarID:  form.AvatarID,
 	}
 
-	profile, err := cnt.peopleAct.CreateUser(ctx, thisUserID, model)
+	userID, err := cnt.peopleAct.CreateUser(ctx, thisUserID, model)
 	if err != nil {
-		ll.Named("CreateUser").Nested(err)
-		return cnt.com.Response(c, err)
+		ll = ll.Named("peopleAct.CreateUser")
+		return cnt.com.Response(c, err, ll)
 	}
 
 	cnt.audit.Oper(thisUserID, audit.EntityUser, audit.Create, audit.P{
-		"userID": profile.ID,
+		"userID": userID,
 	})
 
-	ll.With("userID", 0).Debug("user created")
+	ll.With("userID", userID).Debug("user created")
 
-	return c.JSON(http.StatusOK, newUserProfileView(profile))
+	return c.JSON(http.StatusOK, userCreateResponse{UserID: userID})
 }
 
 // DeleteUser docs
@@ -65,47 +109,36 @@ func (cnt *Controller) CreateUser(c echo.Context) error {
 //	@Summary	Удаляет пользователя
 //	@Description
 //	@Produce	json
-//	@Param		user_id	path		string	true	"id пользователя"
-//	@Success	200		{object}	userPublicProfileView
+//	@Param		user_id	path	string	true	"id пользователя"
+//	@Success	204		"no-content"
 //	@Failure	400		{object}	fail.Response
 //	@Router		/people/:user_id [DELETE]
 //	@Tags		people
 //	@Security	ApiKeyAuth
 func (cnt *Controller) DeleteUser(c echo.Context) error {
 	var (
-		ll = cnt.logger.Named("DeleteUser")
-		//ctx  = c.Request().Context()
-		form = new(UserForm)
+		ll         = cnt.logger.Named("DeleteUser")
+		ctx        = c.Request().Context()
+		form       = new(userForm)
+		thisUserID = controller.ExtractThisUserID(c)
 	)
 
-	thisUserID, nested := cnt.com.ExtractUserAndForm(c, form)
-	if nested != nil {
-		ll.Named("ExtractUserAndForm").Nestedf(nested.Message())
-		return cnt.fail.SendNested(c, "", nested)
+	if err := cnt.com.ExtractForm(c, ll, form); err != nil {
+		return err
 	}
 
-	//profile, err := cnt.peopleAct.GetUserProfile(ctx, thisUserID, form.UserID)
-	//if err != nil {
-	//	ll = ll.Named("GetUserProfile").With("thisUserID", thisUserID)
-	//
-	//	switch err.(type) {
-	//	case *action.NotFoundErr:
-	//		ll.NotFoundTag().Info(err.Error())
-	//		return cnt.fail.Send(c, "", http.StatusNotFound, err)
-	//	case *action.ForbiddenErr:
-	//		ll.DenyTag().Info(err.Error())
-	//		return cnt.fail.Send(c, "", http.StatusForbidden, err)
-	//	default:
-	//		ll.Nested(err)
-	//		return cnt.fail.SendInternalServerErr(c, "", err)
-	//	}
-	//}
+	ll = ll.With("userID", form.UserID)
 
-	cnt.audit.Oper(thisUserID, audit.EntityUser, audit.Delete, audit.P{
+	if err := cnt.peopleAct.DeleteUser(ctx, thisUserID, form.UserID); err != nil {
+		ll = ll.Named("peopleAct.DeleteUser")
+		return cnt.com.Response(c, err, ll)
+	}
+
+	cnt.audit.Del(thisUserID, audit.EntityUser, audit.P{
 		"userID": form.UserID,
 	})
 
-	ll.With("userID", 0).Debug("user deleted")
+	ll.With("userID", 0).Debug("user is deleted")
 
 	return c.NoContent(http.StatusNoContent)
 }

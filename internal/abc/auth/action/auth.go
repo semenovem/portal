@@ -49,7 +49,7 @@ func (a *AuthAction) Refresh(
 	if err != nil {
 		ll.Named("GetUserAuth").Nested(err)
 
-		if provider.IsNoRows(err) {
+		if provider.IsNoRow(err) {
 			return nil, throw.Err404User
 		}
 
@@ -65,7 +65,7 @@ func (a *AuthAction) Refresh(
 	if err != nil {
 		ll = ll.Named("UpdateRefreshSession")
 
-		if provider.IsNoRows(err) {
+		if provider.IsNoRow(err) {
 			err = throw.NewAuthErr("no auth session with the specified refresh token - could not be updated")
 
 			ll.With("refreshID_old", payload.RefreshID).

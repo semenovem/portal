@@ -13,6 +13,11 @@ func (r *Router) addRoutes() {
 	unauth.POST("/auth/onetime/:entry_id", r.authCnt.LoginOnetimeLink)
 	auth.POST("/auth/onetime", r.authCnt.CreateOnetimeLink)
 
+	// ----------------- Store -----------------
+	auth.GET("/store/:store_path", r.storeCnt.Load)
+	auth.POST("/store/:store_path", r.storeCnt.Store)
+	auth.DELETE("/store/:store_path", r.storeCnt.Delete)
+
 	// ----------------- Media -----------------
 	auth.POST("/media/file", r.mediaCnt.FileUpload)
 	auth.GET("/media/file/:file_id", r.mediaCnt.FileUpload)
@@ -26,19 +31,16 @@ func (r *Router) addRoutes() {
 
 	// ----------------- People -----------------
 	auth.POST("/people", r.peopleCnt.CreateUser)
-
-	auth.GET("/people/self/profile", r.peopleCnt.SelfProfile)
-	auth.GET("/people/:user_id/profile", r.peopleCnt.Profile)
-
 	auth.DELETE("/people/:user_id", r.peopleCnt.DeleteUser)
 
-	// People Position
-	auth.GET("/people/positions", r.peopleCnt.Profile)
+	auth.GET("/people/self/profile", r.peopleCnt.SelfProfile)
+	auth.GET("/people/:user_id/profile", r.peopleCnt.UserProfile)
+	auth.GET("/people/:user_id/profile/public", r.peopleCnt.UserPublicProfile)
 
-	// ----------------- Store -----------------
-	auth.GET("/store/:store_path", r.storeCnt.Load)
-	auth.POST("/store/:store_path", r.storeCnt.Store)
-	auth.DELETE("/store/:store_path", r.storeCnt.Delete)
+	auth.GET("/people/free-login/:login_name", r.peopleCnt.CheckLogin)
+
+	// People Position
+	auth.GET("/people/positions", r.peopleCnt.UserPublicProfile)
 
 	// ----------------- Vehicle -----------------
 	auth.GET("/vehicles", r.vehicleCnt.Search)

@@ -1,7 +1,7 @@
 package txt
 
 const (
-	ValidUserLogin       = "10004 Логин пользователя может содержать символы и цифры"
+	ValidUserLogin       = "10004 Логин пользователя может содержать символы и цифры (6-64 длинна)"
 	ValidatePasswordWeak = "10005 Пароль должен содержать хотя бы одну букву в нижнем регистре, одну букву в верхнем регистре, одну цифру, один спецсимвол, и не содержать пробелов. Длинной 8-20 символов"
 
 	ValidateEmailNotSpecified  = "10012 Не указан электронный адрес"
@@ -10,6 +10,11 @@ const (
 	ValidateUserPositionLength = "10030 Позиция пользователя должно быть 3-64 символов"
 	ValidateUserNameInvalid    = "10004 Имя пользователя содержит недопустимые символы"
 	ValidatePINInvalid         = "10007 ПИН должен состоять из 4-х цифр"
+)
+
+const (
+	RestrictDuplicateLogin = "10200 Такой логин уже есть у другого пользователя"
+	RestrictDuplicateEmail = "10201 Такой email уже есть у другого пользователя"
 )
 
 const (
@@ -40,4 +45,6 @@ var messages = map[string]*struct {
 	ValidatePINInvalid:         {},
 	ValidateEmailInvalid:       {},
 	AuthWrongPIN:               {},
+	RestrictDuplicateLogin:     {},
+	RestrictDuplicateEmail:     {},
 }

@@ -22,6 +22,10 @@ func NewUserPasswdAuth(salt string) UserPasswdAuthenticator {
 }
 
 func (u *userPasswdAuth) Hashing(passwd string) string {
+	if passwd == "" {
+		return ""
+	}
+
 	var (
 		b    = []byte(fmt.Sprint(passwd))
 		hash = sha1.Sum(append(b, u.salt...))
@@ -31,5 +35,9 @@ func (u *userPasswdAuth) Hashing(passwd string) string {
 }
 
 func (u *userPasswdAuth) Matching(hash, passwd string) bool {
+	if hash == "" || passwd == "" {
+		return false
+	}
+
 	return u.Hashing(passwd) == hash
 }

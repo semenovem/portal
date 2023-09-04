@@ -55,7 +55,7 @@ func (a *AuthAction) getSessionByRefresh(
 	if err != nil {
 		ll = ll.Named("GetSession")
 
-		if provider.IsNoRows(err) {
+		if provider.IsNoRow(err) {
 			ll.Auth(throw.Err404AuthSession)
 			return nil, throw.Err404AuthSession
 		}

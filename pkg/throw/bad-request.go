@@ -1,23 +1,33 @@
 package throw
 
 var (
-	ErrBadRequestDuplicateLogin = NewBadRequestErr("duplicate user login")
-	ErrBadRequestDuplicateEmail = NewBadRequestErr("duplicate user email")
+	Err400DuplicateLogin = NewBadRequestErr("duplicate user login")
+	Err400DuplicateEmail = NewBadRequestErr("duplicate user email")
 )
 
 // BadRequestErr ошибки в результате проверок и валидации
-type BadRequestErr struct {
+type BadRequestErr interface {
+	Error() string
+	isBadRequestErr() bool
+}
+
+type badRequestErr struct {
 	msg string
 }
 
-func (e BadRequestErr) Error() string {
+func (e badRequestErr) Error() string {
 	return e.msg
 }
 
-func (e BadRequestErr) IsBadRequestErr() bool {
+func (e badRequestErr) isBadRequestErr() bool {
 	return true
 }
 
 func NewBadRequestErr(msg string) error {
-	return &BadRequestErr{msg: msg}
+	return &badRequestErr{msg: msg}
+}
+
+func IsBadRequestErr(err error) bool {
+	_, ok := err.(*badRequestErr)
+	return ok
 }

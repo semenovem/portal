@@ -12,7 +12,8 @@ type UserModel struct {
 	deleted    bool
 	status     it.UserStatus
 	note       *string
-	roles      *[]it.UserRole
+	roles      *[]string
+	roles2     *[]string
 	avatarID   *uint32
 	expiredAt  *time.Time
 	login      *string
@@ -84,14 +85,15 @@ func (u *UserModel) Roles() []it.UserRole {
 		return nil
 	}
 
-	return *u.roles
+	return it.InflateUserRoles(*u.roles)
 }
 
 func (u *UserModel) SetRoles(roles []it.UserRole) {
 	if len(roles) == 0 {
 		u.roles = nil
 	} else {
-		u.roles = &roles
+		rr := it.StringifyUserRoles(roles)
+		u.roles = &rr
 	}
 }
 

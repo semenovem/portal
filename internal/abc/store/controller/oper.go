@@ -3,6 +3,7 @@ package store_controller
 import (
 	"errors"
 	"github.com/labstack/echo/v4"
+	"github.com/semenovem/portal/internal/abc/controller"
 	"github.com/semenovem/portal/pkg/throw"
 	"net/http"
 
@@ -24,15 +25,14 @@ import (
 //	@Security	ApiKeyAuth
 func (cnt *Controller) Store(c echo.Context) error {
 	var (
-		ll   = cnt.logger.Named("Store")
-		form = new(storeForm)
-		ctx  = c.Request().Context()
+		ll         = cnt.logger.Named("Store")
+		form       = new(storeForm)
+		ctx        = c.Request().Context()
+		thisUserID = controller.ExtractThisUserID(c)
 	)
 
-	thisUserID, nested := cnt.com.ExtractUserAndForm(c, form)
-	if nested != nil {
-		ll.Named("ExtractForm").Nestedf(nested.Message())
-		return cnt.fail.SendNested(c, "", nested)
+	if err := cnt.com.ExtractForm(c, ll, form); err != nil {
+		return err
 	}
 
 	ll = ll.With("store_path", form.StorePath).With("thisUserID", thisUserID)
@@ -60,15 +60,14 @@ func (cnt *Controller) Store(c echo.Context) error {
 //	@Security	ApiKeyAuth
 func (cnt *Controller) Load(c echo.Context) error {
 	var (
-		ll   = cnt.logger.Named("Store")
-		form = new(storePathForm)
-		ctx  = c.Request().Context()
+		ll         = cnt.logger.Named("Store")
+		form       = new(storePathForm)
+		ctx        = c.Request().Context()
+		thisUserID = controller.ExtractThisUserID(c)
 	)
 
-	thisUserID, nested := cnt.com.ExtractUserAndForm(c, form)
-	if nested != nil {
-		ll.Named("ExtractForm").Nestedf(nested.Message())
-		return cnt.fail.SendNested(c, "", nested)
+	if err := cnt.com.ExtractForm(c, ll, form); err != nil {
+		return err
 	}
 
 	ll = ll.With("store_path", form.StorePath).With("thisUserID", thisUserID)
@@ -102,15 +101,14 @@ func (cnt *Controller) Load(c echo.Context) error {
 //	@Security	ApiKeyAuth
 func (cnt *Controller) Delete(c echo.Context) error {
 	var (
-		ll   = cnt.logger.Named("Store")
-		form = new(storePathForm)
-		ctx  = c.Request().Context()
+		ll         = cnt.logger.Named("Store")
+		form       = new(storePathForm)
+		ctx        = c.Request().Context()
+		thisUserID = controller.ExtractThisUserID(c)
 	)
 
-	thisUserID, nested := cnt.com.ExtractUserAndForm(c, form)
-	if nested != nil {
-		ll.Named("ExtractForm").Nestedf(nested.Message())
-		return cnt.fail.SendNested(c, "", nested)
+	if err := cnt.com.ExtractForm(c, ll, form); err != nil {
+		return err
 	}
 
 	ll = ll.With("store_path", form.StorePath).With("thisUserID", thisUserID)

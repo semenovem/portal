@@ -49,6 +49,7 @@ func New(
 	config *config.API,
 	auditService *audit.AuditProvider,
 	jwtService *jwtoken.Service,
+
 	authPvd *auth_provider.AuthProvider,
 	peoplePvd *people_provider.PeopleProvider,
 

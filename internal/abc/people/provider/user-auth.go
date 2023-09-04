@@ -61,16 +61,14 @@ func (p *PeopleProvider) getUserAuth(
 		sq += " AND id = $1"
 		arg = userID
 	} else {
-		panic("incorrect method call (login and userID is empty")
+		panic("incorrect method call - login and userID is empty")
 	}
 
 	err := p.db.QueryRow(ctx, sq, arg).Scan(&u.ID, &u.Status, &u.Roles, &u.ExpiredAt, &u.PasswdHash)
 	if err != nil {
 		ll := p.logger.Named("getUserByLogin")
 
-		if provider.IsNoRows(err) {
-			ll.NotFound(err)
-		} else {
+		if !provider.IsNoRow(err) {
 			ll.DB(err)
 		}
 
@@ -81,8 +79,8 @@ func (p *PeopleProvider) getUserAuth(
 
 	err = p.db.QueryRow(ctx, sq, u.ID).Scan(&u.WorkedAt, &u.FiredAt)
 	if err != nil {
-		if !provider.IsNoRows(err) {
-			p.logger.Named("getUserByLogin").DB(err)
+		if !provider.IsNoRow(err) {
+			p.logger.Named("getUserByID").DB(err)
 			return nil, err
 		}
 	}

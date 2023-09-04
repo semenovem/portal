@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/caarlos0/env/v9 v9.0.0
 	github.com/go-playground/universal-translator v0.18.1
-	github.com/go-playground/validator/v10 v10.15.0
+	github.com/go-playground/validator/v10 v10.15.3
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang-migrate/migrate/v4 v4.16.2

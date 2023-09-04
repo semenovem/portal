@@ -22,7 +22,7 @@ const (
 )
 
 var (
-	regValidateUserLogin = regexp.MustCompile(`(?i)^[a-z]+[\w_-]*[^_-]$`)
+	regValidateUserLogin = regexp.MustCompile(`(?i)^[a-zа-яйё]+[\wа-яйё_-]*[^_-]$`)
 	regValidateUserName  = regexp.MustCompile(`^[a-zа-яёй0-9_-]*$`)
 )
 
@@ -80,8 +80,7 @@ func ValidateUserPassword(password string) error {
 }
 
 func ValidateUserEmail(email string) error {
-	l := utf8.RuneCountInString(email)
-	if l > maxUserEmailLen {
+	if l := utf8.RuneCountInString(email); l > maxUserEmailLen {
 		return ErrValidLong
 	}
 
@@ -93,16 +92,11 @@ func ValidateUserEmail(email string) error {
 }
 
 func ValidateUserName(name string) error {
-	var (
-		n = strings.TrimSpace(strings.ToLower(name))
-		l = utf8.RuneCountInString(n)
-	)
+	n := strings.TrimSpace(strings.ToLower(name))
 
-	if l > maxUserNameLen {
+	if l := utf8.RuneCountInString(n); l > maxUserNameLen {
 		return ErrValidLong
-	}
-
-	if l < minUserNameLen {
+	} else if l < minUserNameLen {
 		return ErrValidShort
 	}
 

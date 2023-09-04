@@ -2,6 +2,7 @@ package media_controller
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/semenovem/portal/internal/abc/controller"
 	"github.com/semenovem/portal/pkg/it"
 	"github.com/semenovem/portal/pkg/throw"
 	"mime/multipart"
@@ -18,8 +19,8 @@ import (
 //	@Description
 //	@Produce	json
 //	@Accept		multipart/form-data
-//	@Success	201			{object}	fileUploadResponse
-//	@Failure	400			{object}	fail.Response
+//	@Success	201	{object}	fileUploadResponse
+//	@Failure	400	{object}	fail.Response
 //	@Router		/media/file [POST]
 //	@Tags		media
 //	@Security	ApiKeyAuth
@@ -29,13 +30,8 @@ func (cnt *Controller) FileUpload(c echo.Context) error {
 		ctx        = c.Request().Context()
 		note       string
 		fileHeader *multipart.FileHeader
+		thisUserID = controller.ExtractThisUserID(c)
 	)
-
-	thisUserID, nested := cnt.com.ExtractThisUser(c)
-	if nested != nil {
-		ll.Named("ExtractThisUser").Nestedf(nested.Message())
-		return cnt.fail.SendNested(c, "", nested)
-	}
 
 	form, err := c.MultipartForm()
 	if err != nil {
@@ -69,6 +65,8 @@ func (cnt *Controller) FileUpload(c echo.Context) error {
 		ll.Named("processUploadingFile").Nestedf(nested.Message())
 		return cnt.fail.SendNested(c, "", nested)
 	}
+
+	// TODO сообщение в аудит о загрузке файла
 
 	ll.With("id", mediaObjectID).Debug("file uploaded")
 

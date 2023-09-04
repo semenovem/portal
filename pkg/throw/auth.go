@@ -18,13 +18,14 @@ var (
 // AuthErr ошибки в результате нарушения при авторизации
 type AuthErr interface {
 	Error() string
+	isAuthErr() bool
 }
 
 type authErr struct {
 	msg string
 }
 
-func NewAuthErr(msg string, prevErrMsg ...string) AuthErr {
+func NewAuthErr(msg string, prevErrMsg ...string) error {
 	if len(prevErrMsg) != 0 {
 		for _, s := range prevErrMsg {
 			msg += ": " + s
@@ -36,6 +37,10 @@ func NewAuthErr(msg string, prevErrMsg ...string) AuthErr {
 
 func (e authErr) Error() string {
 	return e.msg
+}
+
+func (e authErr) isAuthErr() bool {
+	return true
 }
 
 func IsAuthErr(err error) bool {

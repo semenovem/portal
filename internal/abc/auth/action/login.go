@@ -20,7 +20,7 @@ func (a *AuthAction) NewLogin(
 	if err != nil {
 		ll = ll.Named("GetUserByLogin")
 
-		if provider.IsNoRows(err) {
+		if provider.IsNoRow(err) {
 			ll.Auth(throw.Err404User)
 			return nil, throw.Err404User
 		}

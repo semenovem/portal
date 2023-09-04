@@ -7,18 +7,18 @@ import (
 )
 
 type CreateUserDTO struct {
-	FirstName  string
-	Surname    string
-	Note       string
-	Status     it.UserStatus
-	Roles      []it.UserRole
-	ExpiredAt  time.Time
-	Login      string
-	PasswdHash string
-	AvatarID   uint32
+	FirstName string
+	Surname   string
+	Note      string
+	Status    it.UserStatus
+	Roles     []it.UserRole
+	ExpiredAt time.Time
+	Login     string
+	Passwd    string
+	AvatarID  uint32
 }
 
-func (dto *CreateUserDTO) toProviderUserModel() *people_provider.UserModel {
+func (dto *CreateUserDTO) toPvdModel(passwdHash string) *people_provider.UserModel {
 	m := people_provider.UserModel{}
 
 	m.SetFirstname(dto.FirstName)
@@ -28,8 +28,13 @@ func (dto *CreateUserDTO) toProviderUserModel() *people_provider.UserModel {
 	m.SetRoles(dto.Roles)
 	m.SetExpiredAt(&dto.ExpiredAt)
 	m.SetLogin(dto.Login)
-	m.SetPasswdHash(dto.PasswdHash)
+	m.SetPasswdHash(passwdHash)
 	m.SetAvatarID(dto.AvatarID)
 
 	return &m
+}
+
+type LoginNameCheckDTO struct {
+	Exists      bool
+	ValidateErr error
 }

@@ -25,7 +25,7 @@ func (a *PeopleAction) getUserProfile(ctx context.Context, userID uint32) (*it.U
 	if err != nil {
 		ll.Named("GetUserProfile").Nested(err)
 
-		if provider.IsNoRows(err) {
+		if provider.IsNoRow(err) {
 			return nil, throw.Err404User
 		}
 

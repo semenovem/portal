@@ -51,8 +51,9 @@ type UserRole string
 type UserStatus string
 
 const (
-	UserRoleAdmin UserRole = "super-admin"
-	UserRoleUser  UserRole = "user"
+	UserRoleSuperAdmin UserRole = "super-admin"
+	UserRoleAdmin      UserRole = "admin"
+	UserRoleUser       UserRole = "user"
 )
 
 const (
@@ -78,18 +79,20 @@ func ParseUserStatus(s string) (UserStatus, error) {
 		return UserStatusBlocked, nil
 	}
 
-	return "", fmt.Errorf(msgErrUserStatusInvalid, s)
+	return "", fmt.Errorf(msgErrUnknownUserStatus, s)
 }
 
 func ParseUserRole(s string) (UserRole, error) {
 	switch strings.ToLower(strings.TrimSpace(s)) {
+	case string(UserRoleSuperAdmin):
+		return UserRoleSuperAdmin, nil
 	case string(UserRoleAdmin):
 		return UserRoleAdmin, nil
 	case string(UserRoleUser):
 		return UserRoleUser, nil
 	}
 
-	return "", fmt.Errorf(msgErrUserRoleInvalid, s)
+	return "", fmt.Errorf(msgErrUnknownUserRole, s)
 }
 
 func ParseUserRoles(roles []string) ([]UserRole, error) {
@@ -111,4 +114,20 @@ func ParseUserRoles(roles []string) ([]UserRole, error) {
 	}
 
 	return result, nil
+}
+
+func StringifyUserRoles(a []UserRole) []string {
+	b := make([]string, len(a))
+	for i := range a {
+		b[i] = string(a[i])
+	}
+	return b
+}
+
+func InflateUserRoles(a []string) []UserRole {
+	b := make([]UserRole, len(a))
+	for i := range a {
+		b[i] = UserRole(a[i])
+	}
+	return b
 }

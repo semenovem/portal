@@ -32,7 +32,7 @@ func (cnt *Controller) Search(c echo.Context) error {
 //	@Description
 //	@Produce	json
 //	@Param		vehicle_id	path		uint32	true	"ID автомобиля"
-//	@Success	200			{object}	view.Vehicle
+//	@Success	200			{object}	vehicleView
 //	@Failure	400			{object}	fail.Response
 //	@Router		/vehicles/:vehicle_id [GET]
 //	@Tags		vehicles
@@ -47,7 +47,7 @@ func (cnt *Controller) Get(c echo.Context) error {
 //	@Description
 //	@Produce	json
 //	@Param		vehicle_id	path		uint32	true	"ID автомобиля"
-//	@Success	200			{object}	view.Vehicle
+//	@Success	200			{object}	vehicleView
 //	@Failure	400			{object}	fail.Response
 //	@Router		/vehicles/:vehicle_id [PUT]
 //	@Tags		vehicles
@@ -62,7 +62,7 @@ func (cnt *Controller) Upd(c echo.Context) error {
 //	@Description
 //	@Produce	json
 //	@Param		vehicle_id	path		uint32	true	"ID автомобиля"
-//	@Success	201			{object}	view.Vehicle
+//	@Success	201			{object}	vehicleView
 //	@Failure	400			{object}	fail.Response
 //	@Router		/vehicles/:vehicle_id [POST]
 //	@Tags		vehicles

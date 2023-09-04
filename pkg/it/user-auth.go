@@ -14,11 +14,11 @@ type UserAuth struct {
 
 func (u *UserAuth) CanLogging() error {
 	if u.Status != UserStatusActive {
-		return ErrUserHaveNotActiveStatus
+		return ErrUserNotActive
 	}
 	now := time.Now()
 
-	if u.ExpiredAt != nil && u.FiredAt.Before(now) {
+	if u.ExpiredAt != nil && u.ExpiredAt.Before(now) {
 		return ErrUserExpired
 	}
 

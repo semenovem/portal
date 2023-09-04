@@ -58,9 +58,9 @@ func (cnt *Controller) processUploadingFile(
 		ll.Named("Upload").Nested(err)
 
 		switch err.(type) {
-		case *throw.AccessErr:
+		case throw.AccessErr:
 			return 0, fail.NewNested(http.StatusForbidden, err)
-		case *throw.BadRequestErr:
+		case throw.BadRequestErr:
 			return 0, fail.NewNested(http.StatusBadRequest, err)
 		}
 

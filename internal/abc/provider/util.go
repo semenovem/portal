@@ -12,8 +12,8 @@ const (
 	MsgErrNoRecordRedis = "no record in redis"
 )
 
-// IsDuplicateKeyError является ли ошибки БД следствием ограничения дублирования
-func IsDuplicateKeyError(err error) bool {
+// IsDuplicateKeyErr является ли ошибки БД следствием ограничения уникальности значения в поле
+func IsDuplicateKeyErr(err error) bool {
 	if e, ok := err.(*pgconn.PgError); ok {
 		return e.Code == "23505"
 	}
@@ -21,8 +21,8 @@ func IsDuplicateKeyError(err error) bool {
 	return false
 }
 
-// IsNoRows является ли ошибка БД следствием отсутствия запрошенной строки
-func IsNoRows(err error) bool {
+// IsNoRow является ли ошибка БД следствием отсутствия запрошенной строки
+func IsNoRow(err error) bool {
 	return errors.Is(err, pgx.ErrNoRows) || errors.Is(err, sql.ErrNoRows)
 }
 
@@ -31,10 +31,21 @@ func IsNoRec(err error) bool {
 	return errors.Is(err, redis.Nil)
 }
 
-// IsConstrainForeignKeyError ограничение удаления записи
-func IsConstrainForeignKeyError(err error) bool {
+// IsConstrainForeignKeyErr ограничение удаления записи
+func IsConstrainForeignKeyErr(err error) bool {
 	if e, ok := err.(*pgconn.PgError); ok {
 		return e.Code == "23503"
+	}
+
+	return false
+}
+
+// OID 16495
+
+// IsUnknownTypeErr неизвестный тип
+func IsUnknownTypeErr(err error) bool {
+	if e, ok := err.(*pgconn.PgError); ok {
+		return e.Code == "16495"
 	}
 
 	return false

@@ -15,12 +15,17 @@ func (a *AuthAction) CreateOnetimeEntry(ctx context.Context, userID uint32) (uui
 	userAuth, err := a.peoplePvd.GetUserAuth(ctx, userID)
 	if err != nil {
 		ll.Named("CreateOnetimeEntry").Nested(err)
+
+		if provider.IsNoRow(err) {
+			return uuid.Nil, throw.Err404User
+		}
+
 		return uuid.Nil, err
 	}
 
 	if err = a.canLogin(userAuth); err != nil {
 		ll.Named("canLogin").Nested(err)
-		return uuid.Nil, err
+		return uuid.Nil, throw.NewBadRequestErr(err.Error())
 	}
 
 	entryID, err := a.authPvd.NewOnetimeEntry(ctx, userAuth.ID)
@@ -50,7 +55,7 @@ func (a *AuthAction) LoginByOnetimeEntryID(ctx context.Context, entryID uuid.UUI
 	if err != nil {
 		ll.Named("GetUserAuth").Nested(err)
 
-		if provider.IsNoRows(err) {
+		if provider.IsNoRow(err) {
 			return nil, throw.Err404User
 		}
 	}

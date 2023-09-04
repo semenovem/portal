@@ -1,7 +1,7 @@
 package people_controller
 
 import (
-	controller2 "github.com/semenovem/portal/internal/abc/controller"
+	"github.com/semenovem/portal/internal/abc/controller"
 	"github.com/semenovem/portal/internal/abc/people/action"
 	"github.com/semenovem/portal/internal/audit"
 	"github.com/semenovem/portal/pkg"
@@ -11,13 +11,13 @@ import (
 type Controller struct {
 	logger    pkg.Logger
 	fail      *fail.Service
-	com       *controller2.Common
+	com       *controller.Common
 	audit     *audit.AuditProvider
 	peopleAct *people_action.PeopleAction
 }
 
 func New(
-	arg *controller2.CntArgs,
+	arg *controller.CntArgs,
 	peopleAct *people_action.PeopleAction,
 ) *Controller {
 	return &Controller{
