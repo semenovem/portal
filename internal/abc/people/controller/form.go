@@ -52,3 +52,9 @@ func (f *createUserForm) getLogin() string {
 type freeLoginNameForm struct {
 	LoginName string `param:"login_name" validate:"required"`
 }
+
+type handbookForm struct {
+	DeptID     []uint16 `json:"dept_id[]" query:"dept_id[]" validate:"omitempty"`
+	PositionID []uint16 `json:"position_id[]" query:"position_id[]" validate:"omitempty"`
+	Order      []string `json:"order[]" query:"order[]" validate:"omitempty"`
+}

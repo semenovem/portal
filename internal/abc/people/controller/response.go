@@ -8,3 +8,7 @@ type freeLoginNameResponse struct {
 	Free        bool   `json:"free"`
 	ValidateErr string `json:"validate_err,omitempty"`
 }
+
+type publicHandbookResponse struct {
+	Employees []*publicEmployeeView `json:"employees"`
+}

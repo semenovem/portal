@@ -25,6 +25,7 @@ type UserProfile struct {
 type EmployeeProfile struct {
 	UserProfile
 	Position    UserPosition // должность
+	Dept        UserDept     // отдел
 	Boss        *UserBoss    // Руководитель
 	StartWorkAt time.Time    // Дата начала работы
 	FiredAt     *time.Time   // Дата увольнения
@@ -34,7 +35,7 @@ type UserBoss struct {
 	ID        uint32
 	Firstname string
 	Surname   string
-	UserPosition
+	Position  UserPosition
 }
 
 func (u *UserProfile) ExpiredAtToString() string {

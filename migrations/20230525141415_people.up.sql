@@ -8,9 +8,19 @@ CREATE TABLE IF NOT EXISTS people.positions
 (
   id          smallserial PRIMARY KEY,
   title       varchar UNIQUE NOT NULL,                      -- название должности
-  description varchar        NOT NULL,                      -- Описание
+  description varchar        NOT NULL,                      -- описание
   parent_id   int REFERENCES people.positions default NULL, -- руководитель
   deleted     timestamp                       default NULL
+);
+
+-- Отделы
+CREATE TABLE IF NOT EXISTS people.departments
+(
+  id          smallserial PRIMARY KEY,
+  title       varchar UNIQUE NOT NULL,                        -- название департамента
+  description varchar        NOT NULL,                        -- описание
+  parent_id   int REFERENCES people.departments default NULL, -- руководитель
+  deleted     timestamp                         default NULL
 );
 
 -- Пользователи
@@ -36,6 +46,7 @@ CREATE TABLE IF NOT EXISTS people.employees
 (
   user_id     int PRIMARY KEY REFERENCES people.users NOT NULL,
   position_id int REFERENCES people.positions         NOT NULL,
+  dept_id     int REFERENCES people.departments       NOT NULL,
   worked_at   timestamp default now()                 NOT NULL, -- дата начала работы
   fired_at    timestamp default NULL                            -- дата увольнения (последний день работы)
 );

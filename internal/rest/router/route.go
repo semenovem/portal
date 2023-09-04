@@ -39,6 +39,8 @@ func (r *Router) addRoutes() {
 
 	auth.GET("/people/free-login/:login_name", r.peopleCnt.CheckLogin)
 
+	unauth.GET("/people/handbook/public", r.peopleCnt.PublicHandbook)
+
 	// People Position
 	auth.GET("/people/positions", r.peopleCnt.UserPublicProfile)
 

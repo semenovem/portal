@@ -1,6 +1,9 @@
 package people_controller
 
-import "github.com/semenovem/portal/pkg/it"
+import (
+	"github.com/semenovem/portal/pkg/it"
+	"time"
+)
 
 // Общедоступный профиль пользователя
 type userPublicProfileView struct {
@@ -8,6 +11,16 @@ type userPublicProfileView struct {
 	Firstname string `json:"firstname,omitempty"`
 	Surname   string `json:"surname,omitempty"`
 	Avatar    string `json:"avatar,omitempty"`
+}
+
+// Общедоступный профиль сотрудника
+type publicEmployeeView struct {
+	userPublicProfileView
+	StartWorkAt  time.Time `json:"start_work_at"` // Дата начала работы
+	PositionName string    `json:"position_name"`
+	DeptName     string    `json:"dept_name"`
+	Note         string    `json:"note,omitempty"`
+	BossID       uint32    `json:"boss_id"`
 }
 
 type userProfileView struct {
