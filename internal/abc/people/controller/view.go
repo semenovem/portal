@@ -44,6 +44,19 @@ func newUserPublicProfileView(u *it.UserProfile) *userPublicProfileView {
 	return r
 }
 
+func newEmployeePublicProfileView(u *it.EmployeeProfile) *publicEmployeeView {
+	p := publicEmployeeView{
+		userPublicProfileView: *newUserPublicProfileView(&u.UserProfile),
+		StartWorkAt:           u.StartWorkAt,
+		PositionName:          u.Position.Title,
+		DeptName:              u.Dept.Title,
+		Note:                  u.Note,
+		//BossID:                u.Boss.ID, // todo кажется что нужно фио
+	}
+
+	return &p
+}
+
 func newUserProfileView(u *it.UserProfile) *userProfileView {
 	r := &userProfileView{
 		userPublicProfileView: *newUserPublicProfileView(u),

@@ -39,7 +39,7 @@ func (r *Router) addRoutes() {
 
 	auth.GET("/people/free-login/:login_name", r.peopleCnt.CheckLogin)
 
-	unauth.GET("/people/handbook/public", r.peopleCnt.PublicHandbook)
+	unauth.GET("/people/handbook", r.peopleCnt.Handbook)
 
 	// People Position
 	auth.GET("/people/positions", r.peopleCnt.UserPublicProfile)

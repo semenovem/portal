@@ -16,7 +16,7 @@ import (
 	"github.com/semenovem/portal/internal/abc/store/action"
 	"github.com/semenovem/portal/internal/abc/store/provider"
 	"github.com/semenovem/portal/internal/audit"
-	"github.com/semenovem/portal/internal/rest/router"
+	"github.com/semenovem/portal/internal/router"
 	"github.com/semenovem/portal/internal/s3"
 	"github.com/semenovem/portal/internal/zoo/conn"
 	"github.com/semenovem/portal/pkg"

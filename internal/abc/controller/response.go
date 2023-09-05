@@ -9,7 +9,7 @@ import (
 )
 
 // Response ответ клиенту
-func (a *Common) Response(c echo.Context, err error, ll pkg.Logger) error {
+func (a *Common) Response(c echo.Context, ll pkg.Logger, err error) error {
 	var (
 		retCode int
 		text    string

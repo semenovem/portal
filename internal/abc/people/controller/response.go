@@ -10,5 +10,6 @@ type freeLoginNameResponse struct {
 }
 
 type publicHandbookResponse struct {
+	Total     uint32                `json:"total"`
 	Employees []*publicEmployeeView `json:"employees"`
 }

@@ -36,7 +36,7 @@ func (cnt *Controller) CheckLogin(c echo.Context) error {
 	exists, err := cnt.peopleAct.CheckLoginName(ctx, thisUserID, form.LoginName)
 	if err != nil && !it.IsValidateErr(err) {
 		ll = ll.Named("peopleAct.CheckLoginName")
-		return cnt.com.Response(c, err, ll)
+		return cnt.com.Response(c, ll, err)
 	}
 
 	var validateErr string
@@ -92,7 +92,7 @@ func (cnt *Controller) CreateUser(c echo.Context) error {
 	userID, err := cnt.peopleAct.CreateUser(ctx, thisUserID, model)
 	if err != nil {
 		ll = ll.Named("peopleAct.CreateUser")
-		return cnt.com.Response(c, err, ll)
+		return cnt.com.Response(c, ll, err)
 	}
 
 	cnt.audit.Oper(thisUserID, audit.EntityUser, audit.Create, audit.P{
@@ -131,7 +131,7 @@ func (cnt *Controller) DeleteUser(c echo.Context) error {
 
 	if err := cnt.peopleAct.DeleteUser(ctx, thisUserID, form.UserID); err != nil {
 		ll = ll.Named("peopleAct.DeleteUser")
-		return cnt.com.Response(c, err, ll)
+		return cnt.com.Response(c, ll, err)
 	}
 
 	cnt.audit.Del(thisUserID, audit.EntityUser, audit.P{

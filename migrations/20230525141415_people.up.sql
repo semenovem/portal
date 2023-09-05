@@ -65,16 +65,25 @@ CREATE TABLE IF NOT EXISTS people.user_media_boxes
 -------------------------------   init data   ----------------------------------
 --------------------------------------------------------------------------------
 
-insert into people.positions (title, description, parent_id)
-values ('водитель', 'описание должности 1', null),
-       ('водитель-экспедитор', 'описание должности 2', null),
-       ('экспедитор', 'описание должности 2', null),
-       ('грузчик-экспедитор', 'описание должности 2', null),
-       ('Руководитель отдела транспорта', '', null),
-       ('Генеральный директор', '', null),
-       ('Руководитель АТИ', '', null),
-       ('Оператор', '', null),
-       ('грузчик', '', null)
+insert into people.positions (id, title, description, parent_id)
+values (1, 'водитель', 'описание должности 1', null),
+       (2, 'водитель-экспедитор', 'описание должности 2', null),
+       (3, 'экспедитор', 'описание должности 2', null),
+       (4, 'грузчик-экспедитор', 'описание должности 2', null),
+       (5, 'Руководитель отдела транспорта', '', null),
+       (6, 'Генеральный директор', '', null),
+       (7, 'Руководитель АТИ', '', null),
+       (8, 'Оператор', '', null),
+       (9, 'грузчик', '', null)
+on conflict do nothing;
+
+
+insert into people.departments (id, title, description, parent_id)
+values (1, 'Управление', '', null),
+       (2, 'АТИ', 'междугородние перевозки', null),
+       (3, 'Кадры', 'работа с персоналом', null),
+       (4, 'Транспортный', 'работа с транспортом', null),
+       (5, 'Сборка', '', null)
 on conflict do nothing;
 
 
@@ -82,20 +91,20 @@ on conflict do nothing;
 -------------------------------   test data   ----------------------------------
 --------------------------------------------------------------------------------
 
-insert into people.users (firstname, surname, note, status, login, passwd_hash)
-values ('Петр', 'Петрович', '', 'active', null, null),
-       ('Иван', 'Сидорович', '', 'active', 'login1',
+insert into people.users (firstname, surname, note, status, roles, login, passwd_hash)
+values ('Петр', 'Петрович', '', 'active', '{super-admin}', 'login1',
         'ec95a5a1e2e7b82333340b5ec1db3e82e3a8ae9b'),
-       ('ivan', 'ivanov', 'note для пользователя', 'inactive', 'login2',
+       ('Иван', 'Сидорович', '', 'active', null, null, null),
+       ('ivan', 'ivanov', 'note для пользователя', 'inactive', null, 'login3',
         'ec95a5a1e2e7b82333340b5ec1db3e82e3a8ae9b'),
-       ('oleg', 'olegovich', 'note2 для пользователя', 'active', 'login3',
+       ('oleg', 'olegovich', 'note2 для пользователя', 'active', null, 'login4',
         'ec95a5a1e2e7b82333340b5ec1db3e82e3a8ae9b'),
-       ('Макс', 'Масков', 'note(макс) для пользователя', 'active', 'login4',
+       ('Макс', 'Масков', 'note(макс) для пользователя', 'active', null, 'login5',
         'ec95a5a1e2e7b82333340b5ec1db3e82e3a8ae9b')
 
 on conflict do nothing;
 
-insert into people.employees (user_id, position_id, worked_at, fired_at)
-values (3, 1, '2023-07-12T15:38:30Z', now()),
-       (4, 2, '2022-08-12T15:38:30Z', NULL)
+insert into people.employees (user_id, position_id, dept_id, worked_at, fired_at)
+values (3, 1, 1, '2023-07-12T15:38:30Z', now()),
+       (4, 2, 2, '2022-08-12T15:38:30Z', null)
 on conflict do nothing;

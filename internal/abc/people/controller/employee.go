@@ -5,23 +5,34 @@ import (
 	"net/http"
 )
 
-// PublicHandbook docs
+// Handbook docs
 //
 //	@Summary	Справочник сотрудников
+//	@Description Доступен в локальной сети без авторизации
 //	@Description
 //	@Produce	json
 //	@Success	200	{object}	publicHandbookResponse
 //	@Failure	400	{object}	fail.Response
 //	@Router		/people/handbook [GET]
 //	@Tags		people
-//	@Security	ApiKeyAuth
-func (cnt *Controller) PublicHandbook(c echo.Context) error {
+func (cnt *Controller) Handbook(c echo.Context) error {
 	var (
-		ll = cnt.logger.Named("PublicHandbook")
-		//ctx        = c.Request().Context()
+		ll  = cnt.logger.Named("Handbook")
+		ctx = c.Request().Context()
 	)
+
+	result, err := cnt.peopleAct.PublicHandbook(ctx)
+	if err != nil {
+		ll.Named("peopleAct.PublicHandbook").Nested(err)
+		return cnt.com.Response(c, ll, err)
+	}
 
 	ll.Debug("success")
 
-	return c.JSON(http.StatusOK, publicHandbookResponse{})
+	response := publicHandbookResponse{
+		Total:     result.Total,
+		Employees: newEmployeePublicProfileViews(result.Employees),
+	}
+
+	return c.JSON(http.StatusOK, response)
 }

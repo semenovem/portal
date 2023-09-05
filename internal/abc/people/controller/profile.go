@@ -5,7 +5,6 @@ import (
 	"github.com/semenovem/portal/internal/abc/controller"
 	"net/http"
 
-	_ "github.com/semenovem/portal/internal/rest/view"
 	_ "github.com/semenovem/portal/pkg/fail"
 )
 
@@ -29,7 +28,7 @@ func (cnt *Controller) SelfProfile(c echo.Context) error {
 	profile, err := cnt.peopleAct.GetUserProfile(ctx, thisUserID, thisUserID)
 	if err != nil {
 		ll = ll.Named("GetUserProfile")
-		return cnt.com.Response(c, err, ll)
+		return cnt.com.Response(c, ll, err)
 	}
 
 	return c.JSON(http.StatusOK, newUserProfileView(profile))
@@ -62,7 +61,7 @@ func (cnt *Controller) UserProfile(c echo.Context) error {
 	profile, err := cnt.peopleAct.GetUserProfile(ctx, thisUserID, form.UserID)
 	if err != nil {
 		ll = ll.Named("GetUserProfile").With("user", form.UserID)
-		return cnt.com.Response(c, err, ll)
+		return cnt.com.Response(c, ll, err)
 	}
 
 	return c.JSON(http.StatusOK, newUserProfileView(profile))
@@ -94,7 +93,7 @@ func (cnt *Controller) UserPublicProfile(c echo.Context) error {
 	profile, err := cnt.peopleAct.GetUserProfile(ctx, thisUserID, form.UserID)
 	if err != nil {
 		ll = ll.Named("GetUserProfile")
-		return cnt.com.Response(c, err, ll)
+		return cnt.com.Response(c, ll, err)
 	}
 
 	return c.JSON(http.StatusOK, newUserPublicProfileView(profile))

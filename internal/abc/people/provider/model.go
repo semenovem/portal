@@ -13,7 +13,6 @@ type UserModel struct {
 	status     it.UserStatus
 	note       *string
 	roles      *[]string
-	roles2     *[]string
 	avatarID   *uint32
 	expiredAt  *time.Time
 	login      *string

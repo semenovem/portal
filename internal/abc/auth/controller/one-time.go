@@ -39,7 +39,7 @@ func (cnt *Controller) CreateOnetimeLink(c echo.Context) error {
 	entryID, err := cnt.authAct.CreateOnetimeEntry(ctx, form.UserID)
 	if err != nil {
 		ll.Named("CreateOnetimeEntry").Nested(err)
-		return cnt.com.Response(c, err, ll)
+		return cnt.com.Response(c, ll, err)
 	}
 
 	cnt.audit.Auth(thisUserID, audit.CreateOnetimeEntry, audit.P{
