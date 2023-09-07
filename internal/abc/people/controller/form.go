@@ -58,3 +58,7 @@ type handbookForm struct {
 	PositionID []uint16 `json:"position_id[]" query:"position_id[]" validate:"omitempty"`
 	Order      []string `json:"order[]" query:"order[]" validate:"omitempty"`
 }
+
+type userUpdateForm struct {
+	Fields map[string]string `json:"fields"`
+}
