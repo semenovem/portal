@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/semenovem/portal/internal/abc/controller"
+	people_dto "github.com/semenovem/portal/internal/abc/people/dto"
+	"github.com/semenovem/portal/pkg/throw"
 	"net/http"
 )
 
@@ -26,17 +28,59 @@ func (cnt *Controller) UserUpdate(c echo.Context) error {
 	var (
 		thisUserID = controller.ExtractThisUserID(c)
 		ll         = cnt.logger.Named("UserUpdate").With("thisUserID", thisUserID)
-		//ctx        = c.Request().Context()
-		form = new(userUpdateForm)
+		ctx        = c.Request().Context()
+		form       = new(employeeUpdateForm)
 	)
 
 	if err := cnt.com.ExtractForm(c, ll, form); err != nil {
-		return err
+		return err.Err
 	}
 
-	fmt.Printf(">>>>>>>>>>>> %+v \n", form.Fields)
+	fmt.Printf(">>>>>>>>>>>> %+v \n", form)
+
+	expiredAt, err := controller.ParseTime(form.ExpiredAt)
+	if err != nil {
+		err = throw.NewBadRequestTimeFieldErr("expired_at")
+		ll.Named("controller.ParseTime").With("form", form).BadRequest(err)
+		return cnt.com.Response(c, ll, err)
+	}
+
+	workedAt, err := controller.ParseTime(form.WorkedAt)
+	if err != nil {
+		err = throw.NewBadRequestTimeFieldErr("worked_at")
+		ll.Named("controller.ParseTime").With("form", form).BadRequest(err)
+		return cnt.com.Response(c, ll, err)
+	}
+
+	firedAt, err := controller.ParseTime(form.FiredAt)
+	if err != nil {
+		err = throw.NewBadRequestTimeFieldErr("fired_at")
+		ll.Named("controller.ParseTime").With("form", form).BadRequest(err)
+		return cnt.com.Response(c, ll, err)
+	}
+
+	dto := people_dto.UserDTO{
+		Firstname:  form.Firstname,
+		Surname:    form.Surname,
+		Note:       form.Note,
+		Status:     form.Status,
+		Roles:      form.Roles,
+		AvatarID:   form.AvatarID,
+		Login:      form.Login,
+		PositionID: form.PositionID,
+		DeptID:     form.DeptID,
+		ExpiredAt:  expiredAt,
+		WorkedAt:   workedAt,
+		FiredAt:    firedAt,
+	}
+
+	resp, err := cnt.peopleAct.UpdateEmployee(ctx, thisUserID, form.UserID, &dto)
+	if err != nil {
+		ll.Named("peopleAct.UpdateEmployee").Nested(err)
+		return cnt.com.Response(c, ll, err)
+	}
 
 	ll.Debug("user updated")
 
-	return c.JSON(http.StatusOK, "")
+	return c.JSON(http.StatusOK, newEmployeeUpdateResponse(resp))
 }

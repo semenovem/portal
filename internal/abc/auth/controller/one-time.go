@@ -31,7 +31,7 @@ func (cnt *Controller) CreateOnetimeLink(c echo.Context) error {
 	)
 
 	if err := cnt.com.ExtractForm(c, ll, form); err != nil {
-		return err
+		return err.Err
 	}
 
 	ll = ll.With("userID", form.UserID)
@@ -72,7 +72,7 @@ func (cnt *Controller) LoginOnetimeLink(c echo.Context) error {
 	)
 
 	if err := cnt.com.ExtractForm(c, ll, form); err != nil {
-		return err
+		return err.Err
 	}
 
 	ll = ll.With("sessionID", form.EntryID)

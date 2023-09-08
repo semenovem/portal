@@ -30,7 +30,7 @@ func (cnt *Controller) CheckLogin(c echo.Context) error {
 	)
 
 	if err := cnt.com.ExtractForm(c, ll, form); err != nil {
-		return err
+		return err.Err
 	}
 
 	exists, err := cnt.peopleAct.CheckLoginName(ctx, thisUserID, form.LoginName)
@@ -74,7 +74,7 @@ func (cnt *Controller) CreateUser(c echo.Context) error {
 	)
 
 	if err := cnt.com.ExtractForm(c, ll, form); err != nil {
-		return err
+		return err.Err
 	}
 
 	model := &people_action.CreateUserDTO{
@@ -124,7 +124,7 @@ func (cnt *Controller) DeleteUser(c echo.Context) error {
 	)
 
 	if err := cnt.com.ExtractForm(c, ll, form); err != nil {
-		return err
+		return err.Err
 	}
 
 	ll = ll.With("userID", form.UserID)

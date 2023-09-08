@@ -55,7 +55,7 @@ func (cnt *Controller) UserProfile(c echo.Context) error {
 	)
 
 	if err := cnt.com.ExtractForm(c, ll, form); err != nil {
-		return err
+		return err.Err
 	}
 
 	profile, err := cnt.peopleAct.GetUserProfile(ctx, thisUserID, form.UserID)
@@ -87,7 +87,7 @@ func (cnt *Controller) UserPublicProfile(c echo.Context) error {
 	)
 
 	if err := cnt.com.ExtractForm(c, ll, form); err != nil {
-		return err
+		return err.Err
 	}
 
 	profile, err := cnt.peopleAct.GetUserProfile(ctx, thisUserID, form.UserID)

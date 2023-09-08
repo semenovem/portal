@@ -15,4 +15,6 @@ const (
 	UserToEmployee Code = "user-to-employee"
 
 	FreeLoginNameCheck Code = "free-login-name-check" // Проверить, свободен ли логин
+
+	EmployeeUpdate Code = "employee-update" // Обновление данных пользователя
 )

@@ -17,6 +17,7 @@ func (a *PeopleAction) CheckLoginName(
 
 	// TODO Должна быть проверка на право проверки свободного логина пользователя
 	// Требуется право создания нового пользователя
+	// Требуется право менять логин у пользователя
 
 	if err = it.ValidateUserLogin(loginName); err != nil {
 		ll.Named("ValidateUserLogin").BadRequest(err)

@@ -32,7 +32,7 @@ func (cnt *Controller) Store(c echo.Context) error {
 	)
 
 	if err := cnt.com.ExtractForm(c, ll, form); err != nil {
-		return err
+		return err.Err
 	}
 
 	ll = ll.With("store_path", form.StorePath)
@@ -67,7 +67,7 @@ func (cnt *Controller) Load(c echo.Context) error {
 	)
 
 	if err := cnt.com.ExtractForm(c, ll, form); err != nil {
-		return err
+		return err.Err
 	}
 
 	ll = ll.With("store_path", form.StorePath)
@@ -108,7 +108,7 @@ func (cnt *Controller) Delete(c echo.Context) error {
 	)
 
 	if err := cnt.com.ExtractForm(c, ll, form); err != nil {
-		return err
+		return err.Err
 	}
 
 	ll = ll.With("store_path", form.StorePath)

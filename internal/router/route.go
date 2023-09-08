@@ -43,7 +43,12 @@ func (r *Router) addRoutes() {
 	unauth.GET("/people/handbook", r.peopleCnt.Handbook)
 
 	// People Position
-	auth.GET("/people/positions", r.peopleCnt.UserPublicProfile)
+	auth.GET("/people/position", r.peopleCnt.UserPublicProfile)
+	auth.GET("/people/position/:position_id", r.peopleCnt.UserPublicProfile)
+
+	// People Dept
+	auth.GET("/people/dept", r.peopleCnt.UserPublicProfile)
+	auth.GET("/people/dept/:dept_id", r.peopleCnt.UserPublicProfile)
 
 	// ----------------- Vehicle -----------------
 	auth.GET("/vehicles", r.vehicleCnt.Search)

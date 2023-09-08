@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// Deprecated
 type CreateUserDTO struct {
 	FirstName string
 	Surname   string

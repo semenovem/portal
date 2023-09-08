@@ -7,16 +7,20 @@ import (
 	"net/http"
 )
 
+type ExtractResponse struct {
+	Err error
+}
+
 // ExtractForm New получить данные формы
-func (a *Common) ExtractForm(c echo.Context, ll pkg.Logger, form interface{}) error {
+func (a *Common) ExtractForm(c echo.Context, ll pkg.Logger, form interface{}) *ExtractResponse {
 	if err := c.Bind(form); err != nil {
 		ll.Named("ExtractForm.bind").BadRequest(err)
-		return a.fail.Send(c, "", http.StatusBadRequest, err)
+		return &ExtractResponse{a.fail.Send(c, "", http.StatusBadRequest, err)}
 	}
 
 	if err := c.Validate(form); err != nil {
 		ll.Named("ExtractForm.validate").With("form", form).BadRequest(err)
-		return a.fail.SendValidationErr(c, "", err)
+		return &ExtractResponse{a.fail.SendValidationErr(c, "", err)}
 	}
 
 	return nil

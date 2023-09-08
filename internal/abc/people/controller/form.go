@@ -59,6 +59,18 @@ type handbookForm struct {
 	Order      []string `json:"order[]" query:"order[]" validate:"omitempty"`
 }
 
-type userUpdateForm struct {
-	Fields map[string]string `json:"fields"`
+type employeeUpdateForm struct {
+	userForm
+	Firstname  *string   `json:"firstname" validate:"omitempty,user-name-vld-tag"`
+	Surname    *string   `json:"surname" validate:"omitempty,user-name-vld-tag"`
+	Note       *string   `json:"note"`
+	Status     *string   `json:"status" validate:"omitempty,user-status-vld-tag"`
+	Roles      *[]string `json:"roles" validate:"user-roles-vld-tag"`
+	AvatarID   *uint32   `json:"avatar_id"`
+	Login      *string   `json:"login" validate:"omitempty,user-login-vld-tag"`
+	PositionID *uint16   `json:"position_id" validate:"omitempty"`
+	DeptID     *uint16   `json:"dept_id" validate:"omitempty"`
+	ExpiredAt  *string   `json:"expired_at"`
+	WorkedAt   *string   `json:"worked_at"`
+	FiredAt    *string   `json:"fired_at"`
 }
