@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS people.users
   note        text                                  default NULL,                -- примечание
   avatar_id   int check ( avatar_id > 0)            default NULL,
   expired_at  timestamp                             default NULL,                -- УЗ активна до указанного времени
-  updated_at  timestamp                             default now()      NOT NULL, -- время последнего обновления
+  updated_at  timestamp                             default now()      NOT NULL,
 
   login       varchar(128)
     constraint users_login_unique_constraint UNIQUE default NULL,
@@ -49,6 +49,7 @@ CREATE TABLE IF NOT EXISTS people.employees
   user_id     int PRIMARY KEY REFERENCES people.users NOT NULL,
   position_id int REFERENCES people.positions         NOT NULL,
   dept_id     int REFERENCES people.departments       NOT NULL,
+  updated_at  timestamp default now()                 NOT NULL,
   worked_at   timestamp default now()                 NOT NULL, -- дата начала работы
   fired_at    timestamp default NULL,                           -- дата увольнения (последний день работы)
   constraint users_fired_before_work_constraint CHECK (employees.worked_at < employees.fired_at)
@@ -61,6 +62,13 @@ CREATE TABLE IF NOT EXISTS people.user_media_boxes
   position_id int REFERENCES people.positions         NOT NULL,
   worked_at   timestamp default now()                 NOT NULL, -- дата начала работы
   fired_at    timestamp default NULL                  NULL      -- дата увольнения (последний день работы)
+);
+
+-- Руководители отделов
+CREATE TABLE IF NOT EXISTS people.head_of_dept
+(
+  dept_id     smallint references people.departments NOT NULL,
+  employee_id int references people.employees        NOT NULL
 );
 
 

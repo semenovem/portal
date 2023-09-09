@@ -20,7 +20,11 @@ func NewWithTargetErr(target, err error) error {
 	return NewWithTargetErrf(target, err.Error())
 }
 
-func NewWithTargetErrf(target error, msg string) error {
+func NewWithTargetErrf(target error, msg string, v ...any) error {
+	if len(v) != 0 {
+		msg = fmt.Sprintf(msg, v...)
+	}
+
 	switch t := target.(type) {
 	case accessErr, *accessErr:
 		return &accessErr{

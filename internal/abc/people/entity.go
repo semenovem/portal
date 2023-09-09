@@ -1,15 +1,40 @@
 package people
 
-import "github.com/semenovem/portal/pkg/it"
+import (
+	"time"
+)
 
-// EmployeesSearchOpts параметры поиска сотрудников
-type EmployeesSearchOpts struct {
-	Limit  uint32
-	Offset uint32
+type UserPosition struct {
+	ID       uint16
+	Title    string
+	ParentID uint16
 }
 
-// EmployeesSearchResult результат поиска сотрудников
-type EmployeesSearchResult struct {
-	Total     uint32
-	Employees []*it.EmployeeProfile
+type UserDept struct {
+	ID       uint16
+	Title    string
+	ParentID uint16
+}
+
+type Employee struct {
+	ID        uint32
+	Status    UserStatus
+	Roles     []UserRole
+	AvatarID  uint32
+	FirstName string
+	Surname   string
+	Note      string
+	ExpiredAt *time.Time
+
+	PositionID  uint16     // должность
+	DeptID      uint16     // отдел
+	StartWorkAt time.Time  // Дата начала работы
+	FiredAt     *time.Time // Дата увольнения
+}
+
+type UserBoss struct {
+	ID            uint32
+	Firstname     string
+	Surname       string
+	PositionTitle string
 }

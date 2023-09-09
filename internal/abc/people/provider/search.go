@@ -3,16 +3,20 @@ package people_provider
 import (
 	"context"
 	"github.com/semenovem/portal/internal/abc/people"
-	"github.com/semenovem/portal/pkg/it"
+	people_dto "github.com/semenovem/portal/internal/abc/people/dto"
+	"time"
 )
 
 func (p *PeopleProvider) SearchEmployees(
 	ctx context.Context,
-	opts *people.EmployeesSearchOpts,
-) (*people.EmployeesSearchResult, error) {
+	opts *people_dto.EmployeesSearchOpts,
+) (*people_dto.EmployeesSearchResult, error) {
 	var (
 		total uint32
-		ls    = make([]*it.EmployeeProfile, 0)
+		//bossIDs     = make([]uint32, 0)
+		//positionIDs = make([]uint32, 0)
+		//deptIDs     = make([]uint32, 0)
+		ls = make([]*people.Employee, 0)
 
 		sq = `SELECT e.user_id
 		FROM people.employees AS e
@@ -25,7 +29,20 @@ func (p *PeopleProvider) SearchEmployees(
 	}
 
 	for rows.Next() {
-		o := it.EmployeeProfile{}
+		o := people.Employee{
+			ID:          0,
+			Status:      "",
+			Roles:       nil,
+			AvatarID:    0,
+			FirstName:   "",
+			Surname:     "",
+			Note:        "",
+			ExpiredAt:   nil,
+			PositionID:  0,
+			DeptID:      0,
+			StartWorkAt: time.Time{},
+			FiredAt:     nil,
+		}
 
 		if err = rows.Scan(
 			&o.ID,
@@ -42,7 +59,7 @@ func (p *PeopleProvider) SearchEmployees(
 
 	defer rows.Close()
 
-	return &people.EmployeesSearchResult{
+	return &people_dto.EmployeesSearchResult{
 		Total:     total,
 		Employees: ls,
 	}, err

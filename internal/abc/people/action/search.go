@@ -2,18 +2,16 @@ package people_action
 
 import (
 	"context"
-	"github.com/semenovem/portal/internal/abc/people"
+	people_dto "github.com/semenovem/portal/internal/abc/people/dto"
 )
 
-func (a *PeopleAction) PublicHandbook(ctx context.Context) (*people.EmployeesSearchResult, error) {
+func (a *PeopleAction) EmployeeHandbook(
+	ctx context.Context,
+	opts *people_dto.EmployeesSearchOpts,
+) (*people_dto.EmployeesSearchResult, error) {
 	var (
-		ll = a.logger.Named("PublicHandbook")
+		ll = a.logger.Named("EmployeeHandbook")
 	)
-
-	opts := &people.EmployeesSearchOpts{
-		Limit:  0,
-		Offset: 0,
-	}
 
 	result, err := a.peoplePvd.SearchEmployees(ctx, opts)
 	if err != nil {

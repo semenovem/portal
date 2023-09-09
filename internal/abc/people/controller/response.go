@@ -9,7 +9,7 @@ type freeLoginNameResponse struct {
 	ValidateErr string `json:"validate_err,omitempty"` // Что не так с введенным логином
 }
 
-type publicHandbookResponse struct {
-	Total     uint32                `json:"total"`
-	Employees []*publicEmployeeView `json:"employees"`
+type employeeHandbookResponse struct {
+	Total     uint32                 `json:"total"`
+	Employees []*employeeProfileView `json:"employees"`
 }

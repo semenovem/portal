@@ -9,33 +9,38 @@ import (
 	"net/http"
 )
 
-// Handbook docs
+// EmployeeHandbook docs
 //
 //	@Summary		Справочник сотрудников
 //	@Description	Доступен в локальной сети без авторизации
 //	@Description
 //	@Produce	json
-//	@Success	200	{object}	publicHandbookResponse
+//	@Success	200	{object}	employeeHandbookResponse
 //	@Failure	400	{object}	fail.Response
-//	@Router		/people/handbook [GET]
+//	@Router		/people/employee/handbook [GET]
 //	@Tags		people
-func (cnt *Controller) Handbook(c echo.Context) error {
+func (cnt *Controller) EmployeeHandbook(c echo.Context) error {
 	var (
-		ll  = cnt.logger.Named("Handbook")
+		ll  = cnt.logger.Named("EmployeeHandbook")
 		ctx = c.Request().Context()
 	)
 
-	result, err := cnt.peopleAct.PublicHandbook(ctx)
+	opts := &people_dto.EmployeesSearchOpts{
+		Limit:  0,
+		Offset: 0,
+	}
+
+	result, err := cnt.peopleAct.EmployeeHandbook(ctx, opts)
 	if err != nil {
-		ll.Named("peopleAct.PublicHandbook").Nested(err)
+		ll.Named("peopleAct.EmployeeHandbook").Nested(err)
 		return cnt.com.Response(c, ll, err)
 	}
 
 	ll.Debug("success")
 
-	response := publicHandbookResponse{
+	response := employeeHandbookResponse{
 		Total:     result.Total,
-		Employees: newEmployeePublicProfileViews(result.Employees),
+		Employees: newEmployeePublicProfileViews(nil),
 	}
 
 	return c.JSON(http.StatusOK, response)

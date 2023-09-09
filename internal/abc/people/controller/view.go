@@ -13,6 +13,17 @@ type userPublicProfileView struct {
 	Avatar    string `json:"avatar,omitempty"`
 }
 
+// Профиль сотрудника
+type employeeProfileView struct {
+	userPublicProfileView
+	WorkedAt     time.Time  `json:"worked_at"`          // Дата начала работы
+	FiredAt      *time.Time `json:"fired_at,omitempty"` // Дата начала работы
+	PositionName string     `json:"position_name"`
+	DeptName     string     `json:"dept_name"`
+	Note         string     `json:"note,omitempty"`
+	BossID       uint32     `json:"boss_id"`
+}
+
 // Общедоступный профиль сотрудника
 type publicEmployeeView struct {
 	userPublicProfileView

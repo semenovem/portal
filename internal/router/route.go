@@ -31,18 +31,18 @@ func (r *Router) addRoutes() {
 
 	// ----------------- People -----------------
 	auth.DELETE("/people/:user_id", r.peopleCnt.DeleteUser)
+	auth.GET("/people/free-login/:login_name", r.peopleCnt.CheckLogin)
 
 	// Employee
+	unauth.GET("/people/employee/handbook", r.peopleCnt.EmployeeHandbook)
 	auth.POST("/people/employee", r.peopleCnt.CreateEmployee)
 	auth.PATCH("/people/employee/:user_id", r.peopleCnt.UpdateEmployee)
+
+	auth.GET("/people/:user_id/profile", r.peopleCnt.UserProfile)
 
 	auth.GET("/people/self/profile", r.peopleCnt.SelfProfile)
 	auth.GET("/people/:user_id/profile", r.peopleCnt.UserProfile)
 	auth.GET("/people/:user_id/profile/public", r.peopleCnt.UserPublicProfile)
-
-	auth.GET("/people/free-login/:login_name", r.peopleCnt.CheckLogin)
-
-	unauth.GET("/people/handbook", r.peopleCnt.Handbook)
 
 	// People Position
 	auth.GET("/people/position", r.peopleCnt.UserPublicProfile)
