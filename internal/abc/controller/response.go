@@ -32,7 +32,7 @@ func (a *Common) Response(c echo.Context, ll pkg.Logger, err error) error {
 			text = txt.RestrictDuplicateEmail
 		case throw.Err400DuplicateLogin:
 			text = txt.RestrictDuplicateLogin
-		case throw.Err400FiredBehind:
+		case throw.Err400FiredBeforeStart:
 			text = txt.RuleFiredBehindWorked
 		}
 

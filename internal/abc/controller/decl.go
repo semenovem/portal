@@ -20,8 +20,7 @@ const (
 	UserStatusVldTag = "user-status-vld-tag"
 	UserRoleVldTag   = "user-role-vld-tag"
 	UserRolesVldTag  = "user-roles-vld-tag"
-
-	ConditionalTimeVldTag = "conditional-time-vld-tag"
+	TimeVldTag       = "time-vld-tag"
 )
 
 type This struct {
@@ -37,6 +36,6 @@ type CntArgs struct {
 
 // ValidateConditionalTime Валидатор времени
 func ValidateConditionalTime(s string) error {
-	_, err := util.ParsePointerStringToTime(&s)
+	_, err := util.ParsePointerStrToTime(&s)
 	return err
 }

@@ -82,7 +82,12 @@ definitions:
     properties:
       avatar_id:
         type: integer
+      dept_id:
+        minimum: 1
+        type: integer
       expired_at:
+        type: string
+      fired_at:
         type: string
       firstname:
         type: string
@@ -92,6 +97,9 @@ definitions:
         type: string
       passwd:
         type: string
+      position_id:
+        minimum: 1
+        type: integer
       roles:
         items:
           type: string
@@ -100,9 +108,14 @@ definitions:
         type: string
       surname:
         type: string
+      worked_at:
+        type: string
     required:
+    - dept_id
     - firstname
+    - position_id
     - surname
+    - worked_at
     type: object
   internal_abc_people_controller.employeeUpdateForm:
     properties:
@@ -138,6 +151,7 @@ definitions:
       free:
         type: boolean
       validate_err:
+        description: Что не так с введенным логином
         type: string
     type: object
   internal_abc_people_controller.publicEmployeeView:
@@ -169,6 +183,11 @@ definitions:
           $ref: '#/definitions/internal_abc_people_controller.publicEmployeeView'
         type: array
       total:
+        type: integer
+    type: object
+  internal_abc_people_controller.userCreateResponse:
+    properties:
+      user_id:
         type: integer
     type: object
   internal_abc_people_controller.userPublicProfileView:
@@ -471,6 +490,34 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Получить публичный профиль пользователя по его ID
+      tags:
+      - people
+  /people/employee:
+    post:
+      description: |
+        `expired_at, worked_at, fired_at` в формате `2001-03-24T00:00:00Z`
+        введенный login нужно проверить, что он допустим `/people/free-login/:login_name`
+      parameters:
+      - description: данные создаваемого пользователя
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/internal_abc_people_controller.createUserForm'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_abc_people_controller.userCreateResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_semenovem_portal_pkg_fail.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Создает нового сотрудника
       tags:
       - people
   /people/employee/:user_id:

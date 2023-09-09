@@ -1,6 +1,9 @@
 package util
 
-import "time"
+import (
+	"strings"
+	"time"
+)
 
 func ErrToPointerStr(err error) *string {
 	if err == nil {
@@ -49,4 +52,9 @@ func ZeroUint32Nil(s *uint32) *uint32 {
 	}
 
 	return s
+}
+
+func NormLowerStrToPointer(s string) *string {
+	ss := strings.ToLower(strings.TrimSpace(s))
+	return &ss
 }

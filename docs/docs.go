@@ -415,6 +415,48 @@ const docTemplate = `{
                 }
             }
         },
+        "/people/employee": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "` + "`" + `expired_at, worked_at, fired_at` + "`" + ` в формате ` + "`" + `2001-03-24T00:00:00Z` + "`" + `\nвведенный login нужно проверить, что он допустим ` + "`" + `/people/free-login/:login_name` + "`" + `\n",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "people"
+                ],
+                "summary": "Создает нового сотрудника",
+                "parameters": [
+                    {
+                        "description": "данные создаваемого пользователя",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_abc_people_controller.createUserForm"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_abc_people_controller.userCreateResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_fail.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/people/employee/:user_id": {
             "patch": {
                 "security": [
@@ -1012,14 +1054,24 @@ const docTemplate = `{
         "internal_abc_people_controller.createUserForm": {
             "type": "object",
             "required": [
+                "dept_id",
                 "firstname",
-                "surname"
+                "position_id",
+                "surname",
+                "worked_at"
             ],
             "properties": {
                 "avatar_id": {
                     "type": "integer"
                 },
+                "dept_id": {
+                    "type": "integer",
+                    "minimum": 1
+                },
                 "expired_at": {
+                    "type": "string"
+                },
+                "fired_at": {
                     "type": "string"
                 },
                 "firstname": {
@@ -1034,6 +1086,10 @@ const docTemplate = `{
                 "passwd": {
                     "type": "string"
                 },
+                "position_id": {
+                    "type": "integer",
+                    "minimum": 1
+                },
                 "roles": {
                     "type": "array",
                     "items": {
@@ -1044,6 +1100,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "surname": {
+                    "type": "string"
+                },
+                "worked_at": {
                     "type": "string"
                 }
             }
@@ -1099,6 +1158,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "validate_err": {
+                    "description": "Что не так с введенным логином",
                     "type": "string"
                 }
             }
@@ -1146,6 +1206,14 @@ const docTemplate = `{
                     }
                 },
                 "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "internal_abc_people_controller.userCreateResponse": {
+            "type": "object",
+            "properties": {
+                "user_id": {
                     "type": "integer"
                 }
             }

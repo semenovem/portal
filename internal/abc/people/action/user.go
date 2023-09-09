@@ -2,10 +2,10 @@ package people_action
 
 import (
 	"context"
+	people_dto "github.com/semenovem/portal/internal/abc/people/dto"
 	"github.com/semenovem/portal/internal/abc/provider"
 	"github.com/semenovem/portal/pkg/it"
 	"github.com/semenovem/portal/pkg/throw"
-	"strings"
 )
 
 func (a *PeopleAction) CheckLoginName(
@@ -33,10 +33,10 @@ func (a *PeopleAction) CheckLoginName(
 	return exists, nil
 }
 
-func (a *PeopleAction) CreateUser(
+func (a *PeopleAction) CreateEmployee(
 	ctx context.Context,
 	thisUserID uint32,
-	dto *CreateUserDTO,
+	dto *people_dto.EmployeeDTO,
 ) (userID uint32, err error) {
 	ll := a.logger.Named("CreateUser")
 
@@ -45,18 +45,9 @@ func (a *PeopleAction) CreateUser(
 	// ----
 	// ----
 
-	userID, err = a.peoplePvd.CreateUser(ctx, dto.toPvdModel(a.userPasswdAuth.Hashing(dto.Passwd)))
+	userID, err = a.peoplePvd.CreateEmployee(ctx, dto)
 	if err != nil {
 		ll.Named("peoplePvd.CreateUser").Nested(err)
-
-		if provider.IsDuplicateKeyErr(err) {
-			if strings.Contains(err.Error(), "users_login_key") {
-				return 0, throw.Err400DuplicateLogin
-			}
-
-			return 0, throw.NewBadRequestErr(err.Error())
-		}
-
 		return
 	}
 

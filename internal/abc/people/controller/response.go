@@ -6,7 +6,7 @@ type userCreateResponse struct {
 
 type freeLoginNameResponse struct {
 	Free        bool   `json:"free"`
-	ValidateErr string `json:"validate_err,omitempty"`
+	ValidateErr string `json:"validate_err,omitempty"` // Что не так с введенным логином
 }
 
 type publicHandbookResponse struct {

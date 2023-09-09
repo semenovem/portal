@@ -30,9 +30,11 @@ func (r *Router) addRoutes() {
 	//auth.DELETE("/media/box/:box_id", r.mediaCnt.FileUpload)
 
 	// ----------------- People -----------------
-	auth.POST("/people", r.peopleCnt.CreateUser)
 	auth.DELETE("/people/:user_id", r.peopleCnt.DeleteUser)
-	auth.PATCH("/people/employee/:user_id", r.peopleCnt.EmployeeUpdate)
+
+	// Employee
+	auth.POST("/people/employee", r.peopleCnt.CreateEmployee)
+	auth.PATCH("/people/employee/:user_id", r.peopleCnt.UpdateEmployee)
 
 	auth.GET("/people/self/profile", r.peopleCnt.SelfProfile)
 	auth.GET("/people/:user_id/profile", r.peopleCnt.UserProfile)

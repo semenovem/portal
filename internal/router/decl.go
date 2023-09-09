@@ -21,6 +21,7 @@ import (
 	"github.com/semenovem/portal/internal/audit"
 	"github.com/semenovem/portal/pkg"
 	"github.com/semenovem/portal/pkg/fail"
+	"github.com/semenovem/portal/pkg/it"
 	"github.com/semenovem/portal/pkg/jwtoken"
 	"github.com/semenovem/portal/pkg/txt"
 	"net/http"
@@ -49,6 +50,7 @@ func New(
 	config *config.API,
 	auditService *audit.AuditProvider,
 	jwtService *jwtoken.Service,
+	userPasswdAuth it.UserPasswdAuthenticator,
 
 	authPvd *auth_provider.AuthProvider,
 	peoplePvd *people_provider.PeopleProvider,
@@ -150,7 +152,7 @@ func New(
 			config.JWT.RefreshTokenCookieName,
 		),
 
-		peopleCnt: people_controller.New(cntArg, peopleAct),
+		peopleCnt: people_controller.New(cntArg, userPasswdAuth, peopleAct),
 		storeCnt:  store_controller.New(cntArg, storeAct),
 		mediaCnt:  media_controller.New(cntArg, mediaAct),
 	}

@@ -6,15 +6,11 @@ var (
 	Err400DuplicateLogin = NewBadRequestErr("duplicate user login")
 	Err400DuplicateEmail = NewBadRequestErr("duplicate user email")
 
-	Err400FiredBehind = NewBadRequestErr("time fired behind start work")
+	Err400FiredBeforeStart = NewBadRequestErr("time fired before start work")
 )
 
 func NewBadRequestErr(msg string) error {
 	return &badRequestErr{msg: msg}
-}
-
-func NewBadRequestWithTargetErr(target, err error) error {
-	return &badRequestErr{msg: err.Error(), target: target}
 }
 
 func IsBadRequestErr(err error) bool {

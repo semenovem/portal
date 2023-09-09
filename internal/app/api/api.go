@@ -134,6 +134,7 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 		app.config,
 		app.auditService,
 		app.jwtService,
+		app.userPasswdAuth,
 
 		app.providers.auth,
 		app.providers.people,

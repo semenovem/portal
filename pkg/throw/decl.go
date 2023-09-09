@@ -17,28 +17,28 @@ var (
 )
 
 func NewWithTargetErr(target, err error) error {
-	return NewWithTargetErrf(err, err.Error())
+	return NewWithTargetErrf(target, err.Error())
 }
 
 func NewWithTargetErrf(target error, msg string) error {
 	switch t := target.(type) {
-	case accessErr:
+	case accessErr, *accessErr:
 		return &accessErr{
 			msg:    msg,
 			target: t,
 		}
-	case authErr:
+	case authErr, *authErr:
 		return &authErr{
 			msg:    msg,
 			target: t,
 		}
-	case badRequestErr:
+	case badRequestErr, *badRequestErr:
 		return &badRequestErr{
 			msg:    msg,
 			target: t,
 		}
 
-	case invalidErr:
+	case invalidErr, *invalidErr:
 		return &invalidErr{
 			msg:    msg,
 			target: t,

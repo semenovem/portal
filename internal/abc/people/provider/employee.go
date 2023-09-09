@@ -6,7 +6,6 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/semenovem/portal/internal/abc/people/dto"
 	"github.com/semenovem/portal/internal/abc/provider"
-	"github.com/semenovem/portal/pkg/throw"
 )
 
 func (p *PeopleProvider) CreateEmployee(
@@ -72,8 +71,8 @@ func (p *PeopleProvider) createUserTx(
 	)
 
 	if err = tx.QueryRow(ctx, sq, args).Scan(&userID); err != nil {
-		if provider.IsDuplicateKeyErr(err) {
-			return 0, throw.Err400DuplicateLogin
+		if n, ok := provider.ConstraintErr(err); ok {
+			return 0, constraintErr(n, err)
 		}
 
 		p.logger.Named("CreateUser").DB(err)
@@ -92,7 +91,7 @@ func (p *PeopleProvider) createEmployeeTx(
 		sq = `INSERT INTO people.employees
 		       ( user_id,  position_id,  dept_id,  worked_at,  fired_at)
 		VALUES (@user_id, @position_id, @dept_id, @worked_at, @fired_at)
-		ON CONFLICT (user) DO UPDATE SET
+		ON CONFLICT (user_id) DO UPDATE SET
 			position_id = @position_id,
 			dept_id     = @dept_id,
 			worked_at   = @worked_at,
@@ -108,12 +107,8 @@ func (p *PeopleProvider) createEmployeeTx(
 	)
 
 	if _, err := tx.Exec(ctx, sq, args); err != nil {
-		if provider.IsCheckErr(err) {
-			return throw.Err400FiredBehind
-		}
-
-		if provider.IsConstrainForeignKeyErr(err) {
-			return throw.NewBadRequestErr(err.Error())
+		if n, ok := provider.ConstraintErr(err); ok {
+			return constraintErr(n, err)
 		}
 
 		p.logger.Named("createEmployeeTx").DB(err)

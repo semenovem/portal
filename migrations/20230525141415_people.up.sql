@@ -27,29 +27,31 @@ CREATE TABLE IF NOT EXISTS people.departments
 CREATE TABLE IF NOT EXISTS people.users
 (
   id          serial PRIMARY KEY,
-  deleted     bool                       default false      NOT NULL,
-  firstname   varchar(128)                                  NOT NULL, -- Имя
-  surname     varchar(128)               default ''         NOT NULL, -- Фамилия
-  status      people.statuses_enum       default 'inactive' NOT NULL,
-  roles       people.roles_enum[]        default NULL,
-  note        text                       default NULL,                -- примечание
-  avatar_id   int check ( avatar_id > 0) default NULL,
-  expired_at  timestamp                  default NULL,                -- УЗ активна до указанного времени
-  updated_at  timestamp                  default now()      NOT NULL, -- время последнего обновления
+  deleted     bool                                  default false      NOT NULL,
+  firstname   varchar(128)                                             NOT NULL, -- Имя
+  surname     varchar(128)                          default ''         NOT NULL, -- Фамилия
+  status      people.statuses_enum                  default 'inactive' NOT NULL,
+  roles       people.roles_enum[]                   default NULL,
+  note        text                                  default NULL,                -- примечание
+  avatar_id   int check ( avatar_id > 0)            default NULL,
+  expired_at  timestamp                             default NULL,                -- УЗ активна до указанного времени
+  updated_at  timestamp                             default now()      NOT NULL, -- время последнего обновления
 
-  login       varchar(128) UNIQUE        default NULL,
-  passwd_hash varchar(40)                default NULL,                -- хэш пароля
-  props       jsonb                      default NULL                 -- данные пользователя
+  login       varchar(128)
+    constraint users_login_unique_constraint UNIQUE default NULL,
+  passwd_hash varchar(40)                           default NULL,                -- хэш пароля
+  props       jsonb                                 default NULL                 -- данные пользователя
 );
 
 -- Сотрудники компании
 CREATE TABLE IF NOT EXISTS people.employees
 (
-  user_id     int PRIMARY KEY REFERENCES people.users                                             NOT NULL,
-  position_id int REFERENCES people.positions                                                     NOT NULL,
-  dept_id     int REFERENCES people.departments                                                   NOT NULL,
-  worked_at   timestamp default now() check ( fired_at IS NULL OR worked_at < fired_at) NOT NULL, -- дата начала работы
-  fired_at    timestamp default NULL check ( fired_at IS NULL OR fired_at > worked_at )                                         -- дата увольнения (последний день работы)
+  user_id     int PRIMARY KEY REFERENCES people.users NOT NULL,
+  position_id int REFERENCES people.positions         NOT NULL,
+  dept_id     int REFERENCES people.departments       NOT NULL,
+  worked_at   timestamp default now()                 NOT NULL, -- дата начала работы
+  fired_at    timestamp default NULL,                           -- дата увольнения (последний день работы)
+  constraint users_fired_before_work_constraint CHECK (employees.worked_at < employees.fired_at)
 );
 
 -- Наборы документов пользователей

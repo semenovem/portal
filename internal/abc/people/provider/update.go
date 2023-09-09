@@ -103,9 +103,8 @@ func (p *PeopleProvider) updateUserTx(
 
 	res, err := tx.Exec(ctx, sq, args)
 	if err != nil && !provider.IsDuplicateKeyErr(err) {
-		if provider.IsDuplicateKeyErr(err) {
-			// TODO тут привязать к названию ограничения и сообщить конкретную ошибку
-			return throw.Err400DuplicateLogin
+		if n, ok := provider.ConstraintErr(err); ok {
+			return constraintErr(n, err)
 		}
 
 		p.logger.Named("UpdateUserTx").DB(err)
@@ -159,14 +158,8 @@ func (p *PeopleProvider) updateEmployeeTx(
 
 	res, err := tx.Exec(ctx, sq, args)
 	if err != nil {
-		if provider.IsDuplicateKeyErr(err) {
-			// TODO тут привязать к названию ограничения и сообщить конкретную ошибку
-			return throw.Err400DuplicateLogin
-		}
-
-		if provider.IsCheckErr(err) {
-			// TODO тут привязать к названию ограничения и сообщить конкретную ошибку
-			return throw.NewBadRequestWithTargetErr(throw.Err400FiredBehind, err)
+		if n, ok := provider.ConstraintErr(err); ok {
+			return constraintErr(n, err)
 		}
 
 		p.logger.Named("UpdateUserTx").DB(err)

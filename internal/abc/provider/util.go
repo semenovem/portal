@@ -40,6 +40,15 @@ func IsCheckErr(err error) bool {
 	return false
 }
 
+// CheckConstraintErr ограничивающее условие для значения поля в таблице
+func CheckConstraintErr(err error) (nameConstraint string, ok bool) {
+	if e, ok := err.(*pgconn.PgError); ok && e.Code == "23514" {
+		return e.ConstraintName, true
+	}
+
+	return "", false
+}
+
 // IsConstrainForeignKeyErr ограничение удаления записи
 func IsConstrainForeignKeyErr(err error) bool {
 	if e, ok := err.(*pgconn.PgError); ok {
@@ -58,4 +67,13 @@ func IsUnknownTypeErr(err error) bool {
 	}
 
 	return false
+}
+
+// ConstraintErr является ли ошибки БД следствием ограничения уникальности значения в поле
+func ConstraintErr(err error) (nameConstraint string, ok bool) {
+	if e, ok := err.(*pgconn.PgError); ok && (e.Code == "23505" || e.Code == "23514") {
+		return e.ConstraintName, true
+	}
+
+	return "", false
 }

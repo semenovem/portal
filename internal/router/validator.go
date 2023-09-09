@@ -22,7 +22,7 @@ var strValidators = map[string]func(string) error{
 	controller.UserStatusVldTag: it.ValidateUserStatus,
 	controller.UserRoleVldTag:   it.ValidateUserRole,
 
-	controller.ConditionalTimeVldTag: controller.ValidateConditionalTime,
+	controller.TimeVldTag: controller.ValidateConditionalTime,
 }
 
 var arrStrValidators = map[string]func([]string) error{

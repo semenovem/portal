@@ -10,7 +10,8 @@ const (
 	AuthSessionDeny Code = "auth-session-deny" // Создана новая авторизованная сессия
 	AuthSession     Code = "auth-session"      // Создана новая авторизованная сессия
 
-	EntityUser Code = "entity-user"
+	EntityUser     Code = "entity-user"
+	EntityEmployee Code = "entity-employee"
 
 	UserToEmployee Code = "user-to-employee"
 

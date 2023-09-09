@@ -54,39 +54,6 @@ func (p *PeopleProvider) GetUserProfile(ctx context.Context, userID uint32) (*it
 	}, nil
 }
 
-func (p *PeopleProvider) CreateUser(ctx context.Context, m *UserModel) (userID uint32, err error) {
-	var (
-		sq = `INSERT INTO people.users (
-			  firstname, surname, login, note,
-			  status, roles, avatar_id,
-			  expired_at, passwd_hash, props
-			) VALUES (
-				LOWER(@firstname), LOWER(@surname), LOWER(@login), @note,
-				@status, @roles::people.roles_enum[], @avatar_id,
-				@expired_at, @passwd_hash, @props
-			) returning id`
-
-		args = pgx.NamedArgs{
-			"firstname":   m.firstname,
-			"surname":     m.surname,
-			"login":       m.login,
-			"note":        m.note,
-			"status":      m.status,
-			"roles":       m.roles,
-			"avatar_id":   m.avatarID,
-			"expired_at":  m.expiredAt,
-			"passwd_hash": m.passwdHash,
-			"props":       m.props,
-		}
-	)
-
-	if err = p.db.QueryRow(ctx, sq, args).Scan(&userID); err != nil && !provider.IsDuplicateKeyErr(err) {
-		p.logger.Named("CreateUser").DB(err)
-	}
-
-	return userID, err
-}
-
 func (p *PeopleProvider) ExistsLoginName(ctx context.Context, loginName string) (exists bool, err error) {
 	sq := `SELECT NOT EXISTS (select id from people.users where login = $1)`
 	err = p.db.QueryRow(ctx, sq, loginName).Scan(&exists)
