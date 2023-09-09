@@ -3,24 +3,25 @@ CREATE TYPE people.statuses_enum AS ENUM ('active', 'inactive', 'blocked', 'regi
 CREATE TYPE people.additional_field_kind_enum AS ENUM (
   'email-main', 'email-personal', 'tel-work', 'tel-personal', 'note');
 
--- Должности
-CREATE TABLE IF NOT EXISTS people.positions
-(
-  id          smallserial PRIMARY KEY,
-  title       varchar UNIQUE NOT NULL,                      -- название должности
-  description varchar        NOT NULL,                      -- описание
-  parent_id   int REFERENCES people.positions default NULL, -- руководитель
-  deleted     timestamp                       default NULL
-);
-
 -- Отделы
 CREATE TABLE IF NOT EXISTS people.departments
 (
   id          smallserial PRIMARY KEY,
-  title       varchar UNIQUE NOT NULL,                        -- название департамента
-  description varchar        NOT NULL,                        -- описание
-  parent_id   int REFERENCES people.departments default NULL, -- руководитель
-  deleted     timestamp                         default NULL
+  title       varchar UNIQUE                                  NOT NULL, -- название департамента
+  description varchar                                         NOT NULL, -- описание
+  parent_id   int REFERENCES people.departments default NULL,           -- руководитель
+  deleted     bool                              default false NOT NULL
+);
+
+-- Должности
+CREATE TABLE IF NOT EXISTS people.positions
+(
+  id          smallserial PRIMARY KEY,
+  dept_id     int references people.departments             NOT NULL,
+  title       varchar UNIQUE                                NOT NULL, -- название должности
+  description varchar                                       NOT NULL, -- описание
+  parent_id   int REFERENCES people.positions default NULL,           -- руководитель
+  deleted     bool                            default false NOT NULL
 );
 
 -- Пользователи
@@ -76,26 +77,28 @@ CREATE TABLE IF NOT EXISTS people.head_of_dept
 -------------------------------   init data   ----------------------------------
 --------------------------------------------------------------------------------
 
-insert into people.positions (id, title, description, parent_id)
-values (1, 'водитель', 'описание должности 1', null),
-       (2, 'водитель-экспедитор', 'описание должности 2', null),
-       (3, 'экспедитор', 'описание должности 2', null),
-       (4, 'грузчик-экспедитор', 'описание должности 2', null),
-       (5, 'Руководитель отдела транспорта', '', null),
-       (6, 'Генеральный директор', '', null),
-       (7, 'Руководитель АТИ', '', null),
-       (8, 'Оператор', '', null),
-       (9, 'грузчик', '', null)
-on conflict do nothing;
-
-
 insert into people.departments (id, title, description, parent_id)
-values (1, 'Управление', '', null),
-       (2, 'АТИ', 'междугородние перевозки', null),
-       (3, 'Кадры', 'работа с персоналом', null),
-       (4, 'Транспортный', 'работа с транспортом', null),
-       (5, 'Сборка', '', null)
+values (1, 'Дирекция', 'управление всеми процессами в компании', null),
+       (2, 'Доставки/перевозки', 'работа с водителями/грузчиками', 1),
+       (3, 'Кадры', 'набор персонала', 1),
+       (4, 'АТИ', 'междугородние перевозки', 1),
+       (5, 'Транспортный отдел', 'работа с транспортом', 1),
+       (6, 'Сборка', '', 1)
 on conflict do nothing;
+
+insert into people.positions (id, dept_id, title, description, parent_id)
+values (1, 1, 'Генеральный директор', 'описание должности 1', null),
+       (2, 2, 'Заместитель Гендира', 'описание должности 2', null),
+       (2, 1, 'Администратор ИТ', 'описание должности 2', null),
+       (5, 2, 'Руководитель отдела транспорта', '', null),
+       (7, 4, 'Руководитель АТИ', '', null),
+       (2, 2, 'водитель-экспедитор', 'описание должности 2', null),
+       (3, 2, 'экспедитор', 'описание должности 2', null),
+       (4, 2, 'грузчик-экспедитор', 'описание должности 2', null),
+       (8, 2, 'Оператор', '', null),
+       (9, 2, 'грузчик', '', null)
+on conflict do nothing;
+
 
 
 --------------------------------------------------------------------------------

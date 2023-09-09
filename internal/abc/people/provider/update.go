@@ -80,7 +80,7 @@ func (p *PeopleProvider) updateUserTx(
 	}
 	if dto.AvatarID != nil {
 		set = append(set, "avatar_id = @avatar_id")
-		args["avatar_id"] = util.ZeroUint32Nil(dto.AvatarID)
+		args["avatar_id"] = util.NumToValOrNil(dto.AvatarID)
 	}
 	if dto.ExpiredAt != nil {
 		set = append(set, "expired_at = @expired_at")

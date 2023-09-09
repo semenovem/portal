@@ -14,9 +14,10 @@ type UserDept struct {
 	ID       uint16
 	Title    string
 	ParentID uint16
+	BossID   uint16
 }
 
-type Employee struct {
+type EmployeeSlim struct {
 	ID        uint32
 	Status    UserStatus
 	Roles     []UserRole
@@ -24,7 +25,6 @@ type Employee struct {
 	FirstName string
 	Surname   string
 	Note      string
-	ExpiredAt *time.Time
 
 	PositionID  uint16     // должность
 	DeptID      uint16     // отдел

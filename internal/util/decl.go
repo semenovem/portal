@@ -46,7 +46,7 @@ func ZeroTimeNil(s *time.Time) *time.Time {
 	return s
 }
 
-func ZeroUint32Nil(s *uint32) *uint32 {
+func NumToValOrNil[T uint16 | uint32](s *T) *T {
 	if s == nil || *s == 0 {
 		return nil
 	}
