@@ -8,10 +8,20 @@ import (
 func (a *PeopleAction) UpdateEmployee(
 	ctx context.Context,
 	thisUserID, userID uint32,
-	dto *people_dto.UserDTO,
-) (*people_dto.UserProcessingErrDTO, error) {
+	dto *people_dto.EmployeeDTO,
+) error {
+	var (
+		ll = a.logger.Named("UpdateEmployee").With("userID", userID)
+	)
 
-	//people_dto.UserProcessingErrDTO
+	// TODO проверка права редактирования пользователя
+	// Проверка права приема/увольнения пользователя
 
-	return nil, nil
+	err := a.peoplePvd.UpdateEmployee(ctx, userID, dto)
+	if err != nil {
+		ll.Named("peoplePvd.UpdateEmployee").Nested(err)
+		return err
+	}
+
+	return nil
 }

@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/semenovem/portal/pkg"
@@ -47,7 +48,13 @@ func (p *pen) Named(n string) pkg.Logger {
 
 func (p *pen) With(k string, v interface{}) pkg.Logger {
 	a := p.copy()
-	a.with(k, fmt.Sprintf("%+v", v))
+
+	if b, err := json.Marshal(v); err != nil {
+		a.with(k, fmt.Sprintf("%+v", v))
+		p.save(Error, "inside error=[%s]", err.Error())
+	} else {
+		a.with(k, fmt.Sprintf("%+v", string(b)))
+	}
 
 	return a
 }

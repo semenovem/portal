@@ -20,15 +20,20 @@ func (a *Common) Response(c echo.Context, ll pkg.Logger, err error) error {
 	case throw.AccessErr:
 		retCode = http.StatusForbidden
 
+	case throw.InvalidErr:
+		retCode = http.StatusBadRequest
+
 	case throw.BadRequestErr:
 		ll.BadRequest(err)
 		retCode = http.StatusBadRequest
 
-		switch t {
+		switch t.Target() {
 		case throw.Err400DuplicateEmail:
 			text = txt.RestrictDuplicateEmail
 		case throw.Err400DuplicateLogin:
 			text = txt.RestrictDuplicateLogin
+		case throw.Err400FiredBehind:
+			text = txt.RuleFiredBehindWorked
 		}
 
 	case throw.NotFoundErr:

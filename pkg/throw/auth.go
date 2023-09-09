@@ -1,5 +1,7 @@
 package throw
 
+/* AuthErr ошибки в результате нарушения при авторизации */
+
 const (
 	MsgUserCantLogin = "user cant login"
 )
@@ -15,16 +17,6 @@ var (
 	ErrInvalidBearer   = NewAuthErr("invalid bearer token")
 )
 
-// AuthErr ошибки в результате нарушения при авторизации
-type AuthErr interface {
-	Error() string
-	isAuthErr() bool
-}
-
-type authErr struct {
-	msg string
-}
-
 func NewAuthErr(msg string, prevErrMsg ...string) error {
 	if len(prevErrMsg) != 0 {
 		for _, s := range prevErrMsg {
@@ -35,15 +27,33 @@ func NewAuthErr(msg string, prevErrMsg ...string) error {
 	return &authErr{msg: msg}
 }
 
+func IsAuthErr(err error) bool {
+	_, ok := err.(*authErr)
+	return ok
+}
+
+type AuthErr interface {
+	Error() string
+	isAuthErr() bool
+}
+
+type authErr struct {
+	msg    string
+	target error
+}
+
 func (e authErr) Error() string {
 	return e.msg
 }
 
-func (e authErr) isAuthErr() bool {
-	return true
+func (e authErr) Target() error {
+	if e.target != nil {
+		return e.target
+	}
+
+	return e
 }
 
-func IsAuthErr(err error) bool {
-	_, ok := err.(*authErr)
-	return ok
+func (e authErr) isAuthErr() bool {
+	return true
 }

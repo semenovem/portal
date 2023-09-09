@@ -13,6 +13,10 @@ const (
 )
 
 const (
+	RuleFiredBehindWorked = "10200 Дата приема на работу позднее даты увольнения"
+)
+
+const (
 	RestrictDuplicateLogin = "10200 Такой логин уже есть у другого пользователя"
 	RestrictDuplicateEmail = "10201 Такой email уже есть у другого пользователя"
 )
@@ -47,4 +51,5 @@ var messages = map[string]*struct {
 	AuthWrongPIN:               {},
 	RestrictDuplicateLogin:     {},
 	RestrictDuplicateEmail:     {},
+	RuleFiredBehindWorked:      {},
 }

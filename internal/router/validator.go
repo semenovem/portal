@@ -21,6 +21,8 @@ var strValidators = map[string]func(string) error{
 	controller.UserNameVldTag:   it.ValidateUserName,
 	controller.UserStatusVldTag: it.ValidateUserStatus,
 	controller.UserRoleVldTag:   it.ValidateUserRole,
+
+	controller.ConditionalTimeVldTag: controller.ValidateConditionalTime,
 }
 
 var arrStrValidators = map[string]func([]string) error{
@@ -28,7 +30,7 @@ var arrStrValidators = map[string]func([]string) error{
 }
 
 func newValidation() (echo.Validator, error) {
-	val := validator.New()
+	val := validator.New(validator.WithRequiredStructEnabled())
 
 	// Строковые валидаторы
 	for k, v := range strValidators {

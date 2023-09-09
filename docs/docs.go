@@ -415,6 +415,46 @@ const docTemplate = `{
                 }
             }
         },
+        "/people/employee/:user_id": {
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "` + "`" + `expired_at, worked_at, fired_at` + "`" + ` в формате ` + "`" + `2001-03-24T00:00:00Z` + "`" + `\n\n\n\n",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "people"
+                ],
+                "summary": "Обновление данных пользователя",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id пользователя",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_abc_people_controller.employeeUpdateForm"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_fail.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/people/free-login/:login_name": {
             "get": {
                 "security": [
@@ -443,6 +483,32 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/internal_abc_people_controller.freeLoginNameResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_fail.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/people/handbook": {
+            "get": {
+                "description": "Доступен в локальной сети без авторизации\n",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "people"
+                ],
+                "summary": "Справочник сотрудников",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_abc_people_controller.publicHandbookResponse"
                         }
                     },
                     "400": {
@@ -824,17 +890,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "github_com_semenovem_portal_internal_rest_view.VehicleShort": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "integer"
-                }
-            }
-        },
         "github_com_semenovem_portal_pkg_fail.Response": {
             "type": "object",
             "properties": {
@@ -993,6 +1048,50 @@ const docTemplate = `{
                 }
             }
         },
+        "internal_abc_people_controller.employeeUpdateForm": {
+            "type": "object",
+            "properties": {
+                "avatar_id": {
+                    "type": "integer"
+                },
+                "dept_id": {
+                    "type": "integer"
+                },
+                "expired_at": {
+                    "type": "string"
+                },
+                "fired_at": {
+                    "type": "string"
+                },
+                "firstname": {
+                    "type": "string"
+                },
+                "login": {
+                    "type": "string"
+                },
+                "note": {
+                    "type": "string"
+                },
+                "position_id": {
+                    "type": "integer"
+                },
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "status": {
+                    "type": "string"
+                },
+                "surname": {
+                    "type": "string"
+                },
+                "worked_at": {
+                    "type": "string"
+                }
+            }
+        },
         "internal_abc_people_controller.freeLoginNameResponse": {
             "type": "object",
             "properties": {
@@ -1001,6 +1100,53 @@ const docTemplate = `{
                 },
                 "validate_err": {
                     "type": "string"
+                }
+            }
+        },
+        "internal_abc_people_controller.publicEmployeeView": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "boss_id": {
+                    "type": "integer"
+                },
+                "dept_name": {
+                    "type": "string"
+                },
+                "firstname": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "note": {
+                    "type": "string"
+                },
+                "position_name": {
+                    "type": "string"
+                },
+                "start_work_at": {
+                    "description": "Дата начала работы",
+                    "type": "string"
+                },
+                "surname": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_abc_people_controller.publicHandbookResponse": {
+            "type": "object",
+            "properties": {
+                "employees": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_abc_people_controller.publicEmployeeView"
+                    }
+                },
+                "total": {
+                    "type": "integer"
                 }
             }
         },
@@ -1050,10 +1196,21 @@ const docTemplate = `{
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_semenovem_portal_internal_rest_view.VehicleShort"
+                        "$ref": "#/definitions/internal_abc_vehicle_controller.VehicleShort"
                     }
                 },
                 "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "internal_abc_vehicle_controller.VehicleShort": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
                     "type": "integer"
                 }
             }

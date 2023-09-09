@@ -3,12 +3,14 @@ package people_controller
 import (
 	"github.com/labstack/echo/v4"
 	"net/http"
+
+	_ "github.com/semenovem/portal/pkg/fail"
 )
 
 // Handbook docs
 //
-//	@Summary	Справочник сотрудников
-//	@Description Доступен в локальной сети без авторизации
+//	@Summary		Справочник сотрудников
+//	@Description	Доступен в локальной сети без авторизации
 //	@Description
 //	@Produce	json
 //	@Success	200	{object}	publicHandbookResponse

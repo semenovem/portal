@@ -1,14 +1,16 @@
 package people_controller
 
 import (
+	"github.com/semenovem/portal/internal/util"
 	"github.com/semenovem/portal/pkg/it"
+	"github.com/semenovem/portal/pkg/throw"
 	"html"
 	"strings"
 	"time"
 )
 
-type userForm struct {
-	UserID uint32 `param:"user_id" validate:"required"`
+type userPathForm struct {
+	UserID uint32 `json:"user_id" param:"user_id" validate:"required"`
 }
 
 type createUserForm struct {
@@ -60,17 +62,41 @@ type handbookForm struct {
 }
 
 type employeeUpdateForm struct {
-	userForm
+	UserID     uint32    `json:"user_id" param:"user_id" validate:"required" swaggerignore:"true"`
 	Firstname  *string   `json:"firstname" validate:"omitempty,user-name-vld-tag"`
 	Surname    *string   `json:"surname" validate:"omitempty,user-name-vld-tag"`
 	Note       *string   `json:"note"`
 	Status     *string   `json:"status" validate:"omitempty,user-status-vld-tag"`
-	Roles      *[]string `json:"roles" validate:"user-roles-vld-tag"`
+	Roles      *[]string `json:"roles" validate:"omitempty,user-roles-vld-tag"`
 	AvatarID   *uint32   `json:"avatar_id"`
 	Login      *string   `json:"login" validate:"omitempty,user-login-vld-tag"`
 	PositionID *uint16   `json:"position_id" validate:"omitempty"`
 	DeptID     *uint16   `json:"dept_id" validate:"omitempty"`
-	ExpiredAt  *string   `json:"expired_at"`
-	WorkedAt   *string   `json:"worked_at"`
-	FiredAt    *string   `json:"fired_at"`
+	ExpiredAt  *string   `json:"expired_at" validate:"omitempty,conditional-time-vld-tag"`
+	WorkedAt   *string   `json:"worked_at" validate:"omitempty,conditional-time-vld-tag"`
+	FiredAt    *string   `json:"fired_at" validate:"omitempty,conditional-time-vld-tag"`
+}
+
+func (f *employeeUpdateForm) getExpiredAt() *time.Time {
+	t, err := util.ParsePointerStringToTime(f.ExpiredAt)
+	if err != nil {
+		panic(throw.NewInvalidTimeFieldErr("expired_at", err))
+	}
+	return t
+}
+
+func (f *employeeUpdateForm) getWorkedAt() *time.Time {
+	t, err := util.ParsePointerStringToTime(f.WorkedAt)
+	if err != nil {
+		panic(throw.NewInvalidTimeFieldErr("worked_at", err))
+	}
+	return t
+}
+
+func (f *employeeUpdateForm) getFiredAt() *time.Time {
+	t, err := util.ParsePointerStringToTime(f.FiredAt)
+	if err != nil {
+		panic(throw.NewInvalidTimeFieldErr("fired_at", err))
+	}
+	return t
 }

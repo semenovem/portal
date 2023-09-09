@@ -120,7 +120,7 @@ func (cnt *Controller) DeleteUser(c echo.Context) error {
 		thisUserID = controller.ExtractThisUserID(c)
 		ll         = cnt.logger.Named("DeleteUser").With("thisUserID", thisUserID)
 		ctx        = c.Request().Context()
-		form       = new(userForm)
+		form       = new(userPathForm)
 	)
 
 	if err := cnt.com.ExtractForm(c, ll, form); err != nil {

@@ -31,6 +31,15 @@ func IsNoRec(err error) bool {
 	return errors.Is(err, redis.Nil)
 }
 
+// IsCheckErr ограничивающее условие для значения поля в таблице
+func IsCheckErr(err error) bool {
+	if e, ok := err.(*pgconn.PgError); ok {
+		return e.Code == "23514"
+	}
+
+	return false
+}
+
 // IsConstrainForeignKeyErr ограничение удаления записи
 func IsConstrainForeignKeyErr(err error) bool {
 	if e, ok := err.(*pgconn.PgError); ok {

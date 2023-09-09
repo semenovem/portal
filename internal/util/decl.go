@@ -1,6 +1,8 @@
 package util
 
-func ErrToPointStr(err error) *string {
+import "time"
+
+func ErrToPointerStr(err error) *string {
 	if err == nil {
 		return nil
 	}
@@ -15,4 +17,36 @@ func ErrToStr(err error) string {
 	}
 
 	return err.Error()
+}
+
+func ZeroStrNil(s *string) *string {
+	if s == nil || *s == "" {
+		return nil
+	}
+
+	return s
+}
+
+func ZeroArrStrNil(s *[]string) *[]string {
+	if s == nil || len(*s) == 0 {
+		return nil
+	}
+
+	return s
+}
+
+func ZeroTimeNil(s *time.Time) *time.Time {
+	if s == nil || s.IsZero() {
+		return nil
+	}
+
+	return s
+}
+
+func ZeroUint32Nil(s *uint32) *uint32 {
+	if s == nil || *s == 0 {
+		return nil
+	}
+
+	return s
 }

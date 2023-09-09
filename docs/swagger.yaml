@@ -1,12 +1,5 @@
 basePath: /[v1]/
 definitions:
-  github_com_semenovem_portal_internal_rest_view.VehicleShort:
-    properties:
-      id:
-        type: integer
-      name:
-        type: integer
-    type: object
   github_com_semenovem_portal_pkg_fail.Response:
     properties:
       additional_fields:
@@ -111,12 +104,72 @@ definitions:
     - firstname
     - surname
     type: object
+  internal_abc_people_controller.employeeUpdateForm:
+    properties:
+      avatar_id:
+        type: integer
+      dept_id:
+        type: integer
+      expired_at:
+        type: string
+      fired_at:
+        type: string
+      firstname:
+        type: string
+      login:
+        type: string
+      note:
+        type: string
+      position_id:
+        type: integer
+      roles:
+        items:
+          type: string
+        type: array
+      status:
+        type: string
+      surname:
+        type: string
+      worked_at:
+        type: string
+    type: object
   internal_abc_people_controller.freeLoginNameResponse:
     properties:
       free:
         type: boolean
       validate_err:
         type: string
+    type: object
+  internal_abc_people_controller.publicEmployeeView:
+    properties:
+      avatar:
+        type: string
+      boss_id:
+        type: integer
+      dept_name:
+        type: string
+      firstname:
+        type: string
+      id:
+        type: integer
+      note:
+        type: string
+      position_name:
+        type: string
+      start_work_at:
+        description: Дата начала работы
+        type: string
+      surname:
+        type: string
+    type: object
+  internal_abc_people_controller.publicHandbookResponse:
+    properties:
+      employees:
+        items:
+          $ref: '#/definitions/internal_abc_people_controller.publicEmployeeView'
+        type: array
+      total:
+        type: integer
     type: object
   internal_abc_people_controller.userPublicProfileView:
     properties:
@@ -148,9 +201,16 @@ definitions:
     properties:
       items:
         items:
-          $ref: '#/definitions/github_com_semenovem_portal_internal_rest_view.VehicleShort'
+          $ref: '#/definitions/internal_abc_vehicle_controller.VehicleShort'
         type: array
       total:
+        type: integer
+    type: object
+  internal_abc_vehicle_controller.VehicleShort:
+    properties:
+      id:
+        type: integer
+      name:
         type: integer
     type: object
   internal_abc_vehicle_controller.vehicleView:
@@ -413,6 +473,35 @@ paths:
       summary: Получить публичный профиль пользователя по его ID
       tags:
       - people
+  /people/employee/:user_id:
+    patch:
+      description: |+
+        `expired_at, worked_at, fired_at` в формате `2001-03-24T00:00:00Z`
+
+
+
+      parameters:
+      - description: id пользователя
+        in: path
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_abc_people_controller.employeeUpdateForm'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_semenovem_portal_pkg_fail.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Обновление данных пользователя
+      tags:
+      - people
   /people/free-login/:login_name:
     get:
       parameters:
@@ -435,6 +524,24 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Проверяет, свободен ли указанный логин
+      tags:
+      - people
+  /people/handbook:
+    get:
+      description: |
+        Доступен в локальной сети без авторизации
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_abc_people_controller.publicHandbookResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_semenovem_portal_pkg_fail.Response'
+      summary: Справочник сотрудников
       tags:
       - people
   /people/positions:
