@@ -1,7 +1,6 @@
 package people_controller
 
 import (
-	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/semenovem/portal/internal/abc/controller"
 	people_dto "github.com/semenovem/portal/internal/abc/people/dto"
@@ -37,16 +36,14 @@ func (cnt *Controller) EmployeeHandbook(c echo.Context) error {
 		return cnt.com.Response(c, ll, err)
 	}
 
-	fmt.Println(">>>>>>> Employees   >> ", result.Employees)
-	fmt.Println(">>>>>>> DeptMap     >> ", result.DeptMap)
-	fmt.Println(">>>>>>> PositionMap >> ", result.PositionMap)
-	fmt.Println(">>>>>>> UserBossMap >> ", result.UserBossMap)
+	// TODO добавить руководителя для УЗ
+	employeeViews := newEmployeeProfileViews(result.Employees, result.DeptMap, result.PositionMap)
 
 	ll.Debug("success")
 
 	response := employeeHandbookResponse{
 		Total:     result.Total,
-		Employees: newEmployeePublicProfileViews(nil),
+		Employees: employeeViews,
 	}
 
 	return c.JSON(http.StatusOK, response)

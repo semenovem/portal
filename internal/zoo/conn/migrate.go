@@ -69,18 +69,13 @@ func MigrateDev(logger pkg.Logger, dbStr, path string) error {
 	}
 
 	if err = m.Down(); err != nil {
-		if err.Error() == "no change" {
-			ll.Debugf(err.Error())
-			return nil
+		if err.Error() != "no change" {
+			ll.Named("Down").DB(err)
 		}
-
-		ll.Named("Down").DB(err)
-		return err
 	}
 
 	if err = m.Up(); err != nil {
-		if err.Error() == "no change" {
-			ll.Debugf(err.Error())
+		if err.Error() != "no change" {
 			return nil
 		}
 
@@ -88,7 +83,7 @@ func MigrateDev(logger pkg.Logger, dbStr, path string) error {
 		return err
 	}
 
-	ll.Info("applying new migrations")
+	ll.Info("applying new dev migrations")
 
 	return nil
 }

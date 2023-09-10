@@ -229,7 +229,7 @@ services:
         limits:
           cpus: '0.3'
           memory: 200M
-      replicas: 1
+      replicas: 0
 
   grafana:
     <<: *net
@@ -248,7 +248,7 @@ services:
         limits:
           cpus: '0.3'
           memory: 250M
-      replicas: 1
+      replicas: 0
 
 
 
