@@ -40,5 +40,4 @@ func (dto *EmployeeDTO) ToEmployeeSlim() *people.EmployeeSlim {
 		StartWorkAt: time.Time{},
 		FiredAt:     nil,
 	}
-
 }

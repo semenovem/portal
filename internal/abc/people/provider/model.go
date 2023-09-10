@@ -18,6 +18,7 @@ type UserModel struct {
 	login      *string
 	passwdHash *string
 	props      *it.UserProps
+	updateAt   time.Time
 }
 
 func (u *UserModel) ID() uint32 {
@@ -162,4 +163,37 @@ func (u *UserModel) Props() *it.UserProps {
 
 func (u *UserModel) SetProps(props *it.UserProps) {
 	u.props = props
+}
+
+func (u *UserModel) UpdatedAt() time.Time {
+	return u.updateAt
+}
+
+type EmployeeModel struct {
+	UserModel
+	updateAt   time.Time
+	positionID uint16
+	deptID     uint16
+	workedAt   time.Time
+	firedAt    *time.Time
+}
+
+func (m *EmployeeModel) UpdatedAt() time.Time {
+	return m.updateAt
+}
+
+func (m *EmployeeModel) PositionID() uint16 {
+	return m.positionID
+}
+
+func (m *EmployeeModel) DeptID() uint16 {
+	return m.deptID
+}
+
+func (m *EmployeeModel) WorkedAt() time.Time {
+	return m.workedAt
+}
+
+func (m *EmployeeModel) FiredAt() *time.Time {
+	return m.firedAt
 }

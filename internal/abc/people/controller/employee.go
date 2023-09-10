@@ -1,6 +1,7 @@
 package people_controller
 
 import (
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/semenovem/portal/internal/abc/controller"
 	people_dto "github.com/semenovem/portal/internal/abc/people/dto"
@@ -26,7 +27,7 @@ func (cnt *Controller) EmployeeHandbook(c echo.Context) error {
 	)
 
 	opts := &people_dto.EmployeesSearchOpts{
-		Limit:  0,
+		Limit:  100,
 		Offset: 0,
 	}
 
@@ -35,6 +36,11 @@ func (cnt *Controller) EmployeeHandbook(c echo.Context) error {
 		ll.Named("peopleAct.EmployeeHandbook").Nested(err)
 		return cnt.com.Response(c, ll, err)
 	}
+
+	fmt.Println(">>>>>>> Employees   >> ", result.Employees)
+	fmt.Println(">>>>>>> DeptMap     >> ", result.DeptMap)
+	fmt.Println(">>>>>>> PositionMap >> ", result.PositionMap)
+	fmt.Println(">>>>>>> UserBossMap >> ", result.UserBossMap)
 
 	ll.Debug("success")
 

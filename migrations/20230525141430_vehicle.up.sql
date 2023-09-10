@@ -96,10 +96,10 @@ CREATE TABLE IF NOT EXISTS vehicle.inspections
 -- --------------------------------------
 -- --------------------------------------
 
-INSERT INTO vehicle.vehicles (brand, model, date_of_issue, date_start_use, date_end_use, status,
-                              note, "number", vin, tonnage, created_at, updated_at, created_user_id)
-VALUES ('asdasdasd', 'sdsaddf', '2023-08-21', '2023-08-21', NULL, 'active', 'note note note',
-        'sadfasf', '`sdasfdasdf', 2134, '2023-08-21 10:33:05.497822', '2023-08-21 10:33:05.497822',
-        4);
-
+-- INSERT INTO vehicle.vehicles (brand, model, date_of_issue, date_start_use, date_end_use, status,
+--                               note, "number", vin, tonnage, created_at, updated_at, created_user_id)
+-- VALUES ('asdasdasd', 'sdsaddf', '2023-08-21', '2023-08-21', NULL, 'active', 'note note note',
+--         'sadfasf', '`sdasfdasdf', 2134, '2023-08-21 10:33:05.497822', '2023-08-21 10:33:05.497822',
+--         4);
+--
 

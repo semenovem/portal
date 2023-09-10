@@ -65,12 +65,33 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 			userPasswdAuth: it.NewUserPasswdAuth(cfg.UserPasswdSalt),
 		}
 		err error
+
+		dbc = cfg.DBCoreConn.ConvTo()
 	)
 
-	if app.db, err = conn.ConnectDBPostgres(ctx, cfg.DBCoreConn.ConvTo()); err != nil {
+	if app.db, err = conn.ConnectDBPostgres(ctx, dbc); err != nil {
 		ll.Named("ConnectDBPostgres").Error(err.Error())
 		return err
 	}
+
+	cstr := fmt.Sprintf(
+		"postgres://%s:%s@%s:%d/%s?sslmode=%s&search_path=%s&application_name=%spool_max_conns=%d"+
+			"",
+		dbc.User,
+		dbc.Password,
+		dbc.Host,
+		dbc.Port,
+		dbc.Name,
+		dbc.SSLMode,
+		dbc.Schema,
+		dbc.AppName,
+		dbc.MaxOpenConns,
+		//dbc.MaxLifetime,
+		//dbc.MaxIdleLifetime,
+	)
+
+	//&pool_max_conn_lifetime=%s
+	//&pool_max_conn_idle_time=%s
 
 	stats := app.db.Stat()
 	ll.Info(fmt.Sprintf(">>>> IdleConns  = %v", stats.IdleConns()))
@@ -78,24 +99,13 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 	ll.Info(fmt.Sprintf(">>>> TotalConns = %v", stats.TotalConns()))
 	ll.Info(fmt.Sprintf(">>>> TotalConns = %v", stats.TotalConns()))
 
-	// Миграции БД
-	func() {
-		var (
-			ll              = ll.Named("migration")
-			ctxnest, cancel = context.WithCancel(ctx)
-		)
-		defer cancel()
+	if err = conn.Migrate(ll, cstr, cfg.DBMigrationsDir); err != nil {
+		ll.Named("Migrate").Nested(err)
+	}
 
-		db, err := conn.ConnectDBPostgresSQL(ctxnest, ll, cfg.DBCoreConn.ConvTo())
-		if err != nil {
-			ll.Named("ConnectDBPostgresSQL").DB(err)
-			return
-		}
-
-		if err = conn.Migrate(ll, db, cfg.DBMigrationsDir); err != nil {
-			ll.Named("Migrate").Nested(err)
-		}
-	}()
+	if err = conn.MigrateDev(ll, cstr, cfg.DBMigrationsDirDev); err != nil {
+		ll.Named("Migrate").Nested(err)
+	}
 
 	// Redis
 	if app.redis, err = conn.InitRedis(ctx, ll, cfg.RedisConn.ConvTo()); err != nil {

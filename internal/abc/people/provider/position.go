@@ -3,24 +3,16 @@ package people_provider
 import (
 	"context"
 	"github.com/lib/pq"
-	"github.com/semenovem/portal/pkg/it"
 )
 
 type PositionModel struct {
 	id          uint16
-	deptID      uint16
 	title       string
 	description string
-	parentID    *uint16
-	deleted     bool
 }
 
 func (m *PositionModel) ID() uint16 {
 	return m.id
-}
-
-func (m *PositionModel) DeptID() uint16 {
-	return m.deptID
 }
 
 func (m *PositionModel) Title() string {
@@ -31,45 +23,50 @@ func (m *PositionModel) Description() string {
 	return m.description
 }
 
-func (m *PositionModel) ParentID() uint16 {
-	if m.parentID == nil {
-		return 0
-	}
-	return *m.parentID
-}
-
-func (p *PeopleProvider) GetPositionModel(ctx context.Context, positionID uint16) (*it.UserPosition, error) {
+func (p *PeopleProvider) GetPositionModel(ctx context.Context, positionID uint16) (*PositionModel, error) {
 	var (
-		sq  = `SELECT title, COALESCE(parent_id, 0) AS parent_id FROM people.positions WHERE id = $1`
-		pos = it.UserPosition{
-			ID: positionID,
-		}
+		sq  = `SELECT id, title, description FROM people.positions WHERE id = $1`
+		pos PositionModel
 	)
 
-	err := p.db.QueryRow(ctx, sq, positionID).Scan(&pos.Title, &pos.ParentID)
-	if err != nil {
-		p.logger.Named("GetPosition").With("positionID", positionID).DB(err)
+	if err := p.db.QueryRow(ctx, sq, positionID).Scan(
+		&pos.id,
+		&pos.title,
+		&pos.description,
+	); err != nil {
+		p.logger.Named("GetPositionModel").With("positionID", positionID).DB(err)
 		return nil, err
 	}
 
-	return &pos, err
+	return &pos, nil
 }
 
-func (p *PeopleProvider) GetPositionModels(
+func (p *PeopleProvider) GetPositionMap(
 	ctx context.Context,
 	positionIDs []uint16,
-) ([]*PositionModel, error) {
-	var (
-		sq = `SELECT id, dept_id, title, description, parent_id
-		FROM people.positions
-		WHERE id = ANY ($1)`
+) (map[uint16]*PositionModel, error) {
+	positions, err := p.GetPositions(ctx, positionIDs)
+	if err != nil {
+		return nil, err
+	}
 
+	posMap := make(map[uint16]*PositionModel)
+	for _, m := range positions {
+		posMap[m.id] = m
+	}
+
+	return posMap, nil
+}
+
+func (p *PeopleProvider) GetPositions(ctx context.Context, positionIDs []uint16) ([]*PositionModel, error) {
+	var (
+		sq = `SELECT id, title, description FROM people.positions WHERE id = ANY ($1)`
 		ls = make([]*PositionModel, 0)
 	)
 
 	rows, err := p.db.Query(ctx, sq, pq.Array(positionIDs))
 	if err != nil {
-		p.logger.Named("GetPositionModels").DB(err)
+		p.logger.Named("GetPositions").DB(err)
 		return nil, err
 	}
 
@@ -80,14 +77,14 @@ func (p *PeopleProvider) GetPositionModels(
 
 		if err = rows.Scan(
 			&m.id,
-			&m.deptID,
 			&m.title,
 			&m.description,
-			&m.parentID,
 		); err != nil {
-			p.logger.Named("GetPositionModels.Scan").DB(err)
+			p.logger.Named("GetPositions.Scan").DB(err)
 			return nil, err
 		}
+
+		ls = append(ls, &m)
 	}
 
 	if err = rows.Err(); err != nil {

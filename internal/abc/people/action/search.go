@@ -3,6 +3,7 @@ package people_action
 import (
 	"context"
 	people_dto "github.com/semenovem/portal/internal/abc/people/dto"
+	"github.com/semenovem/portal/internal/util"
 )
 
 func (a *PeopleAction) EmployeeHandbook(
@@ -23,11 +24,13 @@ func (a *PeopleAction) EmployeeHandbook(
 	}
 
 	for _, em := range employees {
-		if _, ok := positionIDMap[em.PositionID]; !ok {
-			positionIDMap[em.PositionID] = struct{}{}
+		var p, d = em.PositionID(), em.DeptID()
+
+		if _, ok := positionIDMap[p]; !ok {
+			positionIDMap[p] = struct{}{}
 		}
-		if _, ok := deptIDMap[em.DeptID]; !ok {
-			deptIDMap[em.DeptID] = struct{}{}
+		if _, ok := deptIDMap[d]; !ok {
+			deptIDMap[d] = struct{}{}
 		}
 	}
 
@@ -37,6 +40,15 @@ func (a *PeopleAction) EmployeeHandbook(
 		PositionMap: nil,
 		DeptMap:     nil,
 		UserBossMap: nil,
+	}
+
+	if ret.PositionMap, err = a.peoplePvd.GetPositionMap(ctx, util.NumMapToArr(positionIDMap)); err != nil {
+		ll.Named("peoplePvd.GetPositionMap").Nested(err)
+		return nil, err
+	}
+	if ret.DeptMap, err = a.peoplePvd.GetDeptMap(ctx, util.NumMapToArr(deptIDMap)); err != nil {
+		ll.Named("peoplePvd.GetDeptMap").Nested(err)
+		return nil, err
 	}
 
 	return ret, nil
