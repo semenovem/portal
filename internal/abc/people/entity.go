@@ -1,9 +1,5 @@
 package people
 
-import (
-	"time"
-)
-
 type UserPosition struct {
 	ID       uint16
 	Title    string
@@ -15,21 +11,6 @@ type UserDept struct {
 	Title    string
 	ParentID uint16
 	BossID   uint16
-}
-
-type EmployeeSlim struct {
-	ID        uint32
-	Status    UserStatus
-	Roles     []UserRole
-	AvatarID  uint32
-	FirstName string
-	Surname   string
-	Note      string
-
-	PositionID  uint16     // должность
-	DeptID      uint16     // отдел
-	StartWorkAt time.Time  // Дата начала работы
-	FiredAt     *time.Time // Дата увольнения
 }
 
 type UserBoss struct {

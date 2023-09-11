@@ -14,7 +14,7 @@ const (
 	minUserPasswordLen = 6   // Минимальная длина
 	maxUserPasswordLen = 128 // Максимальная длина
 
-	minUserLoginLen = 6
+	minUserLoginLen = 3
 	maxUserLoginLen = 64 // TODO синхронизировать с типом столбца хранения
 
 	minUserNameLen = 2

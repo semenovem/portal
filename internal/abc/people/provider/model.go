@@ -9,6 +9,7 @@ type UserModel struct {
 	id         uint32
 	firstname  string
 	surname    string
+	patronymic string
 	deleted    bool
 	status     it.UserStatus
 	note       *string
@@ -43,6 +44,14 @@ func (u *UserModel) Surname() string {
 
 func (u *UserModel) SetSurname(name string) {
 	u.surname = name
+}
+
+func (u *UserModel) Patronymic() string {
+	return u.patronymic
+}
+
+func (u *UserModel) SetPatronymic(name string) {
+	u.patronymic = name
 }
 
 func (u *UserModel) Deleted() bool {

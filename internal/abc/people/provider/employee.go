@@ -169,3 +169,12 @@ func (p *PeopleProvider) SearchEmployees(
 
 	return ls, uint32(len(ls)), nil
 }
+
+// Поиск руководителя отдела
+// 1. получаем руководителя из таблицы `people.head_of_dept` по отделу пользователя
+// 2. если не найдено: рекурсивно получим отдел из parent_id отдела пользователя
+
+func (p *PeopleProvider) GetBoss(ctx context.Context, deptID uint16) (*EmployeeModel, error) {
+
+	return nil, nil
+}

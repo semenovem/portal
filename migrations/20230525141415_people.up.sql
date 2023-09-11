@@ -29,7 +29,8 @@ CREATE TABLE IF NOT EXISTS people.users
   deleted     bool                                  default false      NOT NULL,
   updated_at  timestamp                             default now()      NOT NULL,
   firstname   varchar(128)                                             NOT NULL, -- Имя
-  surname     varchar(128)                          default ''         NOT NULL, -- Фамилия
+  surname     varchar(128)                                             NOT NULL, -- Фамилия
+  patronymic  varchar(128)                          default ''         NOT NULL, -- Отчество
   status      people.statuses_enum                  default 'inactive' NOT NULL,
   roles       people.roles_enum[]                   default NULL,
   note        text                                  default NULL,                -- примечание
@@ -64,7 +65,7 @@ CREATE TABLE IF NOT EXISTS people.user_media_boxes
 );
 
 -- Руководители отделов
-CREATE TABLE IF NOT EXISTS people.head_of_dept
+CREATE TABLE IF NOT EXISTS people.heads_of_depts
 (
   dept_id     smallint references people.departments NOT NULL,
   employee_id int references people.employees        NOT NULL,

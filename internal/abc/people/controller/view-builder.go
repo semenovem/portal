@@ -43,10 +43,12 @@ func newEmployeeProfileView(
 ) *employeeProfileView {
 	obj := employeeProfileView{
 		userPublicProfileView: userPublicProfileView{
-			ID:        u.ID(),
-			Firstname: u.Firstname(),
-			Surname:   u.Surname(),
-			Avatar:    fmt.Sprintf("https://asdas/asdasd/%d", u.AvatarID()),
+			ID:         u.ID(),
+			Firstname:  u.Firstname(),
+			Surname:    u.Surname(),
+			Patronymic: u.Patronymic(),
+			// TODO сформировать реальную ссылку на скачивание аватара пользователя
+			Avatar: fmt.Sprintf("https://asdas/asdasd/%d", u.AvatarID()),
 		},
 		WorkedAt: u.WorkedAt(),
 		FiredAt:  u.FiredAt(),
