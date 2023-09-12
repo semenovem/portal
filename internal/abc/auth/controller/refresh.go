@@ -2,6 +2,7 @@ package auth_controller
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/semenovem/portal/pkg/throw"
 	"net/http"
 
 	_ "github.com/semenovem/portal/pkg/fail"
@@ -35,7 +36,11 @@ func (cnt *Controller) Refresh(c echo.Context) error {
 	session, err := cnt.authAct.Refresh(ctx, payload)
 	if err != nil {
 		ll.Named("Refresh").Nested(err)
-		return cnt.fail.Send(c, "", http.StatusUnauthorized, err)
+
+		if throw.IsNotFoundErr(err) {
+			err = throw.NewAuthErr(throw.Err404AuthSession.Error())
+		}
+		return cnt.com.Response(c, ll, err)
 	}
 
 	pair, nested := cnt.pairToken(session)

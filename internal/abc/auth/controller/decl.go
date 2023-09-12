@@ -17,6 +17,7 @@ type Controller struct {
 	logger                    pkg.Logger
 	fail                      *fail.Service
 	jwt                       *jwtoken.Service
+	logoPasswdAuth            it.UserPasswdAuthenticator
 	com                       *controller.Common
 	authAct                   *auth_action.AuthAction
 	audit                     *audit.AuditProvider
@@ -28,6 +29,7 @@ type Controller struct {
 func New(
 	arg *controller.CntArgs,
 	jwt *jwtoken.Service,
+	logoPasswdAuth it.UserPasswdAuthenticator,
 	authAct *auth_action.AuthAction,
 	jwtServedDomains []string,
 	jwtRefreshTokenLife time.Duration,
@@ -36,6 +38,7 @@ func New(
 	return &Controller{
 		logger:                    arg.Logger.Named("auth-cnt"),
 		fail:                      arg.FailureService,
+		logoPasswdAuth:            logoPasswdAuth,
 		com:                       arg.Common,
 		authAct:                   authAct,
 		audit:                     arg.Audit,

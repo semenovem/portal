@@ -2,26 +2,32 @@ package people_action
 
 import (
 	"context"
+	people_provider "github.com/semenovem/portal/internal/abc/people/provider"
 	"github.com/semenovem/portal/internal/abc/provider"
-	"github.com/semenovem/portal/pkg/it"
 	"github.com/semenovem/portal/pkg/throw"
 )
 
-func (a *PeopleAction) GetUserProfile(
+func (a *PeopleAction) GetUserModel(
 	ctx context.Context,
 	thisUserID, userID uint32,
-) (*it.UserProfile, error) {
-	//ll := a.logger.Named("GetUserProfile")
-
-	// TODO тут делать проверку права на просмотр данных пользователя
-
-	return a.getUserProfile(ctx, userID)
-}
-
-func (a *PeopleAction) getUserProfile(ctx context.Context, userID uint32) (*it.UserProfile, error) {
+) (*people_provider.UserModel, error) {
 	ll := a.logger.Named("getUserProfile")
 
-	profile, err := a.peoplePvd.GetUserProfile(ctx, userID)
+	// TODO проверка права на просмотр данных пользователя
+
+	profile, err := a.peoplePvd.GetUserModel(ctx, userID)
+	if err != nil {
+		ll.Named("peoplePvd.GetUserModel").Nested(err)
+		return nil, err
+	}
+
+	return profile, err
+}
+
+func (a *PeopleAction) GetEmployeeModel(ctx context.Context, userID uint32) (*people_provider.EmployeeModel, error) {
+	ll := a.logger.Named("getUserProfile")
+
+	profile, err := a.peoplePvd.GetEmployeeModel(ctx, userID)
 	if err != nil {
 		ll.Named("GetUserProfile").Nested(err)
 

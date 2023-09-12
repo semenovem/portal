@@ -117,6 +117,42 @@ definitions:
     - surname
     - worked_at
     type: object
+  internal_abc_people_controller.employeeHandbookResponse:
+    properties:
+      employees:
+        items:
+          $ref: '#/definitions/internal_abc_people_controller.employeeProfileView'
+        type: array
+      total:
+        type: integer
+    type: object
+  internal_abc_people_controller.employeeProfileView:
+    properties:
+      avatar:
+        type: string
+      boss_id:
+        type: integer
+      dept_name:
+        type: string
+      fired_at:
+        description: Дата увольнения
+        type: string
+      firstname:
+        type: string
+      id:
+        type: integer
+      note:
+        type: string
+      patronymic:
+        type: string
+      position_name:
+        type: string
+      surname:
+        type: string
+      worked_at:
+        description: Дата начала работы
+        type: string
+    type: object
   internal_abc_people_controller.employeeUpdateForm:
     properties:
       avatar_id:
@@ -154,37 +190,6 @@ definitions:
         description: Что не так с введенным логином
         type: string
     type: object
-  internal_abc_people_controller.publicEmployeeView:
-    properties:
-      avatar:
-        type: string
-      boss_id:
-        type: integer
-      dept_name:
-        type: string
-      firstname:
-        type: string
-      id:
-        type: integer
-      note:
-        type: string
-      position_name:
-        type: string
-      start_work_at:
-        description: Дата начала работы
-        type: string
-      surname:
-        type: string
-    type: object
-  internal_abc_people_controller.publicHandbookResponse:
-    properties:
-      employees:
-        items:
-          $ref: '#/definitions/internal_abc_people_controller.publicEmployeeView'
-        type: array
-      total:
-        type: integer
-    type: object
   internal_abc_people_controller.userCreateResponse:
     properties:
       user_id:
@@ -198,6 +203,8 @@ definitions:
         type: string
       id:
         type: integer
+      patronymic:
+        type: string
       surname:
         type: string
     type: object
@@ -392,34 +399,6 @@ paths:
       summary: Сохранение файлов
       tags:
       - media
-  /people:
-    post:
-      description: |
-        `expired_at` в формате `2001-03-24T00:00:00Z`
-        введенный login нужно проверить, что он допустим `/people/free-login/:login_name`
-      parameters:
-      - description: данные создаваемого пользователя
-        in: body
-        name: payload
-        required: true
-        schema:
-          $ref: '#/definitions/internal_abc_people_controller.createUserForm'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/internal_abc_people_controller.userPublicProfileView'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/github_com_semenovem_portal_pkg_fail.Response'
-      security:
-      - ApiKeyAuth: []
-      summary: Создает пользователя
-      tags:
-      - people
   /people/:user_id:
     delete:
       parameters:
@@ -519,7 +498,7 @@ paths:
       - ApiKeyAuth: []
       summary: Создает нового сотрудника
       tags:
-      - people
+      - people/employee
   /people/employee/:user_id:
     patch:
       description: |+
@@ -548,6 +527,24 @@ paths:
       - ApiKeyAuth: []
       summary: Обновление данных пользователя
       tags:
+      - people/employee
+  /people/employee/handbook:
+    get:
+      description: |
+        Доступен в локальной сети без авторизации
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_abc_people_controller.employeeHandbookResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_semenovem_portal_pkg_fail.Response'
+      summary: Справочник сотрудников
+      tags:
       - people
   /people/free-login/:login_name:
     get:
@@ -571,24 +568,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Проверяет, свободен ли указанный логин
-      tags:
-      - people
-  /people/handbook:
-    get:
-      description: |
-        Доступен в локальной сети без авторизации
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/internal_abc_people_controller.publicHandbookResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/github_com_semenovem_portal_pkg_fail.Response'
-      summary: Справочник сотрудников
       tags:
       - people
   /people/positions:

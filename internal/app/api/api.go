@@ -38,7 +38,7 @@ type appAPI struct {
 	auditService   *audit.AuditProvider
 	failService    *fail.Service
 	jwtService     *jwtoken.Service
-	userPasswdAuth it.UserPasswdAuthenticator
+	logoPasswdAuth it.UserPasswdAuthenticator
 
 	providers struct {
 		auth   *auth_provider.AuthProvider
@@ -62,7 +62,7 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 			ctx:            ctx,
 			logger:         logger,
 			config:         &cfg,
-			userPasswdAuth: it.NewUserPasswdAuth(cfg.UserPasswdSalt),
+			logoPasswdAuth: it.NewUserPasswdAuth(cfg.UserPasswdSalt),
 		}
 		err error
 
@@ -144,7 +144,7 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 		app.config,
 		app.auditService,
 		app.jwtService,
-		app.userPasswdAuth,
+		app.logoPasswdAuth,
 
 		app.providers.auth,
 		app.providers.people,

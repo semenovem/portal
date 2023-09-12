@@ -2,13 +2,11 @@ package people_provider
 
 import (
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/semenovem/portal/internal/abc/people"
 	"github.com/semenovem/portal/pkg"
 	"github.com/semenovem/portal/pkg/throw"
-)
-
-const (
-	userIDIsEmpty    = "userID is empty"
-	userLoginIsEmpty = "login is empty"
+	"html"
+	"strings"
 )
 
 const (
@@ -37,4 +35,24 @@ func constraintErr(name string, err error) error {
 	}
 
 	return throw.NewBadRequestErr(err.Error())
+}
+
+// EmployeesSearchOpts параметры поиска сотрудников
+type EmployeesSearchOpts struct {
+	Limit  uint32
+	Offset uint32
+	//Expired         bool       // Включая у кого истек срок действия
+	//ExpiredAtAfter  *time.Time // Включая истекшие записи после
+	//ExpiredAtBefore *time.Time // Включая у кого истек срок действия
+	Fired    bool // Включая уволенных
+	Statuses []people.UserStatus
+}
+
+func escapeHTML(s *string) *string {
+	if s == nil {
+		return nil
+	}
+
+	ss := html.EscapeString(strings.TrimSpace(*s))
+	return &ss
 }

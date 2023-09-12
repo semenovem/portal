@@ -2,13 +2,13 @@ package people_action
 
 import (
 	"context"
-	people_dto "github.com/semenovem/portal/internal/abc/people/dto"
+	people_provider "github.com/semenovem/portal/internal/abc/people/provider"
 	"github.com/semenovem/portal/internal/util"
 )
 
 func (a *PeopleAction) EmployeeHandbook(
 	ctx context.Context,
-	opts *people_dto.EmployeesSearchOpts,
+	opts *people_provider.EmployeesSearchOpts,
 ) (*EmployeesSearchResult, error) {
 	var (
 		ll = a.logger.Named("EmployeeHandbook")

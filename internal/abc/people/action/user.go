@@ -2,10 +2,8 @@ package people_action
 
 import (
 	"context"
-	people_dto "github.com/semenovem/portal/internal/abc/people/dto"
-	"github.com/semenovem/portal/internal/abc/provider"
+	people_provider "github.com/semenovem/portal/internal/abc/people/provider"
 	"github.com/semenovem/portal/pkg/it"
-	"github.com/semenovem/portal/pkg/throw"
 )
 
 func (a *PeopleAction) CheckLoginName(
@@ -36,7 +34,7 @@ func (a *PeopleAction) CheckLoginName(
 func (a *PeopleAction) CreateEmployee(
 	ctx context.Context,
 	thisUserID uint32,
-	dto *people_dto.EmployeeDTO,
+	dto *people_provider.EmployeeUpdateModel,
 ) (userID uint32, err error) {
 	ll := a.logger.Named("CreateUser")
 
@@ -63,14 +61,23 @@ func (a *PeopleAction) DeleteUser(
 	// TODO Должна быть проверка на право удаления пользователя
 
 	if err := a.peoplePvd.DeleteUser(ctx, userID); err != nil {
-		ll = ll.Named("peoplePvd.DeleteUser")
+		ll.Named("peoplePvd.DeleteUser").Nested(err)
+		return err
+	}
 
-		if provider.IsNoRow(err) {
-			ll.Debug(err.Error())
-			return throw.NewNotFoundErr("user not found or already deleted")
-		}
+	return nil
+}
 
-		ll.Named("peoplePvd.DeleteUser").DB(err)
+func (a *PeopleAction) UndeleteUser(
+	ctx context.Context,
+	thisUserID, userID uint32,
+) error {
+	ll := a.logger.Named("UndeleteUser")
+
+	// TODO Должна быть проверка на право восстановления пользователя
+
+	if err := a.peoplePvd.UndeleteUser(ctx, userID); err != nil {
+		ll.Named("peoplePvd.UndeleteUser").Nested(err)
 		return err
 	}
 

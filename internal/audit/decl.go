@@ -13,6 +13,7 @@ import (
 const (
 	Create    Action = "create"
 	Delete    Action = "delete"
+	Undelete  Action = "undelete"
 	Update    Action = "update"
 	actionGet Action = "get"
 )

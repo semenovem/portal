@@ -5,6 +5,8 @@ import (
 	"github.com/semenovem/portal/internal/util"
 	"github.com/semenovem/portal/pkg"
 	"github.com/semenovem/portal/pkg/fail"
+	"strings"
+	"time"
 )
 
 const (
@@ -38,4 +40,21 @@ type CntArgs struct {
 func ValidateConditionalTime(s string) error {
 	_, err := util.ParsePointerStrToTime(&s)
 	return err
+}
+
+func TimeToString(t *time.Time) string {
+	if t == nil || t.IsZero() {
+		return ""
+	}
+
+	return t.Format(time.RFC3339)
+}
+
+func NormStrPointer(s *string) *string {
+	if s == nil {
+		return nil
+	}
+
+	ss := strings.ToLower(strings.TrimSpace(*s))
+	return &ss
 }

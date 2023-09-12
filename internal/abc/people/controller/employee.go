@@ -3,8 +3,9 @@ package people_controller
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/semenovem/portal/internal/abc/controller"
-	people_dto "github.com/semenovem/portal/internal/abc/people/dto"
+	people_provider "github.com/semenovem/portal/internal/abc/people/provider"
 	"github.com/semenovem/portal/internal/audit"
+	"github.com/semenovem/portal/internal/util"
 	_ "github.com/semenovem/portal/pkg/fail"
 	"net/http"
 )
@@ -25,7 +26,7 @@ func (cnt *Controller) EmployeeHandbook(c echo.Context) error {
 		ctx = c.Request().Context()
 	)
 
-	opts := &people_dto.EmployeesSearchOpts{
+	opts := &people_provider.EmployeesSearchOpts{
 		Limit:  100,
 		Offset: 0,
 	}
@@ -67,7 +68,7 @@ func (cnt *Controller) CreateEmployee(c echo.Context) error {
 		thisUserID = controller.ExtractThisUserID(c)
 		ll         = cnt.logger.Named("CreateEmployee").With("thisUserID", thisUserID)
 		ctx        = c.Request().Context()
-		form       = new(createUserForm)
+		form       = new(employeeCreateForm)
 	)
 
 	if err := cnt.com.ExtractForm(c, ll, form); err != nil {
@@ -76,22 +77,23 @@ func (cnt *Controller) CreateEmployee(c echo.Context) error {
 
 	passwdHash := cnt.userPasswdAuth.Hashing(form.Passwd)
 
-	dto := &people_dto.EmployeeDTO{
-		UserDTO: people_dto.UserDTO{
-			Firstname:  form.getFirstname(),
-			Surname:    form.getSurname(),
-			Note:       form.getNote(),
-			Status:     &form.Status,
-			Roles:      &form.Roles,
-			AvatarID:   &form.AvatarID,
-			ExpiredAt:  form.getExpiredAt(),
-			Login:      form.getLogin(),
+	dto := &people_provider.EmployeeUpdateModel{
+		UserCreateModel: people_provider.UserCreateModel{
+			Firstname:  form.Firstname,
+			Surname:    form.Surname,
+			Patronymic: form.Patronymic,
+			Status:     form.Status,
+			Note:       form.Note,
+			Roles:      form.Roles,
+			AvatarID:   form.AvatarID,
+			ExpiredAt:  util.MustParseToTime(form.ExpiredAt),
+			Login:      form.Login,
 			PasswdHash: &passwdHash,
 		},
-		PositionID: &form.PositionID,
-		DeptID:     &form.DeptID,
-		WorkedAt:   form.getWorkedAt(),
-		FiredAt:    form.getFiredAt(),
+		PositionID: form.PositionID,
+		DeptID:     form.DeptID,
+		WorkedAt:   util.MustParseToTime(form.WorkedAt),
+		FiredAt:    util.MustParseToTime(form.FiredAt),
 	}
 
 	userID, err := cnt.peopleAct.CreateEmployee(ctx, thisUserID, dto)
@@ -136,21 +138,24 @@ func (cnt *Controller) UpdateEmployee(c echo.Context) error {
 		return err.Err
 	}
 
-	dto := people_dto.EmployeeDTO{
-		UserDTO: people_dto.UserDTO{
-			Firstname: form.Firstname,
-			Surname:   form.Surname,
-			Note:      form.Note,
-			Status:    form.Status,
-			Roles:     form.Roles,
-			AvatarID:  form.AvatarID,
-			ExpiredAt: form.getExpiredAt(),
-			Login:     form.Login,
+	ll.With("userID", form.UserID)
+
+	dto := people_provider.EmployeeUpdateModel{
+		UserCreateModel: people_provider.UserCreateModel{
+			Firstname:  form.Firstname,
+			Surname:    form.Surname,
+			Patronymic: form.Patronymic,
+			Status:     form.Status,
+			Note:       form.Note,
+			Roles:      form.Roles,
+			AvatarID:   form.AvatarID,
+			ExpiredAt:  util.MustParseToTime(form.ExpiredAt),
+			Login:      form.Login,
 		},
 		PositionID: form.PositionID,
 		DeptID:     form.DeptID,
-		WorkedAt:   form.getWorkedAt(),
-		FiredAt:    form.getFiredAt(),
+		WorkedAt:   util.MustParseToTime(form.WorkedAt),
+		FiredAt:    util.MustParseToTime(form.FiredAt),
 	}
 
 	err := cnt.peopleAct.UpdateEmployee(ctx, thisUserID, form.UserID, &dto)

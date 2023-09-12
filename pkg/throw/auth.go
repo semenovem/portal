@@ -2,13 +2,9 @@ package throw
 
 /* AuthErr ошибки в результате нарушения при авторизации */
 
-const (
-	MsgUserCantLogin = "user cant login"
-)
-
 var (
 	ErrAuthPasswdIncorrect = NewAuthErr("password is incorrect")
-	ErrAuthUserNotWorks    = NewAuthErr(MsgUserCantLogin)
+	ErrAuthUserCannotLogin = NewAuthErr("user cannot login")
 	ErrAuthRefreshUnknown  = NewAuthErr("refresh token data does not match")
 
 	ErrAuthCookieEmpty = NewAuthErr("empty header [Authorization] token")

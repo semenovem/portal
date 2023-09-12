@@ -29,6 +29,16 @@ func (a *AuditProvider) Del(userID uint32, code Code, payload map[string]interfa
 	}
 }
 
+// Undel Аудит действий пользователя - удаление
+func (a *AuditProvider) Undel(userID uint32, code Code, payload map[string]interface{}) {
+	a.input <- &auditPipe{
+		userID:  userID,
+		code:    code,
+		action:  Delete,
+		payload: payload,
+	}
+}
+
 // Get Аудит действий пользователя
 func (a *AuditProvider) Get(userID uint32, code Code, payload map[string]interface{}) {
 	a.input <- &auditPipe{

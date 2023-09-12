@@ -2,13 +2,13 @@ package people_action
 
 import (
 	"context"
-	"github.com/semenovem/portal/internal/abc/people/dto"
+	"github.com/semenovem/portal/internal/abc/people/provider"
 )
 
 func (a *PeopleAction) UpdateEmployee(
 	ctx context.Context,
 	thisUserID, userID uint32,
-	dto *people_dto.EmployeeDTO,
+	dto *people_provider.EmployeeUpdateModel,
 ) error {
 	var (
 		ll = a.logger.Named("UpdateEmployee").With("userID", userID)

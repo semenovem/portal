@@ -4,9 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/jackc/pgx/v5"
-	"github.com/semenovem/portal/internal/abc/people/dto"
 	"github.com/semenovem/portal/internal/abc/provider"
-	"github.com/semenovem/portal/internal/util"
 	"github.com/semenovem/portal/pkg/throw"
 	"strings"
 )
@@ -14,7 +12,7 @@ import (
 func (p *PeopleProvider) UpdateEmployee(
 	ctx context.Context,
 	userID uint32,
-	dto *people_dto.EmployeeDTO,
+	dto *EmployeeUpdateModel,
 ) error {
 	tx, err := p.db.Begin(ctx)
 	if err != nil {
@@ -28,7 +26,7 @@ func (p *PeopleProvider) UpdateEmployee(
 		}
 	}()
 
-	if err = p.updateUserTx(ctx, tx, userID, &dto.UserDTO); err != nil {
+	if err = p.updateUserTx(ctx, tx, userID, &dto.UserCreateModel); err != nil {
 		return err
 	}
 
@@ -48,58 +46,63 @@ func (p *PeopleProvider) updateUserTx(
 	ctx context.Context,
 	tx pgx.Tx,
 	userID uint32,
-	dto *people_dto.UserDTO,
+	dto *UserCreateModel,
 ) error {
 	var (
-		sq   = `UPDATE people.users SET updated_at = now()` + ", "
-		set  = make([]string, 0)
-		args = pgx.NamedArgs{
-			"user_id":   userID,
-			"firstname": dto.Firstname,
-			"surname":   dto.Surname,
-			"status":    dto.Status,
+		sq    = `UPDATE people.users SET updated_at = now()` + ", "
+		where = " WHERE id = @user_id AND deleted = false"
+		set   = make([]string, 0)
+		args  = pgx.NamedArgs{
+			"user_id": userID,
 		}
 	)
 
 	if dto.Firstname != nil {
-		set = append(set, "firstname = @firstname")
+		set = append(set, "firstname = LOWER(@firstname)")
+		args["firstname"] = dto.getFirstname()
 	}
 	if dto.Surname != nil {
-		set = append(set, "surname = @surname")
+		set = append(set, "surname = LOWER(@surname)")
+		args["surname"] = dto.getSurname()
+	}
+	if dto.Patronymic != nil {
+		set = append(set, "surname = LOWER(@patronymic)")
+		args["patronymic"] = dto.getPatronymic()
 	}
 	if dto.Status != nil {
 		set = append(set, "status = @status")
+		args["status"] = dto.getStatus()
 	}
 	if dto.Note != nil {
 		set = append(set, "note = @note")
-		args["note"] = util.ZeroStrNil(dto.Note)
+		args["note"] = dto.getNote()
 	}
 	if dto.Roles != nil {
 		set = append(set, "roles = @roles::people.roles_enum[]")
-		args["roles"] = util.ZeroArrStrNil(dto.Roles)
+		args["roles"] = dto.getRoles()
 	}
 	if dto.AvatarID != nil {
 		set = append(set, "avatar_id = @avatar_id")
-		args["avatar_id"] = util.NumToValOrNil(dto.AvatarID)
+		args["avatar_id"] = dto.getAvatarID()
 	}
 	if dto.ExpiredAt != nil {
 		set = append(set, "expired_at = @expired_at")
-		args["expired_at"] = util.ZeroTimeNil(dto.ExpiredAt)
+		args["expired_at"] = dto.getExpiredAt()
 	}
 	if dto.Login != nil {
 		set = append(set, "login = @login")
-		args["login"] = util.ZeroStrNil(dto.Login)
+		args["login"] = dto.getLogin()
 	}
 	if dto.PasswdHash != nil {
 		set = append(set, "passwd_hash = @passwd_hash")
-		args["passwd_hash"] = util.ZeroStrNil(dto.PasswdHash)
+		args["passwd_hash"] = dto.getPasswdHash()
 	}
 
 	if len(set) == 0 {
 		return nil
 	}
 
-	sq += strings.Join(set, ",") + " WHERE id = @user_id AND deleted = false"
+	sq += strings.Join(set, ",") + where
 
 	res, err := tx.Exec(ctx, sq, args)
 	if err != nil && !provider.IsDuplicateKeyErr(err) {
@@ -122,32 +125,32 @@ func (p *PeopleProvider) updateEmployeeTx(
 	ctx context.Context,
 	tx pgx.Tx,
 	userID uint32,
-	dto *people_dto.EmployeeDTO,
+	dto *EmployeeUpdateModel,
 ) error {
 	var (
 		sq    = `UPDATE people.employees SET`
 		where = ` WHERE user_id = @user_id AND (select deleted from people.users where id = @user_id) = false`
 		set   = make([]string, 0)
 		args  = pgx.NamedArgs{
-			"user_id":     userID,
-			"position_id": dto.PositionID,
-			"dept_id":     dto.DeptID,
-			"worked_at":   dto.WorkedAt,
+			"user_id": userID,
 		}
 	)
 
 	if dto.PositionID != nil {
 		set = append(set, "position_id = @position_id")
+		args["position_id"] = dto.getPositionID()
 	}
 	if dto.DeptID != nil {
 		set = append(set, "dept_id = @dept_id")
+		args["dept_id"] = dto.getDeptID()
 	}
 	if dto.WorkedAt != nil {
 		set = append(set, "worked_at = @worked_at")
+		args["worked_at"] = dto.getWorkedAt()
 	}
 	if dto.FiredAt != nil {
 		set = append(set, "fired_at = @fired_at")
-		args["fired_at"] = util.ZeroTimeNil(dto.FiredAt)
+		args["fired_at"] = dto.getFiredAt()
 	}
 
 	if len(set) == 0 {

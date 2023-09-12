@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/google/uuid"
 	"github.com/semenovem/portal/internal/abc/auth/provider"
+	"github.com/semenovem/portal/internal/abc/people"
 	"github.com/semenovem/portal/internal/abc/people/provider"
-	"github.com/semenovem/portal/internal/abc/provider"
 	"github.com/semenovem/portal/pkg"
 	"github.com/semenovem/portal/pkg/it"
 	"github.com/semenovem/portal/pkg/jwtoken"
@@ -13,31 +13,27 @@ import (
 )
 
 type AuthAction struct {
-	logger     pkg.Logger
-	authPvd    *auth_provider.AuthProvider
-	peoplePvd  *people_provider.PeopleProvider
-	passwdAuth it.UserPasswdAuthenticator
+	logger    pkg.Logger
+	authPvd   *auth_provider.AuthProvider
+	peoplePvd *people_provider.PeopleProvider
 }
 
 func New(
 	logger pkg.Logger,
-	passwdAuth it.UserPasswdAuthenticator,
 	authPvd *auth_provider.AuthProvider,
 	peoplePvd *people_provider.PeopleProvider,
 ) *AuthAction {
 	return &AuthAction{
-		logger:     logger.Named("AuthAction"),
-		passwdAuth: passwdAuth,
-		authPvd:    authPvd,
-		peoplePvd:  peoplePvd,
+		logger:    logger.Named("AuthAction"),
+		authPvd:   authPvd,
+		peoplePvd: peoplePvd,
 	}
 }
 
-func (a *AuthAction) canLogin(user *it.UserAuth) error {
+func (a *AuthAction) canLogin(user *people.UserAuth) error {
 	if err := user.CanLogging(); err != nil {
-		err = throw.NewAuthErr(throw.MsgUserCantLogin, err.Error())
+		err = throw.NewWithTargetErr(throw.ErrAuthUserCannotLogin, err)
 		a.logger.Named("canLogin").With("user", user).Auth(err)
-
 		return err
 	}
 
@@ -53,14 +49,7 @@ func (a *AuthAction) getSessionByRefresh(
 
 	session, err := a.authPvd.GetSession(ctx, payload.SessionID)
 	if err != nil {
-		ll = ll.Named("GetSession")
-
-		if provider.IsNoRow(err) {
-			ll.Auth(throw.Err404AuthSession)
-			return nil, throw.Err404AuthSession
-		}
-
-		ll.Nested(err)
+		ll.Named("GetSession").Nested(err)
 		return nil, err
 	}
 
@@ -79,7 +68,7 @@ func (a *AuthAction) getSessionByRefresh(
 // Создание новой авторизованной сессии
 func (a *AuthAction) newSession(
 	ctx context.Context,
-	user *it.UserAuth,
+	user *people.UserAuth,
 	deviceID uuid.UUID,
 ) (*it.AuthSession, error) {
 	ll := a.logger.Named("newSession")

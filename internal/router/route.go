@@ -31,6 +31,7 @@ func (r *Router) addRoutes() {
 
 	// ----------------- People -----------------
 	auth.DELETE("/people/:user_id", r.peopleCnt.DeleteUser)
+	auth.POST("/people/:user_id/undelete", r.peopleCnt.UndeleteUser)
 	auth.GET("/people/free-login/:login_name", r.peopleCnt.CheckLogin)
 
 	// Employee

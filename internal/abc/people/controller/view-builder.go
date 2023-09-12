@@ -2,17 +2,36 @@ package people_controller
 
 import (
 	"fmt"
+	"github.com/semenovem/portal/internal/abc/controller"
 	"github.com/semenovem/portal/internal/abc/people/provider"
 	"github.com/semenovem/portal/pkg/it"
 )
 
-func newEmployeePublicProfileViews(ls []*it.EmployeeProfile) []*employeeProfileView {
-	a := make([]*publicEmployeeView, len(ls))
-	for i := range ls {
-		a[i] = newEmployeePublicProfileView(ls[i])
+func newUserPublicProfileView(u *people_provider.UserModel) *userPublicProfileView {
+	r := &userPublicProfileView{
+		ID:         u.ID(),
+		Firstname:  u.Firstname(),
+		Surname:    u.Surname(),
+		Patronymic: u.Patronymic(),
+	}
+	if avatarID := u.AvatarID(); avatarID != 0 {
+		// TODO сформировать реальную ссылку на скачивание аватара пользователя
+		r.Avatar = fmt.Sprintf("https://asdas/asdasd/%d", avatarID)
 	}
 
-	return nil
+	return r
+}
+
+func newUserProfileView(u *people_provider.UserModel) *userProfileView {
+	r := &userProfileView{
+		userPublicProfileView: *newUserPublicProfileView(u),
+		Note:                  u.Note(),
+		ExpiredAt:             controller.TimeToString(u.ExpiredAt()),
+		Status:                string(u.Status()),
+		Roles:                 it.StringifyUserRoles(u.Roles()),
+	}
+
+	return r
 }
 
 func newEmployeeProfileViews(
@@ -42,18 +61,11 @@ func newEmployeeProfileView(
 	position *people_provider.PositionModel,
 ) *employeeProfileView {
 	obj := employeeProfileView{
-		userPublicProfileView: userPublicProfileView{
-			ID:         u.ID(),
-			Firstname:  u.Firstname(),
-			Surname:    u.Surname(),
-			Patronymic: u.Patronymic(),
-			// TODO сформировать реальную ссылку на скачивание аватара пользователя
-			Avatar: fmt.Sprintf("https://asdas/asdasd/%d", u.AvatarID()),
-		},
-		WorkedAt: u.WorkedAt(),
-		FiredAt:  u.FiredAt(),
-		Note:     u.Note(),
-		BossID:   0,
+		userPublicProfileView: *newUserPublicProfileView(&u.UserModel),
+		WorkedAt:              u.WorkedAt(),
+		FiredAt:               u.FiredAt(),
+		Note:                  u.Note(),
+		BossID:                0,
 	}
 
 	if dept != nil {

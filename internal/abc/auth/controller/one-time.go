@@ -5,7 +5,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/semenovem/portal/internal/abc/controller"
 	"github.com/semenovem/portal/internal/audit"
-	"github.com/semenovem/portal/pkg/throw"
 	"net/http"
 
 	_ "github.com/semenovem/portal/pkg/fail"
@@ -80,13 +79,7 @@ func (cnt *Controller) LoginOnetimeLink(c echo.Context) error {
 	session, err := cnt.authAct.LoginByOnetimeEntryID(ctx, form.EntryID)
 	if err != nil {
 		ll.Named("LoginByOnetimeEntryID").Nested(err)
-
-		switch err.(type) {
-		case throw.NotFoundErr:
-			return cnt.fail.Send(c, "", http.StatusNotFound, err)
-		}
-
-		return cnt.fail.SendInternalServerErr(c, "", err)
+		return cnt.com.Response(c, ll, err)
 	}
 
 	cnt.audit.Auth(session.UserID, audit.UserLogin, audit.P{

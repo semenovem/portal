@@ -3,9 +3,9 @@ package auth_provider
 import (
 	"context"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 	"github.com/semenovem/portal/internal/abc/provider"
 	"github.com/semenovem/portal/pkg/it"
+	"github.com/semenovem/portal/pkg/throw"
 )
 
 func (p *AuthProvider) CreateSession(
@@ -45,6 +45,7 @@ func (p *AuthProvider) LogoutSession(ctx context.Context, sessionID uint32) erro
 		return err
 	} else if result.RowsAffected() == 0 {
 		ll.AuthStr("auth session id not found (possible already logouted)")
+		return throw.Err404AuthSession
 	}
 
 	if err := p.sessionCanceled(ctx, sessionID); err != nil {
@@ -62,7 +63,7 @@ func (p *AuthProvider) UpdateRefreshSession(
 	refreshNewID uuid.UUID,
 ) error {
 	sq := `UPDATE auth.sessions SET refresh_id = $3
-				WHERE logouted = false AND refresh_id = $2 AND id = $1`
+	WHERE logouted = false AND refresh_id = $2 AND id = $1`
 
 	result, err := p.db.Exec(ctx, sq, sessionID, refreshOldID, refreshNewID)
 	if err != nil {
@@ -75,7 +76,7 @@ func (p *AuthProvider) UpdateRefreshSession(
 	}
 
 	if result.RowsAffected() == 0 {
-		return pgx.ErrNoRows
+		return throw.Err404AuthSession
 	}
 
 	return nil
@@ -112,52 +113,3 @@ func (p *AuthProvider) GetDelOnetimeEntry(
 
 	return uint32(v), err
 }
-
-//func (p *AuthProvider) CreateSession(
-//	ctx context.Context,
-//	userID uint32,
-//	deviceID uuid.UUID,
-//) (*it.AuthSession, error) {
-//	var (
-//		ll        = p.logger.Named("CreateSession")
-//		refreshID = uuid.New()
-//		sessionID uint32
-//
-//		sq = `INSERT INTO auth.sessions (user_id, device_id, refresh_id) VALUES ($1, $2, $3)
-//			   RETURNING id;`
-//	)
-//
-//	tx, err := p.db.Begin(ctx)
-//	if err != nil {
-//		ll.DBTag().Named("Begin").Error(err.Error())
-//		return nil, err
-//	}
-//
-//	defer func() {
-//		if err1 := tx.Rollback(ctx); err1 != nil && err1 != pgx.ErrTxClosed {
-//			ll.DBTag().Named("Rollback").Error(err1.Error())
-//		}
-//	}()
-//
-//	if err = tx.QueryRow(ctx, sq, userID, deviceID, refreshID).Scan(&sessionID); err != nil {
-//		ll.DBTag().Named("QueryRow").With("userID", userID).Error(err.Error())
-//		return nil, err
-//	}
-//
-//	if _, err = tx.Exec(ctx, sq2, sessionID, userAgent); err != nil {
-//		ll.DBTag().Named("Exec").Error(err.Error())
-//		return nil, err
-//	}
-//
-//	if err = tx.Commit(ctx); err != nil {
-//		ll.DBTag().Named("Commit").Error(err.Error())
-//		return nil, err
-//	}
-//
-//	return &it.AuthSession{
-//		ID:        sessionID,
-//		UserID:    userID,
-//		DeviceID:  deviceID,
-//		RefreshID: refreshID,
-//	}, nil
-//}

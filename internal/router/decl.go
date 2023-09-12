@@ -50,7 +50,7 @@ func New(
 	config *config.API,
 	auditService *audit.AuditProvider,
 	jwtService *jwtoken.Service,
-	userPasswdAuth it.UserPasswdAuthenticator,
+	logoPasswdAuth it.UserPasswdAuthenticator,
 
 	authPvd *auth_provider.AuthProvider,
 	peoplePvd *people_provider.PeopleProvider,
@@ -146,13 +146,14 @@ func New(
 		authCnt: auth_controller.New(
 			cntArg,
 			jwtService,
+			logoPasswdAuth,
 			authAct,
 			strings.Split(config.JWT.ServedDomains, ","),
 			time.Hour*24*time.Duration(config.JWT.RefreshTokenLifetimeDay),
 			config.JWT.RefreshTokenCookieName,
 		),
 
-		peopleCnt: people_controller.New(cntArg, userPasswdAuth, peopleAct),
+		peopleCnt: people_controller.New(cntArg, logoPasswdAuth, peopleAct),
 		storeCnt:  store_controller.New(cntArg, storeAct),
 		mediaCnt:  media_controller.New(cntArg, mediaAct),
 	}

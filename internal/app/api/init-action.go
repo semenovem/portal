@@ -10,14 +10,13 @@ import (
 func (app *appAPI) initActions() {
 	app.actions.auth = auth_action.New(
 		app.logger,
-		app.userPasswdAuth,
 		app.providers.auth,
 		app.providers.people,
 	)
 
 	app.actions.people = people_action.New(
 		app.logger,
-		app.userPasswdAuth,
+		app.logoPasswdAuth,
 		app.providers.people,
 	)
 

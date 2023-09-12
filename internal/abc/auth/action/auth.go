@@ -3,7 +3,6 @@ package auth_action
 import (
 	"context"
 	"github.com/google/uuid"
-	"github.com/semenovem/portal/internal/abc/provider"
 	"github.com/semenovem/portal/pkg/it"
 	"github.com/semenovem/portal/pkg/jwtoken"
 	"github.com/semenovem/portal/pkg/throw"
@@ -48,11 +47,6 @@ func (a *AuthAction) Refresh(
 	userAuth, err := a.peoplePvd.GetUserAuth(ctx, sessionOld.UserID)
 	if err != nil {
 		ll.Named("GetUserAuth").Nested(err)
-
-		if provider.IsNoRow(err) {
-			return nil, throw.Err404User
-		}
-
 		return nil, err
 	}
 
@@ -65,7 +59,7 @@ func (a *AuthAction) Refresh(
 	if err != nil {
 		ll = ll.Named("UpdateRefreshSession")
 
-		if provider.IsNoRow(err) {
+		if throw.IsNotFoundErr(err) {
 			err = throw.NewAuthErr("no auth session with the specified refresh token - could not be updated")
 
 			ll.With("refreshID_old", payload.RefreshID).

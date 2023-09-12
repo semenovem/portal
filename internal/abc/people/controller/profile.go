@@ -8,32 +8,6 @@ import (
 	_ "github.com/semenovem/portal/pkg/fail"
 )
 
-// SelfProfile docs
-//
-//	@Summary	Получить свой профиль
-//	@Description
-//	@Produce	json
-//	@Success	200	{object}	userPublicProfileView
-//	@Failure	400	{object}	fail.Response
-//	@Router		/people/self/profile [GET]
-//	@Tags		people
-//	@Security	ApiKeyAuth
-func (cnt *Controller) SelfProfile(c echo.Context) error {
-	var (
-		thisUserID = controller.ExtractThisUserID(c)
-		ll         = cnt.logger.Named("SelfProfile").With("thisUserID", thisUserID)
-		ctx        = c.Request().Context()
-	)
-
-	profile, err := cnt.peopleAct.GetUserProfile(ctx, thisUserID, thisUserID)
-	if err != nil {
-		ll = ll.Named("GetUserProfile")
-		return cnt.com.Response(c, ll, err)
-	}
-
-	return c.JSON(http.StatusOK, newUserProfileView(profile))
-}
-
 // UserProfile docs
 //
 //	@Summary		Получить профиль пользователя по его ID
@@ -58,7 +32,7 @@ func (cnt *Controller) UserProfile(c echo.Context) error {
 		return err.Err
 	}
 
-	profile, err := cnt.peopleAct.GetUserProfile(ctx, thisUserID, form.UserID)
+	profile, err := cnt.peopleAct.GetUserModel(ctx, thisUserID, form.UserID)
 	if err != nil {
 		ll = ll.Named("GetUserProfile").With("user", form.UserID)
 		return cnt.com.Response(c, ll, err)
@@ -90,7 +64,7 @@ func (cnt *Controller) UserPublicProfile(c echo.Context) error {
 		return err.Err
 	}
 
-	profile, err := cnt.peopleAct.GetUserProfile(ctx, thisUserID, form.UserID)
+	profile, err := cnt.peopleAct.GetUserModel(ctx, thisUserID, form.UserID)
 	if err != nil {
 		ll = ll.Named("GetUserProfile")
 		return cnt.com.Response(c, ll, err)

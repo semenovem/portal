@@ -19,6 +19,13 @@ func NewInvalidTimeFieldErr(fieldName string, err error) error {
 	}
 }
 
+// NewInvalidTimeErr ошибка парсинга времени
+func NewInvalidTimeErr(err error) error {
+	return &invalidErr{
+		msg: fmt.Sprintf("not time format (2001-03-24T00:00:00Z): %s", err.Error()),
+	}
+}
+
 func IsInvalidErr(err error) bool {
 	_, ok := err.(*invalidErr)
 	return ok

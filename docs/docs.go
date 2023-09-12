@@ -258,48 +258,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/people": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "` + "`" + `expired_at` + "`" + ` в формате ` + "`" + `2001-03-24T00:00:00Z` + "`" + `\nвведенный login нужно проверить, что он допустим ` + "`" + `/people/free-login/:login_name` + "`" + `\n",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "people"
-                ],
-                "summary": "Создает пользователя",
-                "parameters": [
-                    {
-                        "description": "данные создаваемого пользователя",
-                        "name": "payload",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/internal_abc_people_controller.createUserForm"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/internal_abc_people_controller.userPublicProfileView"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_fail.Response"
-                        }
-                    }
-                }
-            }
-        },
         "/people/:user_id": {
             "delete": {
                 "security": [
@@ -427,7 +385,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "people"
+                    "people/employee"
                 ],
                 "summary": "Создает нового сотрудника",
                 "parameters": [
@@ -469,7 +427,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "people"
+                    "people/employee"
                 ],
                 "summary": "Обновление данных пользователя",
                 "parameters": [
@@ -486,6 +444,32 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/internal_abc_people_controller.employeeUpdateForm"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_fail.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/people/employee/handbook": {
+            "get": {
+                "description": "Доступен в локальной сети без авторизации\n",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "people"
+                ],
+                "summary": "Справочник сотрудников",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_abc_people_controller.employeeHandbookResponse"
                         }
                     },
                     "400": {
@@ -525,32 +509,6 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/internal_abc_people_controller.freeLoginNameResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_fail.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/people/handbook": {
-            "get": {
-                "description": "Доступен в локальной сети без авторизации\n",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "people"
-                ],
-                "summary": "Справочник сотрудников",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/internal_abc_people_controller.publicHandbookResponse"
                         }
                     },
                     "400": {
@@ -1107,6 +1065,60 @@ const docTemplate = `{
                 }
             }
         },
+        "internal_abc_people_controller.employeeHandbookResponse": {
+            "type": "object",
+            "properties": {
+                "employees": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_abc_people_controller.employeeProfileView"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "internal_abc_people_controller.employeeProfileView": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "boss_id": {
+                    "type": "integer"
+                },
+                "dept_name": {
+                    "type": "string"
+                },
+                "fired_at": {
+                    "description": "Дата увольнения",
+                    "type": "string"
+                },
+                "firstname": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "note": {
+                    "type": "string"
+                },
+                "patronymic": {
+                    "type": "string"
+                },
+                "position_name": {
+                    "type": "string"
+                },
+                "surname": {
+                    "type": "string"
+                },
+                "worked_at": {
+                    "description": "Дата начала работы",
+                    "type": "string"
+                }
+            }
+        },
         "internal_abc_people_controller.employeeUpdateForm": {
             "type": "object",
             "properties": {
@@ -1163,53 +1175,6 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_abc_people_controller.publicEmployeeView": {
-            "type": "object",
-            "properties": {
-                "avatar": {
-                    "type": "string"
-                },
-                "boss_id": {
-                    "type": "integer"
-                },
-                "dept_name": {
-                    "type": "string"
-                },
-                "firstname": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "note": {
-                    "type": "string"
-                },
-                "position_name": {
-                    "type": "string"
-                },
-                "start_work_at": {
-                    "description": "Дата начала работы",
-                    "type": "string"
-                },
-                "surname": {
-                    "type": "string"
-                }
-            }
-        },
-        "internal_abc_people_controller.publicHandbookResponse": {
-            "type": "object",
-            "properties": {
-                "employees": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/internal_abc_people_controller.publicEmployeeView"
-                    }
-                },
-                "total": {
-                    "type": "integer"
-                }
-            }
-        },
         "internal_abc_people_controller.userCreateResponse": {
             "type": "object",
             "properties": {
@@ -1229,6 +1194,9 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "patronymic": {
+                    "type": "string"
                 },
                 "surname": {
                     "type": "string"

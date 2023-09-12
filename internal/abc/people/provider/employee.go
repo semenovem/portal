@@ -4,13 +4,12 @@ import (
 	"context"
 	"errors"
 	"github.com/jackc/pgx/v5"
-	"github.com/semenovem/portal/internal/abc/people/dto"
 	"github.com/semenovem/portal/internal/abc/provider"
 )
 
 func (p *PeopleProvider) CreateEmployee(
 	ctx context.Context,
-	dto *people_dto.EmployeeDTO,
+	dto *EmployeeUpdateModel,
 ) (userID uint32, err error) {
 	tx, err := p.db.Begin(ctx)
 	if err != nil {
@@ -24,7 +23,7 @@ func (p *PeopleProvider) CreateEmployee(
 		}
 	}()
 
-	userID, err = p.createUserTx(ctx, tx, &dto.UserDTO)
+	userID, err = p.createUserTx(ctx, tx, &dto.UserCreateModel)
 	if err != nil {
 		return 0, err
 	}
@@ -44,29 +43,30 @@ func (p *PeopleProvider) CreateEmployee(
 func (p *PeopleProvider) createUserTx(
 	ctx context.Context,
 	tx pgx.Tx,
-	dto *people_dto.UserDTO,
+	dto *UserCreateModel,
 ) (userID uint32, err error) {
 	var (
 		sq = `INSERT INTO people.users (
-			  firstname, surname, login, note,
+			  firstname, surname, patronymic, login, note,
 			  status, roles, avatar_id,
 			  expired_at, passwd_hash
 			) VALUES (
-				LOWER(@firstname), LOWER(@surname), LOWER(@login), @note,
+				LOWER(@firstname), LOWER(@surname), LOWER(@patronymic), LOWER(@login), @note,
 				@status, @roles::people.roles_enum[], @avatar_id,
 				@expired_at, @passwd_hash
 			) returning id`
 
 		args = pgx.NamedArgs{
-			"firstname":   *dto.Firstname,
-			"surname":     *dto.Surname,
-			"login":       dto.Login,
-			"note":        dto.Note,
-			"status":      dto.Status,
-			"roles":       dto.Roles,
-			"avatar_id":   dto.AvatarID,
-			"expired_at":  dto.ExpiredAt,
-			"passwd_hash": dto.PasswdHash,
+			"firstname":   dto.getFirstname(),
+			"surname":     dto.getSurname(),
+			"patronymic":  dto.getPatronymic(),
+			"login":       dto.getLogin(),
+			"note":        dto.getNote(),
+			"status":      dto.getStatus(),
+			"roles":       dto.getRoles(),
+			"avatar_id":   dto.getAvatarID(),
+			"expired_at":  dto.getExpiredAt(),
+			"passwd_hash": dto.getPasswdHash(),
 		}
 	)
 
@@ -85,7 +85,7 @@ func (p *PeopleProvider) createEmployeeTx(
 	ctx context.Context,
 	tx pgx.Tx,
 	userID uint32,
-	dto *people_dto.EmployeeDTO,
+	dto *EmployeeUpdateModel,
 ) error {
 	var (
 		sq = `INSERT INTO people.employees
@@ -99,10 +99,10 @@ func (p *PeopleProvider) createEmployeeTx(
 
 		args = pgx.NamedArgs{
 			"user_id":     userID,
-			"position_id": *dto.PositionID,
-			"dept_id":     *dto.DeptID,
-			"worked_at":   *dto.WorkedAt,
-			"fired_at":    dto.FiredAt,
+			"position_id": dto.getPositionID(),
+			"dept_id":     dto.getDeptID(),
+			"worked_at":   dto.getWorkedAt(),
+			"fired_at":    dto.getFiredAt(),
 		}
 	)
 
@@ -119,10 +119,10 @@ func (p *PeopleProvider) createEmployeeTx(
 
 func (p *PeopleProvider) SearchEmployees(
 	ctx context.Context,
-	opts *people_dto.EmployeesSearchOpts,
+	opts *EmployeesSearchOpts,
 ) ([]*EmployeeModel, uint32, error) {
 	var (
-		// total uint32 TODO пока кол-во пользователей меньше лимита, не делать подсчет кол-ва
+		// Total uint32 TODO пока кол-во пользователей меньше лимита, не делать подсчет кол-ва
 		ls = make([]*EmployeeModel, 0)
 
 		sq = `SELECT u.id, u.firstname, u.surname, u.note, u.status, u.roles, u.avatar_id,

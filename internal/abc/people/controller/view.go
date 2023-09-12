@@ -17,7 +17,7 @@ type userPublicProfileView struct {
 // Профиль сотрудника
 type employeeProfileView struct {
 	userPublicProfileView
-	WorkedAt     time.Time  `json:"worked_at"`          // Дата начала работы
+	WorkedAt     *time.Time `json:"worked_at"`          // Дата начала работы
 	FiredAt      *time.Time `json:"fired_at,omitempty"` // Дата увольнения
 	DeptName     string     `json:"dept_name"`
 	PositionName string     `json:"position_name"`
@@ -43,7 +43,7 @@ type userProfileView struct {
 	Roles     []string `json:"roles,omitempty"`
 }
 
-func newUserPublicProfileView(u *it.UserProfile) *userPublicProfileView {
+func newUserPublicProfileView2(u *it.UserProfile) *userPublicProfileView {
 	r := &userPublicProfileView{
 		ID:        u.ID,
 		Firstname: u.FirstName,
@@ -51,31 +51,6 @@ func newUserPublicProfileView(u *it.UserProfile) *userPublicProfileView {
 	}
 	if u.AvatarID != 0 {
 		r.Avatar = "asdfasf/asdfasdf/"
-	}
-
-	return r
-}
-
-func newEmployeePublicProfileView(u *it.EmployeeProfile) *publicEmployeeView {
-	p := publicEmployeeView{
-		userPublicProfileView: *newUserPublicProfileView(&u.UserProfile),
-		StartWorkAt:           u.StartWorkAt,
-		PositionName:          u.Position.Title,
-		DeptName:              u.Dept.Title,
-		Note:                  u.Note,
-		//BossID:                u.Boss.ID, // todo кажется что нужно фио
-	}
-
-	return &p
-}
-
-func newUserProfileView(u *it.UserProfile) *userProfileView {
-	r := &userProfileView{
-		userPublicProfileView: *newUserPublicProfileView(u),
-		Note:                  u.Note,
-		ExpiredAt:             u.ExpiredAtToString(),
-		Status:                string(u.Status),
-		Roles:                 it.StringifyUserRoles(u.Roles),
 	}
 
 	return r

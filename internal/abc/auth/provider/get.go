@@ -2,7 +2,9 @@ package auth_provider
 
 import (
 	"context"
+	"github.com/semenovem/portal/internal/abc/provider"
 	"github.com/semenovem/portal/pkg/it"
+	"github.com/semenovem/portal/pkg/throw"
 )
 
 func (p *AuthProvider) GetSession(ctx context.Context, sessionID uint32) (*it.AuthSession, error) {
@@ -15,6 +17,10 @@ func (p *AuthProvider) GetSession(ctx context.Context, sessionID uint32) (*it.Au
 
 	err := p.db.QueryRow(ctx, sq, sessionID).Scan(&s.UserID, &s.DeviceID, &s.RefreshID)
 	if err != nil {
+		if provider.IsNoRow(err) {
+			return nil, throw.Err404AuthSession
+		}
+
 		p.logger.Named("GetSession").With("sessionID", sessionID).DB(err)
 		return nil, err
 	}

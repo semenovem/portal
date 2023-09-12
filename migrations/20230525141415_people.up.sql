@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS people.positions
 -- Пользователи
 CREATE TABLE IF NOT EXISTS people.users
 (
-  id          serial PRIMARY KEY,
+  id          serial CHECK ( id > 0 ) PRIMARY KEY,
   deleted     bool                                  default false      NOT NULL,
   updated_at  timestamp                             default now()      NOT NULL,
   firstname   varchar(128)                                             NOT NULL, -- Имя
@@ -37,7 +37,8 @@ CREATE TABLE IF NOT EXISTS people.users
   avatar_id   int check ( avatar_id > 0)            default NULL,
   expired_at  timestamp                             default NULL,                -- УЗ активна до указанного времени
 
-  login       varchar(128)
+-- todo дописать регулярку для проверки допустимых символов
+  login       varchar(128) CHECK ( login <> '' )
     constraint users_login_unique_constraint UNIQUE default NULL,
   passwd_hash varchar(40)                           default NULL,                -- хэш пароля
   props       jsonb                                 default NULL                 -- данные пользователя

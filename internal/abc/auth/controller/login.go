@@ -37,7 +37,7 @@ func (cnt *Controller) Login(c echo.Context) error {
 	session, err := cnt.authAct.NewLogin(
 		ctx,
 		form.Login,
-		form.Passwd,
+		cnt.logoPasswdAuth.Hashing(form.Passwd),
 		form.DeviceID,
 	)
 	if err != nil {

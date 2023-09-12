@@ -9,6 +9,32 @@ import (
 	"net/http"
 )
 
+// SelfProfile docs
+//
+//	@Summary	Получить свой профиль
+//	@Description
+//	@Produce	json
+//	@Success	200	{object}	userPublicProfileView
+//	@Failure	400	{object}	fail.Response
+//	@Router		/people/self/profile [GET]
+//	@Tags		people
+//	@Security	ApiKeyAuth
+func (cnt *Controller) SelfProfile(c echo.Context) error {
+	var (
+		thisUserID = controller.ExtractThisUserID(c)
+		ll         = cnt.logger.Named("SelfProfile").With("thisUserID", thisUserID)
+		ctx        = c.Request().Context()
+	)
+
+	profile, err := cnt.peopleAct.GetUserModel(ctx, thisUserID, thisUserID)
+	if err != nil {
+		ll = ll.Named("GetUserProfile")
+		return cnt.com.Response(c, ll, err)
+	}
+
+	return c.JSON(http.StatusOK, newUserProfileView(profile))
+}
+
 // CheckLogin docs
 //
 //	@Summary	Проверяет, свободен ли указанный логин
@@ -86,6 +112,45 @@ func (cnt *Controller) DeleteUser(c echo.Context) error {
 	})
 
 	ll.With("userID", 0).Debug("user is deleted")
+
+	return c.NoContent(http.StatusNoContent)
+}
+
+// UndeleteUser docs
+//
+//	@Summary	Восстанавливает удаленного пользователя
+//	@Description
+//	@Produce	json
+//	@Param		user_id	path	string	true	"id пользователя"
+//	@Success	204		"no-content"
+//	@Failure	400		{object}	fail.Response
+//	@Router		/people/:user_id/undelete [POST]
+//	@Tags		people
+//	@Security	ApiKeyAuth
+func (cnt *Controller) UndeleteUser(c echo.Context) error {
+	var (
+		thisUserID = controller.ExtractThisUserID(c)
+		ll         = cnt.logger.Named("UndeleteUser").With("thisUserID", thisUserID)
+		ctx        = c.Request().Context()
+		form       = new(userPathForm)
+	)
+
+	if err := cnt.com.ExtractForm(c, ll, form); err != nil {
+		return err.Err
+	}
+
+	ll = ll.With("userID", form.UserID)
+
+	if err := cnt.peopleAct.UndeleteUser(ctx, thisUserID, form.UserID); err != nil {
+		ll = ll.Named("peopleAct.UndeleteUser")
+		return cnt.com.Response(c, ll, err)
+	}
+
+	cnt.audit.Undel(thisUserID, audit.EntityUser, audit.P{
+		"userID": form.UserID,
+	})
+
+	ll.With("userID", 0).Debug("user is undeleted")
 
 	return c.NoContent(http.StatusNoContent)
 }
