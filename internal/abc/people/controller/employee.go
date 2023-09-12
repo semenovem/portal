@@ -57,7 +57,7 @@ func (cnt *Controller) EmployeeHandbook(c echo.Context) error {
 //	@Description	введенный login нужно проверить, что он допустим `/people/free-login/:login_name`
 //	@Description
 //	@Produce	json
-//	@Param		payload	body		createUserForm	true	"данные создаваемого пользователя"
+//	@Param		payload	body		employeeCreateForm	true	"данные создаваемого пользователя"
 //	@Success	200		{object}	userCreateResponse
 //	@Failure	400		{object}	fail.Response
 //	@Router		/people/employee [POST]
@@ -116,7 +116,8 @@ func (cnt *Controller) CreateEmployee(c echo.Context) error {
 //	@Summary		Обновление данных пользователя
 //	@Description	`expired_at, worked_at, fired_at` в формате `2001-03-24T00:00:00Z`
 //	@Description
-//	@Description
+//	@Description	json объект должен содержать только те поля, которые отправляются на редактирование
+//	@Description	все поля опциональны
 //	@Description
 //	@Description
 //	@Produce	json

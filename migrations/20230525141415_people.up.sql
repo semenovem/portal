@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS people.users
   avatar_id   int check ( avatar_id > 0)            default NULL,
   expired_at  timestamp                             default NULL,                -- УЗ активна до указанного времени
 
+-- todo регулярка для проверки login и полей имени
 -- todo дописать регулярку для проверки допустимых символов
   login       varchar(128) CHECK ( login <> '' )
     constraint users_login_unique_constraint UNIQUE default NULL,

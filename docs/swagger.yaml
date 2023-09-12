@@ -78,12 +78,11 @@ definitions:
         description: uri
         type: string
     type: object
-  internal_abc_people_controller.createUserForm:
+  internal_abc_people_controller.employeeCreateForm:
     properties:
       avatar_id:
         type: integer
       dept_id:
-        minimum: 1
         type: integer
       expired_at:
         type: string
@@ -97,8 +96,9 @@ definitions:
         type: string
       passwd:
         type: string
+      patronymic:
+        type: string
       position_id:
-        minimum: 1
         type: integer
       roles:
         items:
@@ -110,12 +110,6 @@ definitions:
         type: string
       worked_at:
         type: string
-    required:
-    - dept_id
-    - firstname
-    - position_id
-    - surname
-    - worked_at
     type: object
   internal_abc_people_controller.employeeHandbookResponse:
     properties:
@@ -168,6 +162,10 @@ definitions:
       login:
         type: string
       note:
+        type: string
+      passwd:
+        type: string
+      patronymic:
         type: string
       position_id:
         type: integer
@@ -471,6 +469,28 @@ paths:
       summary: Получить публичный профиль пользователя по его ID
       tags:
       - people
+  /people/:user_id/undelete:
+    post:
+      parameters:
+      - description: id пользователя
+        in: path
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: no-content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_semenovem_portal_pkg_fail.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Восстанавливает удаленного пользователя
+      tags:
+      - people
   /people/employee:
     post:
       description: |
@@ -482,7 +502,7 @@ paths:
         name: payload
         required: true
         schema:
-          $ref: '#/definitions/internal_abc_people_controller.createUserForm'
+          $ref: '#/definitions/internal_abc_people_controller.employeeCreateForm'
       produces:
       - application/json
       responses:
@@ -504,7 +524,8 @@ paths:
       description: |+
         `expired_at, worked_at, fired_at` в формате `2001-03-24T00:00:00Z`
 
-
+        json объект должен содержать только те поля, которые отправляются на редактирование
+        все поля опциональны
 
       parameters:
       - description: id пользователя

@@ -17,6 +17,8 @@ func (a *PeopleAction) UpdateEmployee(
 	// TODO проверка права редактирования пользователя
 	// Проверка права приема/увольнения пользователя
 
+	// валидация
+
 	err := a.peoplePvd.UpdateEmployee(ctx, userID, dto)
 	if err != nil {
 		ll.Named("peoplePvd.UpdateEmployee").Nested(err)

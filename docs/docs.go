@@ -373,6 +373,42 @@ const docTemplate = `{
                 }
             }
         },
+        "/people/:user_id/undelete": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "people"
+                ],
+                "summary": "Восстанавливает удаленного пользователя",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id пользователя",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "no-content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_fail.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/people/employee": {
             "post": {
                 "security": [
@@ -395,7 +431,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_abc_people_controller.createUserForm"
+                            "$ref": "#/definitions/internal_abc_people_controller.employeeCreateForm"
                         }
                     }
                 ],
@@ -422,7 +458,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "` + "`" + `expired_at, worked_at, fired_at` + "`" + ` в формате ` + "`" + `2001-03-24T00:00:00Z` + "`" + `\n\n\n\n",
+                "description": "` + "`" + `expired_at, worked_at, fired_at` + "`" + ` в формате ` + "`" + `2001-03-24T00:00:00Z` + "`" + `\n\njson объект должен содержать только те поля, которые отправляются на редактирование\nвсе поля опциональны\n\n",
                 "produces": [
                     "application/json"
                 ],
@@ -1009,22 +1045,14 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_abc_people_controller.createUserForm": {
+        "internal_abc_people_controller.employeeCreateForm": {
             "type": "object",
-            "required": [
-                "dept_id",
-                "firstname",
-                "position_id",
-                "surname",
-                "worked_at"
-            ],
             "properties": {
                 "avatar_id": {
                     "type": "integer"
                 },
                 "dept_id": {
-                    "type": "integer",
-                    "minimum": 1
+                    "type": "integer"
                 },
                 "expired_at": {
                     "type": "string"
@@ -1044,9 +1072,11 @@ const docTemplate = `{
                 "passwd": {
                     "type": "string"
                 },
+                "patronymic": {
+                    "type": "string"
+                },
                 "position_id": {
-                    "type": "integer",
-                    "minimum": 1
+                    "type": "integer"
                 },
                 "roles": {
                     "type": "array",
@@ -1141,6 +1171,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "note": {
+                    "type": "string"
+                },
+                "passwd": {
+                    "type": "string"
+                },
+                "patronymic": {
                     "type": "string"
                 },
                 "position_id": {
