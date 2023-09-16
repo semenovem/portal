@@ -41,7 +41,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '2'
+          cpus: '1'
           memory: 300M
 
 
@@ -62,9 +62,24 @@ services:
         limits:
           cpus: '0.5'
           memory: 100M
-        reservations:
-          cpus: '0.5'
-          memory: 10M
+
+
+  redis-gui2:
+    <<: *net
+    image: patrikx3/p3x-redis-ui:2023.10.246
+    ports:
+      - 7843:7843
+    volumes:
+      - ./configs/redis-gui/settings.json:/settings/settings.json
+      - ./configs/redis-gui/p3xrs-conns.json.json:/settings/.p3xrs-conns.json
+    deploy:
+      replicas: 0
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 50M
+    logging:
+      driver: none
 
 
   redis-gui:
@@ -82,21 +97,18 @@ services:
     volumes:
       - ./configs/redis-config.json:/redis-commander/config/local.json:ro
     deploy:
-      replicas: 1
+      replicas: 0
       resources:
         limits:
           cpus: '0.1'
           memory: 50M
-        reservations:
-          cpus: '0.01'
-          memory: 30M
     logging:
       driver: none
 
 
   s3:
     <<: *net
-    image: quay.io/minio/minio:RELEASE.2023-08-16T20-17-30Z
+    image: minio/minio:RELEASE.2023-09-16T01-01-47Z
     hostname: s3storage
     command: server /data --console-address :9001 --certs-dir /certs
     ports:
@@ -112,6 +124,12 @@ services:
       - ./configs/s3/public.crt:/certs/public.crt:ro
     deploy:
       replicas: 1
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 300M
+    logging:
+      driver: none
 
 
 # Использовалось для подготовки s3 скриптами при первом старте (сейчас не требуется)
