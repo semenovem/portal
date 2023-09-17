@@ -9,7 +9,7 @@ import (
 
 func (p *PeopleProvider) CreateEmployee(
 	ctx context.Context,
-	dto *EmployeeUpdateModel,
+	dto *EmployeeCreateModel,
 ) (userID uint32, err error) {
 	tx, err := p.db.Begin(ctx)
 	if err != nil {
@@ -82,7 +82,7 @@ func (p *PeopleProvider) createEmployeeTx(
 	ctx context.Context,
 	tx pgx.Tx,
 	userID uint32,
-	dto *EmployeeUpdateModel,
+	dto *EmployeeCreateModel,
 ) error {
 	var (
 		sq = `INSERT INTO people.employees

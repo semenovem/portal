@@ -5,10 +5,31 @@ import (
 	"github.com/semenovem/portal/internal/abc/people/provider"
 )
 
+func (a *PeopleAction) CreateEmployee(
+	ctx context.Context,
+	thisUserID uint32,
+	dto *people_provider.EmployeeCreateModel,
+) (userID uint32, err error) {
+	ll := a.logger.Named("CreateUser")
+
+	// TODO Должна быть проверка на право создания пользователя
+	// ----
+	// ----
+	// ----
+
+	userID, err = a.peoplePvd.CreateEmployee(ctx, dto)
+	if err != nil {
+		ll.Named("peoplePvd.CreateUser").Nested(err)
+		return
+	}
+
+	return
+}
+
 func (a *PeopleAction) UpdateEmployee(
 	ctx context.Context,
 	thisUserID, userID uint32,
-	dto *people_provider.EmployeeUpdateModel,
+	dto *people_provider.EmployeeCreateModel,
 ) error {
 	var (
 		ll = a.logger.Named("UpdateEmployee").With("userID", userID)

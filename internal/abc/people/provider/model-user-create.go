@@ -12,6 +12,7 @@ type UserCreateModel struct {
 	Surname    *string
 	Patronymic *string
 	Status     *string
+	Groups     *[]string
 	Note       *string
 	AvatarID   *uint32
 	ExpiredAt  *time.Time
@@ -102,7 +103,7 @@ func (u *UserCreateModel) getProps() *people.UserProps {
 	return u.Props
 }
 
-type EmployeeUpdateModel struct {
+type EmployeeCreateModel struct {
 	UserCreateModel
 	PositionID *uint16
 	DeptID     *uint16
@@ -110,28 +111,28 @@ type EmployeeUpdateModel struct {
 	FiredAt    *time.Time
 }
 
-func (m *EmployeeUpdateModel) getPositionID() uint16 {
+func (m *EmployeeCreateModel) getPositionID() uint16 {
 	if m.PositionID == nil {
 		return 0
 	}
 	return *m.PositionID
 }
 
-func (m *EmployeeUpdateModel) getDeptID() uint16 {
+func (m *EmployeeCreateModel) getDeptID() uint16 {
 	if m.DeptID == nil {
 		return 0
 	}
 	return *m.DeptID
 }
 
-func (m *EmployeeUpdateModel) getWorkedAt() time.Time {
+func (m *EmployeeCreateModel) getWorkedAt() time.Time {
 	if m.WorkedAt == nil {
 		return time.Time{}
 	}
 	return *m.WorkedAt
 }
 
-func (m *EmployeeUpdateModel) getFiredAt() *time.Time {
+func (m *EmployeeCreateModel) getFiredAt() *time.Time {
 	if m.FiredAt == nil || m.FiredAt.IsZero() {
 		return nil
 	}

@@ -12,7 +12,7 @@ import (
 func (p *PeopleProvider) UpdateEmployee(
 	ctx context.Context,
 	userID uint32,
-	dto *EmployeeUpdateModel,
+	dto *EmployeeCreateModel,
 ) error {
 	tx, err := p.db.Begin(ctx)
 	if err != nil {
@@ -121,7 +121,7 @@ func (p *PeopleProvider) updateEmployeeTx(
 	ctx context.Context,
 	tx pgx.Tx,
 	userID uint32,
-	dto *EmployeeUpdateModel,
+	dto *EmployeeCreateModel,
 ) error {
 	var (
 		sq    = `UPDATE people.employees SET`

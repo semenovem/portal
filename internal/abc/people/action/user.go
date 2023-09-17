@@ -3,7 +3,6 @@ package people_action
 import (
 	"context"
 	"github.com/semenovem/portal/internal/abc/people"
-	people_provider "github.com/semenovem/portal/internal/abc/people/provider"
 )
 
 func (a *PeopleAction) CheckLoginName(
@@ -29,27 +28,6 @@ func (a *PeopleAction) CheckLoginName(
 	}
 
 	return exists, nil
-}
-
-func (a *PeopleAction) CreateEmployee(
-	ctx context.Context,
-	thisUserID uint32,
-	dto *people_provider.EmployeeUpdateModel,
-) (userID uint32, err error) {
-	ll := a.logger.Named("CreateUser")
-
-	// TODO Должна быть проверка на право создания пользователя
-	// ----
-	// ----
-	// ----
-
-	userID, err = a.peoplePvd.CreateEmployee(ctx, dto)
-	if err != nil {
-		ll.Named("peoplePvd.CreateUser").Nested(err)
-		return
-	}
-
-	return
 }
 
 func (a *PeopleAction) DeleteUser(

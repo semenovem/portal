@@ -77,12 +77,13 @@ func (cnt *Controller) CreateEmployee(c echo.Context) error {
 
 	passwdHash := cnt.userPasswdAuth.Hashing(form.Passwd)
 
-	dto := &people_provider.EmployeeUpdateModel{
+	dto := &people_provider.EmployeeCreateModel{
 		UserCreateModel: people_provider.UserCreateModel{
 			Firstname:  form.Firstname,
 			Surname:    form.Surname,
 			Patronymic: form.Patronymic,
 			Status:     form.Status,
+			Groups:     form.Groups,
 			Note:       form.Note,
 			AvatarID:   form.AvatarID,
 			ExpiredAt:  util.MustParseToTime(form.ExpiredAt),
@@ -140,12 +141,13 @@ func (cnt *Controller) UpdateEmployee(c echo.Context) error {
 
 	ll.With("userID", form.UserID)
 
-	dto := people_provider.EmployeeUpdateModel{
+	dto := people_provider.EmployeeCreateModel{
 		UserCreateModel: people_provider.UserCreateModel{
 			Firstname:  form.Firstname,
 			Surname:    form.Surname,
 			Patronymic: form.Patronymic,
 			Status:     form.Status,
+			Groups:     form.Groups,
 			Note:       form.Note,
 			AvatarID:   form.AvatarID,
 			ExpiredAt:  util.MustParseToTime(form.ExpiredAt),
