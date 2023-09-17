@@ -90,6 +90,10 @@ definitions:
         type: string
       firstname:
         type: string
+      groups:
+        items:
+          type: string
+        type: array
       login:
         type: string
       note:
@@ -100,10 +104,6 @@ definitions:
         type: string
       position_id:
         type: integer
-      roles:
-        items:
-          type: string
-        type: array
       status:
         type: string
       surname:
@@ -159,6 +159,10 @@ definitions:
         type: string
       firstname:
         type: string
+      groups:
+        items:
+          type: string
+        type: array
       login:
         type: string
       note:
@@ -169,10 +173,6 @@ definitions:
         type: string
       position_id:
         type: integer
-      roles:
-        items:
-          type: string
-        type: array
       status:
         type: string
       surname:
@@ -252,6 +252,31 @@ info:
   title: portal API
   version: "1.0"
 paths:
+  /auth/:user_id/onetime:
+    post:
+      parameters:
+      - description: данные для создания сессии
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/internal_abc_auth_controller.onetimeAuthForm'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_abc_auth_controller.onetimeAuthResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_semenovem_portal_pkg_fail.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Создание ссылки для одноразовой авторизации
+      tags:
+      - auth
   /auth/login:
     post:
       parameters:
@@ -299,31 +324,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Выход из авторизованной сессии пользователя
-      tags:
-      - auth
-  /auth/onetime:
-    post:
-      parameters:
-      - description: данные для создания сессии
-        in: body
-        name: payload
-        required: true
-        schema:
-          $ref: '#/definitions/internal_abc_auth_controller.onetimeAuthForm'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/internal_abc_auth_controller.onetimeAuthResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/github_com_semenovem_portal_pkg_fail.Response'
-      security:
-      - ApiKeyAuth: []
-      summary: Создание ссылки для одноразовой авторизации
       tags:
       - auth
   /auth/onetime/:entry_id:

@@ -19,7 +19,7 @@ type Controller struct {
 }
 
 func New(
-	arg *controller.CntArgs,
+	arg *controller.InitArgs,
 	userPasswdAuth it.UserPasswdAuthenticator,
 	peopleAct *people_action.PeopleAction,
 ) *Controller {

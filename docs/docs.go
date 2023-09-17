@@ -25,6 +25,47 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/auth/:user_id/onetime": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Создание ссылки для одноразовой авторизации",
+                "parameters": [
+                    {
+                        "description": "данные для создания сессии",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_abc_auth_controller.onetimeAuthForm"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_abc_auth_controller.onetimeAuthResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_fail.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/login": {
             "post": {
                 "security": [
@@ -94,47 +135,6 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/internal_abc_auth_controller.loginResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_fail.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/auth/onetime": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "auth"
-                ],
-                "summary": "Создание ссылки для одноразовой авторизации",
-                "parameters": [
-                    {
-                        "description": "данные для создания сессии",
-                        "name": "payload",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/internal_abc_auth_controller.onetimeAuthForm"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/internal_abc_auth_controller.onetimeAuthResponse"
                         }
                     },
                     "400": {
@@ -1063,6 +1063,12 @@ const docTemplate = `{
                 "firstname": {
                     "type": "string"
                 },
+                "groups": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "login": {
                     "type": "string"
                 },
@@ -1077,12 +1083,6 @@ const docTemplate = `{
                 },
                 "position_id": {
                     "type": "integer"
-                },
-                "roles": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
                 },
                 "status": {
                     "type": "string"
@@ -1167,6 +1167,12 @@ const docTemplate = `{
                 "firstname": {
                     "type": "string"
                 },
+                "groups": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "login": {
                     "type": "string"
                 },
@@ -1181,12 +1187,6 @@ const docTemplate = `{
                 },
                 "position_id": {
                     "type": "integer"
-                },
-                "roles": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
                 },
                 "status": {
                     "type": "string"

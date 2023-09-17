@@ -28,7 +28,7 @@ type Controller struct {
 }
 
 func New(
-	arg *controller2.CntArgs,
+	arg *controller2.InitArgs,
 	mediaAct *media_action.MediaAction,
 ) *Controller {
 	return &Controller{

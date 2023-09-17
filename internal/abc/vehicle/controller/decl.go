@@ -12,7 +12,7 @@ type Controller struct {
 	act    *controller2.Common
 }
 
-func New(arg *controller2.CntArgs) *Controller {
+func New(arg *controller2.InitArgs) *Controller {
 	return &Controller{
 		logger: arg.Logger.Named("vehicle-cnt"),
 		fail:   arg.FailureService,

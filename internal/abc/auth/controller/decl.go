@@ -27,7 +27,7 @@ type Controller struct {
 }
 
 func New(
-	arg *controller.CntArgs,
+	arg *controller.InitArgs,
 	jwt *jwtoken.Service,
 	logoPasswdAuth it.UserPasswdAuthenticator,
 	authAct *auth_action.AuthAction,

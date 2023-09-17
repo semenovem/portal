@@ -17,7 +17,7 @@ type Controller struct {
 }
 
 func New(
-	arg *controller2.CntArgs,
+	arg *controller2.InitArgs,
 	storeAct *store_action.StoreAction,
 ) *Controller {
 	return &Controller{

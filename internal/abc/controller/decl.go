@@ -28,7 +28,7 @@ type This struct {
 	UserID uint32
 }
 
-type CntArgs struct {
+type InitArgs struct {
 	Logger         pkg.Logger
 	FailureService *fail.Service
 	Audit          *audit.AuditProvider

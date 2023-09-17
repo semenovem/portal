@@ -123,7 +123,7 @@ func New(
 		InvalidRequestMessage: invalidFail,
 	})
 
-	cntArg := &controller.CntArgs{
+	controllerInitArgs := &controller.InitArgs{
 		Logger:         logger,
 		FailureService: failureService,
 		Audit:          auditService,
@@ -141,10 +141,10 @@ func New(
 		server: e,
 		addr:   fmt.Sprintf(":%d", config.Rest.Port),
 
-		vehicleCnt: vehicle_controller.New(cntArg),
+		vehicleCnt: vehicle_controller.New(controllerInitArgs),
 
 		authCnt: auth_controller.New(
-			cntArg,
+			controllerInitArgs,
 			jwtService,
 			logoPasswdAuth,
 			authAct,
@@ -153,9 +153,9 @@ func New(
 			config.JWT.RefreshTokenCookieName,
 		),
 
-		peopleCnt: people_controller.New(cntArg, logoPasswdAuth, peopleAct),
-		storeCnt:  store_controller.New(cntArg, storeAct),
-		mediaCnt:  media_controller.New(cntArg, mediaAct),
+		peopleCnt: people_controller.New(controllerInitArgs, logoPasswdAuth, peopleAct),
+		storeCnt:  store_controller.New(controllerInitArgs, storeAct),
+		mediaCnt:  media_controller.New(controllerInitArgs, mediaAct),
 	}
 
 	r.unauth = e.Group("")
