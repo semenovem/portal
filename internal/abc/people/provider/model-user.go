@@ -2,7 +2,6 @@ package people_provider
 
 import (
 	"github.com/semenovem/portal/internal/abc/people"
-	"github.com/semenovem/portal/pkg/it"
 	"time"
 )
 
@@ -13,11 +12,10 @@ type UserModel struct {
 	patronymic *string
 	status     *string
 	note       *string
-	roles      *[]string
 	avatarID   *uint32
 	expiredAt  *time.Time
 	login      *string
-	props      *it.UserProps
+	props      *people.UserProps
 	updateAt   time.Time
 }
 
@@ -64,14 +62,6 @@ func (u *UserModel) Status() people.UserStatus {
 	return people.ParseUserStatusIfDefault(*u.status)
 }
 
-func (u *UserModel) Roles() []it.UserRole {
-	if u.roles == nil {
-		return nil
-	}
-
-	return it.InflateUserRoles(*u.roles)
-}
-
 func (u *UserModel) AvatarID() uint32 {
 	if u.avatarID == nil {
 		return 0
@@ -94,7 +84,7 @@ func (u *UserModel) Login() string {
 	return *u.login
 }
 
-func (u *UserModel) Props() *it.UserProps {
+func (u *UserModel) Props() *people.UserProps {
 	return u.props
 }
 

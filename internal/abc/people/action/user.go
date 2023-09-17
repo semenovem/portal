@@ -2,8 +2,8 @@ package people_action
 
 import (
 	"context"
+	"github.com/semenovem/portal/internal/abc/people"
 	people_provider "github.com/semenovem/portal/internal/abc/people/provider"
-	"github.com/semenovem/portal/pkg/it"
 )
 
 func (a *PeopleAction) CheckLoginName(
@@ -17,7 +17,7 @@ func (a *PeopleAction) CheckLoginName(
 	// Требуется право создания нового пользователя
 	// Требуется право менять логин у пользователя
 
-	if err = it.ValidateUserLogin(loginName); err != nil {
+	if err = people.ValidateUserLogin(loginName); err != nil {
 		ll.Named("ValidateUserLogin").BadRequest(err)
 		return
 	}

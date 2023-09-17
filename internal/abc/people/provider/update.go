@@ -77,10 +77,6 @@ func (p *PeopleProvider) updateUserTx(
 		set = append(set, "note = @note")
 		args["note"] = dto.getNote()
 	}
-	if dto.Roles != nil {
-		set = append(set, "roles = @roles::people.roles_enum[]")
-		args["roles"] = dto.getRoles()
-	}
 	if dto.AvatarID != nil {
 		set = append(set, "avatar_id = @avatar_id")
 		args["avatar_id"] = dto.getAvatarID()

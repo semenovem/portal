@@ -1,7 +1,6 @@
 package people_controller
 
 import (
-	"github.com/semenovem/portal/pkg/it"
 	"time"
 )
 
@@ -25,33 +24,9 @@ type employeeProfileView struct {
 	BossID       uint32     `json:"boss_id"`
 }
 
-// Общедоступный профиль сотрудника
-type publicEmployeeView struct {
-	userPublicProfileView
-	StartWorkAt  time.Time `json:"start_work_at"` // Дата начала работы
-	PositionName string    `json:"position_name"`
-	DeptName     string    `json:"dept_name"`
-	Note         string    `json:"note,omitempty"`
-	BossID       uint32    `json:"boss_id"`
-}
-
 type userProfileView struct {
 	userPublicProfileView
-	Note      string   `json:"note,omitempty"`
-	ExpiredAt string   `json:"expired_at,omitempty"`
-	Status    string   `json:"status,omitempty"`
-	Roles     []string `json:"roles,omitempty"`
-}
-
-func newUserPublicProfileView2(u *it.UserProfile) *userPublicProfileView {
-	r := &userPublicProfileView{
-		ID:        u.ID,
-		Firstname: u.FirstName,
-		Surname:   u.Surname,
-	}
-	if u.AvatarID != 0 {
-		r.Avatar = "asdfasf/asdfasdf/"
-	}
-
-	return r
+	Note      string `json:"note,omitempty"`
+	ExpiredAt string `json:"expired_at,omitempty"`
+	Status    string `json:"status,omitempty"`
 }

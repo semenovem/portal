@@ -48,12 +48,10 @@ func (p *PeopleProvider) createUserTx(
 	var (
 		sq = `INSERT INTO people.users (
 			  firstname, surname, patronymic, login, note,
-			  status, roles, avatar_id,
-			  expired_at, passwd_hash
+			  status, avatar_id, expired_at, passwd_hash
 			) VALUES (
 				LOWER(@firstname), LOWER(@surname), LOWER(@patronymic), LOWER(@login), @note,
-				@status, @roles::people.roles_enum[], @avatar_id,
-				@expired_at, @passwd_hash
+				@status, @avatar_id, @expired_at, @passwd_hash
 			) returning id`
 
 		args = pgx.NamedArgs{
@@ -63,7 +61,6 @@ func (p *PeopleProvider) createUserTx(
 			"login":       dto.getLogin(),
 			"note":        dto.getNote(),
 			"status":      dto.getStatus(),
-			"roles":       dto.getRoles(),
 			"avatar_id":   dto.getAvatarID(),
 			"expired_at":  dto.getExpiredAt(),
 			"passwd_hash": dto.getPasswdHash(),
@@ -125,11 +122,13 @@ func (p *PeopleProvider) SearchEmployees(
 		// Total uint32 TODO пока кол-во пользователей меньше лимита, не делать подсчет кол-ва
 		ls = make([]*EmployeeModel, 0)
 
-		sq = `SELECT u.id, u.firstname, u.surname, u.note, u.status, u.roles, u.avatar_id,
+		sq = `SELECT u.id, u.firstname, u.surname, u.note, u.status, u.avatar_id,
 		     e.dept_id, e.position_id, e.worked_at, e.fired_at
 		FROM       people.employees AS e
-		LEFT JOIN  people.users     AS u ON e.user_id = u.id AND (e.fired_at IS NULL OR e.fired_at > now())
-		WHERE u.deleted = false AND (u.expired_at IS NULL OR u.expired_at > now()) AND u.status = 'active'
+		LEFT JOIN  people.users     AS u
+		    ON e.user_id = u.id AND (e.fired_at IS NULL OR e.fired_at > now())
+		WHERE u.deleted = false
+		  AND (u.expired_at IS NULL OR u.expired_at > now()) AND u.status = 'active'
 		LIMIT $1 OFFSET $2`
 	)
 
@@ -149,7 +148,6 @@ func (p *PeopleProvider) SearchEmployees(
 			&o.surname,
 			&o.note,
 			&o.status,
-			&o.roles,
 			&o.avatarID,
 			&o.deptID,
 			&o.positionID,

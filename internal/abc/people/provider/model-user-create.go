@@ -2,7 +2,6 @@ package people_provider
 
 import (
 	"github.com/semenovem/portal/internal/abc/people"
-	"github.com/semenovem/portal/pkg/it"
 	"html"
 	"strings"
 	"time"
@@ -14,12 +13,11 @@ type UserCreateModel struct {
 	Patronymic *string
 	Status     *string
 	Note       *string
-	Roles      *[]string
 	AvatarID   *uint32
 	ExpiredAt  *time.Time
 	Login      *string
 	PasswdHash *string
-	Props      *it.UserProps
+	Props      *people.UserProps
 }
 
 func (u *UserCreateModel) getFirstname() string {
@@ -65,14 +63,6 @@ func (u *UserCreateModel) getStatus() string {
 	return *u.Status
 }
 
-func (u *UserCreateModel) getRoles() []string {
-	if u.Roles == nil || len(*u.Roles) == 0 {
-		return nil
-	}
-
-	return *u.Roles
-}
-
 func (u *UserCreateModel) getAvatarID() *uint32 {
 	if u.AvatarID == nil || *u.AvatarID == 0 {
 		return nil
@@ -108,7 +98,7 @@ func (u *UserCreateModel) getPasswdHash() *string {
 	return u.PasswdHash
 }
 
-func (u *UserCreateModel) getProps() *it.UserProps {
+func (u *UserCreateModel) getProps() *people.UserProps {
 	return u.Props
 }
 

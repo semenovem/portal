@@ -1,23 +1,26 @@
 package people
 
 import (
+	"fmt"
 	"github.com/semenovem/portal/pkg/throw"
 	"strings"
 	"time"
+	"unicode"
+	"unicode/utf8"
 )
 
 var (
 	ErrUnknownUserStatus = throw.NewInvalidErr("unknown user status")
-	ErrUnknownUserRole   = throw.NewInvalidErr("unknown user role")
+	ErrUnknownUserGroup  = throw.NewInvalidErr("unknown user group")
 )
 
-type UserRole string
+type UserGroup string
 type UserStatus string
 
 const (
-	UserRoleSuperAdmin UserRole = "super-admin"
-	UserRoleAdmin      UserRole = "admin"
-	UserRoleUser       UserRole = "user"
+	UserGroupSuperAdmin UserGroup = "super-admin"
+	UserGroupAdmin      UserGroup = "admin"
+	UserGroupUser       UserGroup = "user"
 )
 
 const (
@@ -47,17 +50,38 @@ func ParseUserStatusIfDefault(s string) UserStatus {
 	return st
 }
 
-func ParseUserRole(s string) (UserRole, error) {
+func ParseUserGroup(s string) (UserGroup, error) {
 	switch strings.ToLower(strings.TrimSpace(s)) {
-	case string(UserRoleSuperAdmin):
-		return UserRoleSuperAdmin, nil
-	case string(UserRoleAdmin):
-		return UserRoleAdmin, nil
-	case string(UserRoleUser):
-		return UserRoleUser, nil
+	case string(UserGroupSuperAdmin):
+		return UserGroupSuperAdmin, nil
+	case string(UserGroupAdmin):
+		return UserGroupAdmin, nil
+	case string(UserGroupUser):
+		return UserGroupUser, nil
 	}
 
-	return "", throw.NewWithTargetErrf(ErrUnknownUserRole, "origin:[%s]", s)
+	return "", throw.NewWithTargetErrf(ErrUnknownUserGroup, "origin:[%s]", s)
+}
+
+func ParseUserGroups(groups []string) ([]UserGroup, error) {
+	var (
+		errs   = make([]string, 0)
+		result = make([]UserGroup, 0)
+	)
+
+	for _, group := range groups {
+		if r, err := ParseUserGroup(group); err != nil {
+			errs = append(errs, err.Error())
+		} else {
+			result = append(result, r)
+		}
+	}
+
+	if len(errs) != 0 {
+		return nil, fmt.Errorf(strings.Join(errs, "; "))
+	}
+
+	return result, nil
 }
 
 type UserAuth struct {
@@ -87,4 +111,104 @@ func (u *UserAuth) CanLogging() error {
 	}
 
 	return nil
+}
+
+func ValidateUserName(name string) error {
+	n := strings.TrimSpace(strings.ToLower(name))
+
+	if l := utf8.RuneCountInString(n); l > maxUserNameLen {
+		return throw.ErrInvalidLong
+	} else if l < minUserNameLen {
+		return throw.ErrInvalidShort
+	}
+
+	if !regValidateUserName.MatchString(n) {
+		return throw.ErrInvalidIllegalChar
+	}
+
+	return nil
+}
+
+func ValidateUserStatus(status string) error {
+	_, err := ParseUserStatus(status)
+	return err
+}
+
+func ValidateUserGroup(group string) error {
+	_, err := ParseUserGroup(group)
+	return err
+}
+
+func ValidateUserGroups(groups []string) error {
+	_, err := ParseUserGroups(groups)
+	return err
+}
+
+func ValidateUserLogin(login string) error {
+	if l := utf8.RuneCountInString(login); l < minUserLoginLen {
+		return throw.ErrInvalidShort
+	} else if l > maxUserLoginLen {
+		return throw.ErrInvalidLong
+	}
+
+	if !regValidateUserLogin.MatchString(login) {
+		return throw.ErrInvalidIllegalChar
+	}
+
+	return nil
+}
+
+// ValidateUserPassword одна цифра, заглавная, строчная буква, специальный символ и нет пробелов
+func ValidateUserPassword(password string) error {
+	if interValidator.Var(password, "ascii") != nil {
+		return throw.ErrInvalidIllegalChar
+	}
+
+	var (
+		hasNum, hasLower, hasUpper, hasSpecial bool
+	)
+
+	if l := utf8.RuneCountInString(password); l < minUserPasswordLen {
+		return throw.ErrInvalidShort
+	} else if l > maxUserPasswordLen {
+		return throw.ErrInvalidLong
+	}
+
+	for _, char := range password {
+		switch {
+		case unicode.IsNumber(char):
+			hasNum = true
+		case unicode.IsUpper(char):
+			hasUpper = true
+		case unicode.IsLower(char):
+			hasLower = true
+		case unicode.IsSymbol(char) || unicode.IsPunct(char):
+			hasSpecial = true
+		case unicode.IsSpace(char):
+			return throw.ErrInvalidIllegalChar
+		}
+	}
+
+	v := hasNum && hasLower && hasUpper && hasSpecial
+	if !v {
+		return throw.ErrInvalidPasswdWeak
+	}
+
+	return nil
+}
+
+func StringifyUserGroups(a []UserGroup) []string {
+	b := make([]string, len(a))
+	for i := range a {
+		b[i] = string(a[i])
+	}
+	return b
+}
+
+func InflateUserGroups(a []string) []UserGroup {
+	b := make([]UserGroup, len(a))
+	for i := range a {
+		b[i] = UserGroup(a[i])
+	}
+	return b
 }

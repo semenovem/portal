@@ -4,6 +4,14 @@ import "fmt"
 
 /* InvalidErr ошибки в результате не соответствия типов, не валидных данных */
 
+var (
+	ErrInvalidZeroValue   = NewInvalidErr("zero value")         // Пустое значение
+	ErrInvalidPasswdWeak  = NewInvalidErr("password is weak")   // Простой пароль
+	ErrInvalidIllegalChar = NewInvalidErr("illegal characters") // Запрещенные символы
+	ErrInvalidShort       = NewInvalidErr("short")              // Короткий
+	ErrInvalidLong        = NewInvalidErr("long")               // Длинный
+)
+
 func NewInvalidErr(msg string) error {
 	return &invalidErr{msg: msg}
 }

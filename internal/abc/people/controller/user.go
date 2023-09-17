@@ -5,7 +5,7 @@ import (
 	"github.com/semenovem/portal/internal/abc/controller"
 	"github.com/semenovem/portal/internal/audit"
 	_ "github.com/semenovem/portal/pkg/fail"
-	"github.com/semenovem/portal/pkg/it"
+	"github.com/semenovem/portal/pkg/throw"
 	"net/http"
 )
 
@@ -59,7 +59,7 @@ func (cnt *Controller) CheckLogin(c echo.Context) error {
 	}
 
 	exists, err := cnt.peopleAct.CheckLoginName(ctx, thisUserID, form.LoginName)
-	if err != nil && !it.IsValidateErr(err) {
+	if err != nil && !throw.IsBadRequestErr(err) {
 		ll = ll.Named("peopleAct.CheckLoginName")
 		return cnt.com.Response(c, ll, err)
 	}

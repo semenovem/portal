@@ -4,7 +4,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/semenovem/portal/internal/abc/controller"
-	"github.com/semenovem/portal/pkg/it"
+	"github.com/semenovem/portal/internal/abc/people"
 )
 
 type customValidator struct {
@@ -16,17 +16,17 @@ func (cv *customValidator) Validate(i interface{}) error {
 }
 
 var strValidators = map[string]func(string) error{
-	controller.UserLoginVldTag:  it.ValidateUserLogin,
-	controller.UserPasswordTag:  it.ValidateUserPassword,
-	controller.UserNameVldTag:   it.ValidateUserName,
-	controller.UserStatusVldTag: it.ValidateUserStatus,
-	controller.UserRoleVldTag:   it.ValidateUserRole,
+	controller.UserLoginVldTag:  people.ValidateUserLogin,
+	controller.UserPasswordTag:  people.ValidateUserPassword,
+	controller.UserNameVldTag:   people.ValidateUserName,
+	controller.UserStatusVldTag: people.ValidateUserStatus,
+	controller.UserGroupVldTag:  people.ValidateUserGroup,
 
 	controller.TimeVldTag: controller.ValidateConditionalTime,
 }
 
 var arrStrValidators = map[string]func([]string) error{
-	controller.UserRolesVldTag: it.ValidateUserRoles,
+	controller.UserGroupsVldTag: people.ValidateUserGroups,
 }
 
 func newValidation() (echo.Validator, error) {

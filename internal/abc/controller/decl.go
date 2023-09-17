@@ -5,7 +5,6 @@ import (
 	"github.com/semenovem/portal/internal/util"
 	"github.com/semenovem/portal/pkg"
 	"github.com/semenovem/portal/pkg/fail"
-	"strings"
 	"time"
 )
 
@@ -20,8 +19,8 @@ const (
 	UserEmailVldTag  = "user-email-vld-tag"
 	UserNameVldTag   = "user-name-vld-tag"
 	UserStatusVldTag = "user-status-vld-tag"
-	UserRoleVldTag   = "user-role-vld-tag"
-	UserRolesVldTag  = "user-roles-vld-tag"
+	UserGroupVldTag  = "user-group-vld-tag"
+	UserGroupsVldTag = "user-groups-vld-tag"
 	TimeVldTag       = "time-vld-tag"
 )
 
@@ -48,13 +47,4 @@ func TimeToString(t *time.Time) string {
 	}
 
 	return t.Format(time.RFC3339)
-}
-
-func NormStrPointer(s *string) *string {
-	if s == nil {
-		return nil
-	}
-
-	ss := strings.ToLower(strings.TrimSpace(*s))
-	return &ss
 }

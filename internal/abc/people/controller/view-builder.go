@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/semenovem/portal/internal/abc/controller"
 	"github.com/semenovem/portal/internal/abc/people/provider"
-	"github.com/semenovem/portal/pkg/it"
 )
 
 func newUserPublicProfileView(u *people_provider.UserModel) *userPublicProfileView {
@@ -28,7 +27,6 @@ func newUserProfileView(u *people_provider.UserModel) *userProfileView {
 		Note:                  u.Note(),
 		ExpiredAt:             controller.TimeToString(u.ExpiredAt()),
 		Status:                string(u.Status()),
-		Roles:                 it.StringifyUserRoles(u.Roles()),
 	}
 
 	return r

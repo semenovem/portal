@@ -1,7 +1,6 @@
-CREATE TYPE people.roles_enum AS ENUM ('super-admin', 'admin', 'audit', 'guest', 'operator', 'boss');
-CREATE TYPE people.statuses_enum AS ENUM ('active', 'inactive', 'blocked', 'registration');
-CREATE TYPE people.additional_field_kind_enum AS ENUM (
-  'email-main', 'email-personal', 'tel-work', 'tel-personal', 'note');
+CREATE TYPE people.status_enum AS ENUM ('active', 'inactive', 'blocked', 'registration');
+CREATE TYPE people.group_enum AS ENUM ('super-admin', 'admin', 'audit', 'guest', 'operator', 'boss');
+
 
 -- Отделы
 CREATE TABLE IF NOT EXISTS people.departments
@@ -10,16 +9,18 @@ CREATE TABLE IF NOT EXISTS people.departments
   deleted     bool                              default false NOT NULL,
   title       varchar UNIQUE                                  NOT NULL, -- название департамента
   description varchar                                         NOT NULL, -- описание
-  parent_id   int REFERENCES people.departments default NULL            -- руководитель
+  parent_id   int REFERENCES people.departments default NULL,           -- руководитель
+  groups      people.group_enum[]               default NULL
 );
 
 -- Должности
 CREATE TABLE IF NOT EXISTS people.positions
 (
   id          smallserial PRIMARY KEY,
-  deleted     bool default false NOT NULL,
-  title       varchar UNIQUE     NOT NULL, -- название должности
-  description varchar            NOT NULL  -- описание
+  deleted     bool                default false NOT NULL,
+  title       varchar UNIQUE                    NOT NULL, -- название должности
+  description varchar                           NOT NULL, -- описание
+  groups      people.group_enum[] default NULL
 );
 
 -- Пользователи
@@ -31,8 +32,7 @@ CREATE TABLE IF NOT EXISTS people.users
   firstname   varchar(128)                                             NOT NULL, -- Имя
   surname     varchar(128)                                             NOT NULL, -- Фамилия
   patronymic  varchar(128)                          default ''         NOT NULL, -- Отчество
-  status      people.statuses_enum                  default 'inactive' NOT NULL,
-  roles       people.roles_enum[]                   default NULL,
+  status      people.status_enum                    default 'inactive' NOT NULL,
   note        text                                  default NULL,                -- примечание
   avatar_id   int check ( avatar_id > 0)            default NULL,
   expired_at  timestamp                             default NULL,                -- УЗ активна до указанного времени
@@ -43,6 +43,13 @@ CREATE TABLE IF NOT EXISTS people.users
     constraint users_login_unique_constraint UNIQUE default NULL,
   passwd_hash varchar(40)                           default NULL,                -- хэш пароля
   props       jsonb                                 default NULL                 -- данные пользователя
+);
+
+-- Дополнительные группы у пользователя
+CREATE TABLE IF NOT EXISTS people.user_groups
+(
+  user_id int references people.users unique NOT NULL,
+  groups  people.group_enum[]                NOT NULL
 );
 
 -- Сотрудники компании

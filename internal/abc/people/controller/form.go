@@ -5,16 +5,15 @@ type userPathForm struct {
 }
 
 type userCreateForm struct {
-	Firstname  *string   `json:"firstname" validate:"omitempty,user-name-vld-tag"`
-	Surname    *string   `json:"surname" validate:"omitempty,user-name-vld-tag"`
-	Patronymic *string   `json:"patronymic" validate:"omitempty,user-name-vld-tag"`
-	Note       *string   `json:"note"`
-	Status     *string   `json:"status" validate:"omitempty,user-status-vld-tag"`
-	Roles      *[]string `json:"roles" validate:"omitempty,user-roles-vld-tag"`
-	AvatarID   *uint32   `json:"avatar_id"`
-	Login      *string   `json:"login" validate:"omitempty,user-login-vld-tag"`
-	Passwd     string    `json:"passwd" validate:"omitempty,user-password-vld-tag"`
-	ExpiredAt  *string   `json:"expired_at" validate:"omitempty,time-vld-tag"`
+	Firstname  *string `json:"firstname" validate:"omitempty,user-name-vld-tag"`
+	Surname    *string `json:"surname" validate:"omitempty,user-name-vld-tag"`
+	Patronymic *string `json:"patronymic" validate:"omitempty,user-name-vld-tag"`
+	Note       *string `json:"note"`
+	Status     *string `json:"status" validate:"omitempty,user-status-vld-tag"`
+	AvatarID   *uint32 `json:"avatar_id"`
+	Login      *string `json:"login" validate:"omitempty,user-login-vld-tag"`
+	Passwd     string  `json:"passwd" validate:"omitempty,user-password-vld-tag"`
+	ExpiredAt  *string `json:"expired_at" validate:"omitempty,time-vld-tag"`
 }
 
 type employeeCreateForm struct {

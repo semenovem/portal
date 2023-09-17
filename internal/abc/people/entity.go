@@ -19,3 +19,10 @@ type UserBoss struct {
 	Surname       string
 	PositionTitle string
 }
+
+type UserProps struct {
+	Contacts []struct {
+		Line1 string
+		Note1 string
+	}
+}
