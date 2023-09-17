@@ -13,6 +13,16 @@ var (
 	ErrInvalidBearer   = NewAuthErr("invalid bearer token")
 )
 
+type AuthErr interface {
+	Error() string
+	isAuthErr() bool
+}
+
+type authErr struct {
+	msg    string
+	target error
+}
+
 func NewAuthErr(msg string, prevErrMsg ...string) error {
 	if len(prevErrMsg) != 0 {
 		for _, s := range prevErrMsg {
@@ -28,17 +38,14 @@ func IsAuthErr(err error) bool {
 	return ok
 }
 
-type AuthErr interface {
-	Error() string
-	isAuthErr() bool
-}
-
-type authErr struct {
-	msg    string
-	target error
-}
-
 func (e authErr) Error() string {
+	if e.target != nil {
+		if e.msg == "" {
+			return e.target.Error()
+		}
+		return e.target.Error() + ": " + e.msg
+	}
+
 	return e.msg
 }
 

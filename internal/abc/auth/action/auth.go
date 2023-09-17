@@ -3,7 +3,7 @@ package auth_action
 import (
 	"context"
 	"github.com/google/uuid"
-	"github.com/semenovem/portal/pkg/it"
+	"github.com/semenovem/portal/internal/abc/auth"
 	"github.com/semenovem/portal/pkg/jwtoken"
 	"github.com/semenovem/portal/pkg/throw"
 )
@@ -32,7 +32,7 @@ func (a *AuthAction) Logout(ctx context.Context, payload *jwtoken.RefreshPayload
 func (a *AuthAction) Refresh(
 	ctx context.Context,
 	payload *jwtoken.RefreshPayload,
-) (*it.AuthSession, error) {
+) (*auth.Session, error) {
 	ll := a.logger.Named("Refresh").With("sessionID", payload.SessionID)
 
 	sessionOld, err := a.getSessionByRefresh(ctx, payload)

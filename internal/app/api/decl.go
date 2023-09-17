@@ -7,14 +7,7 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/semenovem/portal/config"
-	"github.com/semenovem/portal/internal/abc/auth/action"
-	"github.com/semenovem/portal/internal/abc/auth/provider"
-	"github.com/semenovem/portal/internal/abc/media/action"
-	"github.com/semenovem/portal/internal/abc/media/provider"
-	"github.com/semenovem/portal/internal/abc/people/action"
-	"github.com/semenovem/portal/internal/abc/people/provider"
-	"github.com/semenovem/portal/internal/abc/store/action"
-	"github.com/semenovem/portal/internal/abc/store/provider"
+	"github.com/semenovem/portal/internal/abc"
 	"github.com/semenovem/portal/internal/audit"
 	"github.com/semenovem/portal/internal/router"
 	"github.com/semenovem/portal/internal/s3"
@@ -28,41 +21,30 @@ import (
 )
 
 type appAPI struct {
-	ctx            context.Context
-	logger         pkg.Logger
-	db             *pgxpool.Pool
-	redis          *redis.Client
-	s3             *s3.Service
-	router         *router.Router
-	config         *config.API
-	auditService   *audit.AuditProvider
-	failService    *fail.Service
-	jwtService     *jwtoken.Service
-	logoPasswdAuth it.UserPasswdAuthenticator
+	ctx             context.Context
+	logger          pkg.Logger
+	db              *pgxpool.Pool
+	redis           *redis.Client
+	s3              *s3.Service
+	router          *router.Router
+	config          *config.API
+	auditService    *audit.AuditProvider
+	failService     *fail.Service
+	jwtService      *jwtoken.Service
+	loginPasswdAuth it.LoginPasswdAuthenticator
 
-	providers struct {
-		auth   *auth_provider.AuthProvider
-		people *people_provider.PeopleProvider
-		store  *store_provider.StoreProvider
-		media  *media_provider.MediaProvider
-	}
-
-	actions struct {
-		auth   *auth_action.AuthAction
-		people *people_action.PeopleAction
-		store  *store_action.StoreAction
-		media  *media_action.MediaAction
-	}
+	providers abc.Providers
+	actions   abc.Actions
 }
 
-func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
+func New(ctx context.Context, logger pkg.Logger, cfg *config.API) error {
 	var (
 		ll  = logger.Named("appAPI.New")
 		app = appAPI{
-			ctx:            ctx,
-			logger:         logger,
-			config:         &cfg,
-			logoPasswdAuth: it.NewUserPasswdAuth(cfg.UserPasswdSalt),
+			ctx:             ctx,
+			logger:          logger,
+			config:          cfg,
+			loginPasswdAuth: it.NewLoginPasswdAuthenticator(cfg.UserPasswdSalt),
 		}
 		err error
 
@@ -127,11 +109,11 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 
 	app.auditService = audit.New(ctx, app.db, logger, cfg.GetGRPCAuditConfig())
 
-	// Провайдеры данных
-	app.initProviders()
-
-	// Экшены
-	app.initActions()
+	// Инициализация доменных областей
+	if err = app.initDomains(); err != nil {
+		ll.Named("initDomains").ErrorE(err)
+		return err
+	}
 
 	// Router
 	if app.router, err = router.New(
@@ -140,15 +122,10 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 		app.config,
 		app.auditService,
 		app.jwtService,
-		app.logoPasswdAuth,
+		app.loginPasswdAuth,
 
-		app.providers.auth,
-		app.providers.people,
-
-		app.actions.auth,
-		app.actions.people,
-		app.actions.store,
-		app.actions.media,
+		&app.providers,
+		&app.actions,
 	); err != nil {
 		ll.Named("router").Nested(err)
 		return err
@@ -157,7 +134,7 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 	go app.router.Start()
 
 	// Проверки
-	t, err := app.providers.auth.Now(ctx)
+	t, err := app.providers.Auth.Now(ctx)
 	if err != nil {
 		ll.Named("authPvd.Now").Nested(err)
 		return err

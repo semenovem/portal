@@ -3,7 +3,7 @@ package auth_action
 import (
 	"context"
 	"github.com/google/uuid"
-	"github.com/semenovem/portal/pkg/it"
+	"github.com/semenovem/portal/internal/abc/auth"
 	"github.com/semenovem/portal/pkg/throw"
 )
 
@@ -12,7 +12,7 @@ func (a *AuthAction) NewLogin(
 	ctx context.Context,
 	login, passwdHash string,
 	deviceID uuid.UUID,
-) (*it.AuthSession, error) {
+) (*auth.Session, error) {
 	ll := a.logger.Named("NewLogin").With("login", login).With("deviceID", deviceID)
 
 	userAuth, err := a.peoplePvd.GetUserByLogin(ctx, login, passwdHash)

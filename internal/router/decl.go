@@ -2,20 +2,17 @@ package router
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/semenovem/portal/config"
-	"github.com/semenovem/portal/internal/abc/auth/action"
+	"github.com/semenovem/portal/internal/abc"
 	"github.com/semenovem/portal/internal/abc/auth/controller"
-	"github.com/semenovem/portal/internal/abc/auth/provider"
 	"github.com/semenovem/portal/internal/abc/controller"
-	"github.com/semenovem/portal/internal/abc/media/action"
+	"github.com/semenovem/portal/internal/abc/media"
 	"github.com/semenovem/portal/internal/abc/media/controller"
-	"github.com/semenovem/portal/internal/abc/people/action"
 	"github.com/semenovem/portal/internal/abc/people/controller"
-	"github.com/semenovem/portal/internal/abc/people/provider"
-	"github.com/semenovem/portal/internal/abc/store/action"
 	"github.com/semenovem/portal/internal/abc/store/controller"
 	"github.com/semenovem/portal/internal/abc/vehicle/controller"
 	"github.com/semenovem/portal/internal/audit"
@@ -50,19 +47,15 @@ func New(
 	config *config.API,
 	auditService *audit.AuditProvider,
 	jwtService *jwtoken.Service,
-	logoPasswdAuth it.UserPasswdAuthenticator,
+	loginPasswdAuth it.LoginPasswdAuthenticator,
 
-	authPvd *auth_provider.AuthProvider,
-	peoplePvd *people_provider.PeopleProvider,
-
-	authAct *auth_action.AuthAction,
-	peopleAct *people_action.PeopleAction,
-	storeAct *store_action.StoreAction,
-	mediaAct *media_action.MediaAction,
+	providers *abc.Providers,
+	actions *abc.Actions,
 ) (*Router, error) {
 	var (
-		ll = logger.Named("router")
-		e  = echo.New()
+		ll  = logger.Named("router")
+		e   = echo.New()
+		err error
 	)
 
 	echo.NotFoundHandler = func(c echo.Context) error {
@@ -106,14 +99,12 @@ func New(
 		middleware.CORSWithConfig(corsConfig),
 	)
 
-	var err error
-
 	if e.Validator, err = newValidation(); err != nil {
 		ll.Named("newValidation").Error(err.Error())
 		return nil, err
 	}
 
-	failureService := fail.New(&fail.Config{
+	failService := fail.New(&fail.Config{
 		IsDevMode:             config.IsDev(),
 		Logger:                logger,
 		Messages:              txt.GetMessages(),
@@ -125,13 +116,13 @@ func New(
 
 	controllerInitArgs := &controller.InitArgs{
 		Logger:         logger,
-		FailureService: failureService,
+		FailureService: failService,
 		Audit:          auditService,
 		Common: controller.NewAction(
 			logger,
-			failureService,
-			authPvd,
-			peoplePvd,
+			failService,
+			providers.Auth,
+			providers.People,
 		),
 	}
 
@@ -146,27 +137,50 @@ func New(
 		authCnt: auth_controller.New(
 			controllerInitArgs,
 			jwtService,
-			logoPasswdAuth,
-			authAct,
+			loginPasswdAuth,
+			actions.Auth,
 			strings.Split(config.JWT.ServedDomains, ","),
 			time.Hour*24*time.Duration(config.JWT.RefreshTokenLifetimeDay),
 			config.JWT.RefreshTokenCookieName,
 		),
 
-		peopleCnt: people_controller.New(controllerInitArgs, logoPasswdAuth, peopleAct),
-		storeCnt:  store_controller.New(controllerInitArgs, storeAct),
-		mediaCnt:  media_controller.New(controllerInitArgs, mediaAct),
+		peopleCnt: people_controller.New(controllerInitArgs, loginPasswdAuth, actions.People),
+		storeCnt:  store_controller.New(controllerInitArgs, actions.Store),
+		mediaCnt: media_controller.New(controllerInitArgs, &media.ConfigMedia{
+			AvatarMaxBytes: uint32(config.Upload.AvatarMaxMB) * 1024 * 1024,
+			ImageMaxBytes:  uint32(config.Upload.ImageMaxMB) * 1024 * 1024,
+			VideoMaxBytes:  uint32(config.Upload.VideoMaxMB) * 1024 * 1024,
+			DocMaxBytes:    uint32(config.Upload.DocMaxMB) * 1024 * 1024,
+		}, actions.Media),
 	}
 
 	r.unauth = e.Group("")
 	r.auth = r.unauth.Group("", tokenMiddleware(
 		logger,
-		failureService,
+		failService,
 		jwtService,
-		authPvd,
+		providers.Auth,
 	))
 
 	r.addRoutes()
 
 	return r, nil
+}
+
+func (r *Router) Start() {
+	go func() {
+		<-r.ctx.Done()
+		if err := r.server.Close(); err != nil {
+			r.logger.Named("Close").Error(err.Error())
+		}
+	}()
+
+	r.logger.Infof("router start on %s", r.addr)
+
+	r.server.HidePort = true
+	r.server.HideBanner = true
+
+	if err := r.server.Start(r.addr); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		r.logger.Named("Start").Error(err.Error())
+	}
 }

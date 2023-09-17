@@ -2,13 +2,13 @@ package media_provider
 
 import (
 	"context"
-	"github.com/semenovem/portal/pkg/it"
+	"github.com/semenovem/portal/internal/abc/media"
 )
 
 func (p *MediaProvider) CreateUploadedFile(
 	ctx context.Context,
 	s3Path, note string,
-	mediaObjType it.MediaObjectType,
+	mediaObjType media.MediaObjectType,
 ) (uploadedFileID uint32, err error) {
 	sq := `INSERT INTO media.upload_files (note, kind, s3_path)
 		VALUES ($1, $2, $3) returning id;`

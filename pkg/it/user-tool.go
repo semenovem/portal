@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-type UserPasswdAuthenticator interface {
+type LoginPasswdAuthenticator interface {
 	Hashing(passwd string) string
 	Matching(hash, passwd string) bool
 }
@@ -15,7 +15,7 @@ type userPasswdAuth struct {
 	salt []byte
 }
 
-func NewUserPasswdAuth(salt string) UserPasswdAuthenticator {
+func NewLoginPasswdAuthenticator(salt string) LoginPasswdAuthenticator {
 	return &userPasswdAuth{
 		salt: []byte(salt),
 	}

@@ -2,15 +2,6 @@ package throw
 
 /* AccessErr ошибки в результате нарушения доступа */
 
-func NewAccessErr(msg string) error {
-	return &accessErr{msg: msg}
-}
-
-func IsAccessErr(err error) bool {
-	_, ok := err.(*accessErr)
-	return ok
-}
-
 type AccessErr interface {
 	Error() string
 	isAccessErr() bool
@@ -21,7 +12,23 @@ type accessErr struct {
 	target error
 }
 
+func NewAccessErr(msg string) error {
+	return &accessErr{msg: msg}
+}
+
+func IsAccessErr(err error) bool {
+	_, ok := err.(*accessErr)
+	return ok
+}
+
 func (e accessErr) Error() string {
+	if e.target != nil {
+		if e.msg == "" {
+			return e.target.Error()
+		}
+		return e.target.Error() + ": " + e.msg
+	}
+
 	return e.msg
 }
 

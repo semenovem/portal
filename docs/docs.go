@@ -224,6 +224,40 @@ const docTemplate = `{
                 }
             }
         },
+        "/media/avatar": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "file - файл\n",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "media"
+                ],
+                "summary": "Загрузка аватара пользователя",
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/internal_abc_media_controller.avatarUpload"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_semenovem_portal_pkg_fail.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/media/file": {
             "post": {
                 "security": [
@@ -1021,6 +1055,17 @@ const docTemplate = `{
                 },
                 "refresh_token": {
                     "description": "TODO для разработки",
+                    "type": "string"
+                }
+            }
+        },
+        "internal_abc_media_controller.avatarUpload": {
+            "type": "object",
+            "properties": {
+                "avatar_id": {
+                    "type": "integer"
+                },
+                "url": {
                     "type": "string"
                 }
             }

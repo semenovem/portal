@@ -2,8 +2,8 @@ package media_controller
 
 import (
 	"context"
+	"github.com/semenovem/portal/internal/abc/media"
 	"github.com/semenovem/portal/pkg/fail"
-	"github.com/semenovem/portal/pkg/it"
 	"github.com/semenovem/portal/pkg/throw"
 	"mime/multipart"
 	"net/http"
@@ -19,7 +19,7 @@ func (cnt *Controller) processUploadingFile(
 		ll = cnt.logger.Named("FileUpload")
 	)
 
-	if fh.Size > cnt.maxUpload {
+	if uint32(fh.Size) > cnt.config.ImageMaxBytes {
 		ll.With("size", fh.Size).BadRequest(throw.ErrFileTooBig)
 		return 0, fail.NewNested(http.StatusBadRequest, throw.ErrFileTooBig)
 	}
@@ -47,7 +47,7 @@ func (cnt *Controller) processUploadingFile(
 		return 0, nested
 	}
 
-	objType, err := it.MediaObjectByContentType(contentType)
+	objType, err := media.MediaObjectByContentType(contentType)
 	if err != nil {
 		ll.Named("MediaObjectByContentType").BadRequest(err)
 		return 0, fail.NewNested(http.StatusBadRequest, err)

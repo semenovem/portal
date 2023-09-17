@@ -65,6 +65,13 @@ definitions:
         description: TODO для разработки
         type: string
     type: object
+  internal_abc_media_controller.avatarUpload:
+    properties:
+      avatar_id:
+        type: integer
+      url:
+        type: string
+    type: object
   internal_abc_media_controller.fileUploadResponse:
     properties:
       file:
@@ -374,6 +381,28 @@ paths:
       summary: Обновление токена авторизации
       tags:
       - auth
+  /media/avatar:
+    post:
+      consumes:
+      - multipart/form-data
+      description: |
+        file - файл
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/internal_abc_media_controller.avatarUpload'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_semenovem_portal_pkg_fail.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Загрузка аватара пользователя
+      tags:
+      - media
   /media/file:
     post:
       consumes:

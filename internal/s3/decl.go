@@ -14,6 +14,7 @@ import (
 
 const (
 	UploadedBucketName = "uploaded"
+	AvatarBucketName   = "avatars"
 	docsBucketName     = "docs"
 	imagesBucketName   = "images"
 	videosBucketName   = "videos"
@@ -71,6 +72,7 @@ func New(config *Props) (*Service, error) {
 
 	buckets := []string{
 		UploadedBucketName,
+		AvatarBucketName,
 		docsBucketName,
 		imagesBucketName,
 		videosBucketName,

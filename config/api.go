@@ -30,11 +30,7 @@ type API struct {
 		Host string `env:"GRPC_AUDIT_CLIENT_HOST,required"`
 	}
 
-	Upload struct {
-		ImageMaxMB uint16 `env:"UPLOAD_IMAGE_MAX_MB,required"` // Максимальный размер файла фото
-		VideoMaxMB uint16 `env:"UPLOAD_VIDEO_MAX_MB,required"` // Максимальный размер файла видео
-		DocMaxMB   uint16 `env:"UPLOAD_DOC_MAX_MB,required"`   // Максимальный размер файла документа
-	}
+	Upload FileUpload
 
 	S3Conn S3Conn
 }

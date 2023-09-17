@@ -3,8 +3,8 @@ package auth_action
 import (
 	"context"
 	"github.com/google/uuid"
+	"github.com/semenovem/portal/internal/abc/auth"
 	"github.com/semenovem/portal/internal/abc/provider"
-	"github.com/semenovem/portal/pkg/it"
 	"github.com/semenovem/portal/pkg/throw"
 )
 
@@ -20,7 +20,7 @@ func (a *AuthAction) CreateOnetimeEntry(ctx context.Context, userID uint32) (uui
 
 	if err = a.canLogin(userAuth); err != nil {
 		ll.Named("canLogin").Nested(err)
-		return uuid.Nil, throw.NewBadRequestErr(err.Error())
+		return uuid.Nil, throw.NewBadRequestErrf(err.Error())
 	}
 
 	entryID, err := a.authPvd.NewOnetimeEntry(ctx, userAuth.ID)
@@ -32,7 +32,7 @@ func (a *AuthAction) CreateOnetimeEntry(ctx context.Context, userID uint32) (uui
 }
 
 // LoginByOnetimeEntryID логин по одноразовой точке входа
-func (a *AuthAction) LoginByOnetimeEntryID(ctx context.Context, entryID uuid.UUID) (*it.AuthSession, error) {
+func (a *AuthAction) LoginByOnetimeEntryID(ctx context.Context, entryID uuid.UUID) (*auth.Session, error) {
 	ll := a.logger.Named("LoginByOnetimeEntryID")
 
 	userID, err := a.authPvd.GetDelOnetimeEntry(ctx, entryID)

@@ -18,7 +18,7 @@ func (p *AuthProvider) IsSessionCanceled(ctx context.Context, sessionID uint32) 
 
 // IsSessionCanceled отозвать сессию
 func (p *AuthProvider) sessionCanceled(ctx context.Context, sessionID uint32) error {
-	err := p.redis.Set(ctx, p.getSessionCancelKeyName(sessionID), "", p.jwtAccessTokenLifetime).Err()
+	err := p.redis.Set(ctx, p.getSessionCancelKeyName(sessionID), "", p.config.JWTAccessTokenLifetime).Err()
 	if err != nil {
 		p.logger.Named("sessionCanceled").Redis(err)
 		return err

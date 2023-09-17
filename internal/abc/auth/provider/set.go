@@ -3,8 +3,8 @@ package auth_provider
 import (
 	"context"
 	"github.com/google/uuid"
+	"github.com/semenovem/portal/internal/abc/auth"
 	"github.com/semenovem/portal/internal/abc/provider"
-	"github.com/semenovem/portal/pkg/it"
 	"github.com/semenovem/portal/pkg/throw"
 )
 
@@ -12,7 +12,7 @@ func (p *AuthProvider) CreateSession(
 	ctx context.Context,
 	userID uint32,
 	deviceID uuid.UUID,
-) (*it.AuthSession, error) {
+) (*auth.Session, error) {
 	var (
 		refreshID = uuid.New()
 		sessionID uint32
@@ -26,7 +26,7 @@ func (p *AuthProvider) CreateSession(
 		return nil, err
 	}
 
-	return &it.AuthSession{
+	return &auth.Session{
 		ID:        sessionID,
 		UserID:    userID,
 		DeviceID:  deviceID,
@@ -88,7 +88,7 @@ func (p *AuthProvider) NewOnetimeEntry(
 ) (entryID uuid.UUID, err error) {
 	entryID = uuid.New()
 
-	err = p.redis.Set(ctx, getOnetimeEntryKeyName(entryID), userID, p.onetimeEntryLifetime).Err()
+	err = p.redis.Set(ctx, getOnetimeEntryKeyName(entryID), userID, p.config.OnetimeEntryLifetime).Err()
 	if err != nil {
 		p.logger.Named("NewOnetimeEntry").With("onetimeEntryID", entryID).Error(err.Error())
 	}

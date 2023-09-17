@@ -9,15 +9,6 @@ var (
 	Err404OnetimeEntry = NewNotFoundErr("onetime entry not found")
 )
 
-func NewNotFoundErr(msg string) error {
-	return &notFoundErr{msg: msg}
-}
-
-func IsNotFoundErr(err error) bool {
-	_, ok := err.(*notFoundErr)
-	return ok
-}
-
 type NotFoundErr interface {
 	Error() string
 	isNotFoundErr() bool
@@ -26,6 +17,15 @@ type NotFoundErr interface {
 type notFoundErr struct {
 	msg    string
 	target error
+}
+
+func NewNotFoundErr(msg string) error {
+	return &notFoundErr{msg: msg}
+}
+
+func IsNotFoundErr(err error) bool {
+	_, ok := err.(*notFoundErr)
+	return ok
 }
 
 func (e notFoundErr) Error() string {

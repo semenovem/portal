@@ -37,7 +37,7 @@ func (cnt *Controller) Login(c echo.Context) error {
 	session, err := cnt.authAct.NewLogin(
 		ctx,
 		form.Login,
-		cnt.logoPasswdAuth.Hashing(form.Passwd),
+		cnt.loginPasswdAuth.Hashing(form.Passwd),
 		form.DeviceID,
 	)
 	if err != nil {
@@ -45,7 +45,7 @@ func (cnt *Controller) Login(c echo.Context) error {
 
 		switch err.(type) {
 		case throw.AuthErr, throw.NotFoundErr:
-			return cnt.fail.Send(c, "", http.StatusBadRequest, txt.AuthInvalidLogoPasswd, err)
+			return cnt.fail.Send(c, "", http.StatusBadRequest, txt.AuthInvalidLoginPasswd, err)
 		}
 
 		return cnt.fail.SendInternalServerErr(c, "", err)

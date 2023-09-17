@@ -14,13 +14,13 @@ type Controller struct {
 	fail           *fail.Service
 	com            *controller.Common
 	audit          *audit.AuditProvider
-	userPasswdAuth it.UserPasswdAuthenticator
+	userPasswdAuth it.LoginPasswdAuthenticator
 	peopleAct      *people_action.PeopleAction
 }
 
 func New(
 	arg *controller.InitArgs,
-	userPasswdAuth it.UserPasswdAuthenticator,
+	userPasswdAuth it.LoginPasswdAuthenticator,
 	peopleAct *people_action.PeopleAction,
 ) *Controller {
 	return &Controller{

@@ -12,6 +12,16 @@ var (
 	ErrInvalidLong        = NewInvalidErr("long")               // Длинный
 )
 
+type InvalidErr interface {
+	Error() string
+	isInvalidErr() bool
+}
+
+type invalidErr struct {
+	msg    string
+	target error
+}
+
 func NewInvalidErr(msg string) error {
 	return &invalidErr{msg: msg}
 }
@@ -37,16 +47,6 @@ func NewInvalidTimeErr(err error) error {
 func IsInvalidErr(err error) bool {
 	_, ok := err.(*invalidErr)
 	return ok
-}
-
-type InvalidErr interface {
-	Error() string
-	isInvalidErr() bool
-}
-
-type invalidErr struct {
-	msg    string
-	target error
 }
 
 func (e invalidErr) Error() string {

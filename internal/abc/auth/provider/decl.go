@@ -11,26 +11,28 @@ import (
 )
 
 type AuthProvider struct {
-	logger                 pkg.Logger
-	db                     *pgxpool.Pool
-	redis                  *redis.Client
-	jwtAccessTokenLifetime time.Duration
-	onetimeEntryLifetime   time.Duration
+	logger pkg.Logger
+	db     *pgxpool.Pool
+	redis  *redis.Client
+	config *ConfigAuth
+}
+
+type ConfigAuth struct {
+	JWTAccessTokenLifetime time.Duration
+	OnetimeEntryLifetime   time.Duration
 }
 
 func New(
 	logger pkg.Logger,
 	db *pgxpool.Pool,
 	redisClient *redis.Client,
-	jwtAccessTokenLifetimeMin time.Duration,
-	onetimeEntryLifetime time.Duration,
+	config *ConfigAuth,
 ) *AuthProvider {
 	return &AuthProvider{
-		logger:                 logger.Named("AuthProvider"),
-		db:                     db,
-		redis:                  redisClient,
-		jwtAccessTokenLifetime: jwtAccessTokenLifetimeMin,
-		onetimeEntryLifetime:   onetimeEntryLifetime,
+		logger: logger.Named("AuthProvider"),
+		db:     db,
+		redis:  redisClient,
+		config: config,
 	}
 }
 

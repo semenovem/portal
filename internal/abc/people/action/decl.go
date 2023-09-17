@@ -8,13 +8,13 @@ import (
 
 type PeopleAction struct {
 	logger         pkg.Logger
-	userPasswdAuth it.UserPasswdAuthenticator
+	userPasswdAuth it.LoginPasswdAuthenticator
 	peoplePvd      *people_provider.PeopleProvider
 }
 
 func New(
 	logger pkg.Logger,
-	userPasswdAuth it.UserPasswdAuthenticator,
+	userPasswdAuth it.LoginPasswdAuthenticator,
 	peoplePvd *people_provider.PeopleProvider,
 ) *PeopleAction {
 	return &PeopleAction{

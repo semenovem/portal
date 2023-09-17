@@ -2,14 +2,14 @@ package auth_provider
 
 import (
 	"context"
+	"github.com/semenovem/portal/internal/abc/auth"
 	"github.com/semenovem/portal/internal/abc/provider"
-	"github.com/semenovem/portal/pkg/it"
 	"github.com/semenovem/portal/pkg/throw"
 )
 
-func (p *AuthProvider) GetSession(ctx context.Context, sessionID uint32) (*it.AuthSession, error) {
+func (p *AuthProvider) GetSession(ctx context.Context, sessionID uint32) (*auth.Session, error) {
 	var (
-		s  = it.AuthSession{ID: sessionID}
+		s  = auth.Session{ID: sessionID}
 		sq = `SELECT user_id, device_id, refresh_id
 			FROM auth.sessions
 			WHERE logouted = false AND id = $1`

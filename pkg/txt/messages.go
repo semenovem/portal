@@ -28,8 +28,8 @@ const (
 )
 
 const (
-	AuthInvalidLogoPasswd = "10200 Не верный логин или пароль"
-	AuthWrongPIN          = "10212 Неверный ПИН"
+	AuthInvalidLoginPasswd = "10200 Не верный логин или пароль"
+	AuthWrongPIN           = "10212 Неверный ПИН"
 )
 
 //nolint:lll
@@ -42,7 +42,7 @@ var messages = map[string]*struct {
 	NotFoundMethod:             {},
 	NotFoundErrEntity:          {},
 	NotFoundUser:               {},
-	AuthInvalidLogoPasswd:      {},
+	AuthInvalidLoginPasswd:     {},
 	ValidateUserNameInvalid:    {},
 	ValidateUserNameLength:     {},
 	ValidatePasswordWeak:       {},

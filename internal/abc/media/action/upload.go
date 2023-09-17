@@ -4,14 +4,14 @@ import (
 	"context"
 	"crypto/sha1"
 	"encoding/hex"
+	"github.com/semenovem/portal/internal/abc/media"
 	"github.com/semenovem/portal/internal/s3"
-	"github.com/semenovem/portal/pkg/it"
 )
 
 func (a *MediaAction) Upload(
 	ctx context.Context,
 	thisUserID uint32,
-	mediaObj it.MediaObjectType,
+	mediaObj media.MediaObjectType,
 	binary []byte,
 	note string,
 ) (uint32, error) {

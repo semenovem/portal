@@ -2,6 +2,7 @@ package auth_controller
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/semenovem/portal/internal/abc/auth"
 	"github.com/semenovem/portal/internal/abc/auth/action"
 	"github.com/semenovem/portal/internal/abc/controller"
 	"github.com/semenovem/portal/internal/audit"
@@ -17,7 +18,7 @@ type Controller struct {
 	logger                    pkg.Logger
 	fail                      *fail.Service
 	jwt                       *jwtoken.Service
-	logoPasswdAuth            it.UserPasswdAuthenticator
+	loginPasswdAuth           it.LoginPasswdAuthenticator
 	com                       *controller.Common
 	authAct                   *auth_action.AuthAction
 	audit                     *audit.AuditProvider
@@ -29,7 +30,7 @@ type Controller struct {
 func New(
 	arg *controller.InitArgs,
 	jwt *jwtoken.Service,
-	logoPasswdAuth it.UserPasswdAuthenticator,
+	loginPasswdAuth it.LoginPasswdAuthenticator,
 	authAct *auth_action.AuthAction,
 	jwtServedDomains []string,
 	jwtRefreshTokenLife time.Duration,
@@ -38,7 +39,7 @@ func New(
 	return &Controller{
 		logger:                    arg.Logger.Named("auth-cnt"),
 		fail:                      arg.FailureService,
-		logoPasswdAuth:            logoPasswdAuth,
+		loginPasswdAuth:           loginPasswdAuth,
 		com:                       arg.Common,
 		authAct:                   authAct,
 		audit:                     arg.Audit,
@@ -102,7 +103,7 @@ func (cnt *Controller) extractRefreshToken(c echo.Context) (*jwtoken.RefreshPayl
 }
 
 // ExtractRefreshToken выпустить новый токен
-func (cnt *Controller) pairToken(session *it.AuthSession) (*jwtoken.PairTokens, fail.Nested) {
+func (cnt *Controller) pairToken(session *auth.Session) (*jwtoken.PairTokens, fail.Nested) {
 	pair, err := cnt.jwt.NewPairTokens(&jwtoken.TokenParams{
 		SessionID: session.ID,
 		UserID:    session.UserID,

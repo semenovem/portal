@@ -92,3 +92,10 @@ type S3Conn struct {
 	UseSSL             bool   `env:"S3_USE_SSL,required"`
 	InsecureSkipVerify bool   `env:"S3_INSECURE_SKIP_VERIFY,required"`
 }
+
+type FileUpload struct {
+	AvatarMaxMB uint16 `env:"UPLOAD_AVATAR_MAX_MB,required"` // Максимальный размер файла аватарки
+	ImageMaxMB  uint16 `env:"UPLOAD_IMAGE_MAX_MB,required"`  // Максимальный размер файла фото
+	VideoMaxMB  uint16 `env:"UPLOAD_VIDEO_MAX_MB,required"`  // Максимальный размер файла видео
+	DocMaxMB    uint16 `env:"UPLOAD_DOC_MAX_MB,required"`    // Максимальный размер файла документа
+}

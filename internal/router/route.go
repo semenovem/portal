@@ -19,6 +19,8 @@ func (r *Router) addRoutes() {
 	auth.DELETE("/store/:store_path", r.storeCnt.Delete)
 
 	// ----------------- Media -----------------
+	auth.POST("/media/avatar", r.mediaCnt.UploadAvatar)
+
 	auth.POST("/media/file", r.mediaCnt.FileUpload)
 	auth.GET("/media/file/:file_id", r.mediaCnt.FileUpload)
 	auth.DELETE("/media/file/:file_id", r.mediaCnt.FileUpload)

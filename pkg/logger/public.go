@@ -2,8 +2,8 @@ package logger
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-	"github.com/pkg/errors"
 	"github.com/semenovem/portal/pkg"
 	"io"
 	"os"
@@ -123,7 +123,7 @@ func (p *pen) NestedWith(err error, msg string) error {
 			err = errors.New(msg)
 		} else {
 			p.with(nesterErrMsg, " "+err.Error())
-			err = errors.WithMessage(err, msg)
+			err = fmt.Errorf("%s: %s", err.Error(), msg)
 		}
 
 		p.save(Debug, msg)

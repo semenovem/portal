@@ -34,7 +34,7 @@ func constraintErr(name string, err error) error {
 		return throw.NewWithTargetErr(throw.Err400DuplicateLogin, err)
 	}
 
-	return throw.NewBadRequestErr(err.Error())
+	return throw.NewBadRequestErrf(err.Error())
 }
 
 // EmployeesSearchOpts параметры поиска сотрудников

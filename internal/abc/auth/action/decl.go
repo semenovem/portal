@@ -3,11 +3,11 @@ package auth_action
 import (
 	"context"
 	"github.com/google/uuid"
+	"github.com/semenovem/portal/internal/abc/auth"
 	"github.com/semenovem/portal/internal/abc/auth/provider"
 	"github.com/semenovem/portal/internal/abc/people"
 	"github.com/semenovem/portal/internal/abc/people/provider"
 	"github.com/semenovem/portal/pkg"
-	"github.com/semenovem/portal/pkg/it"
 	"github.com/semenovem/portal/pkg/jwtoken"
 	"github.com/semenovem/portal/pkg/throw"
 )
@@ -44,7 +44,7 @@ func (a *AuthAction) canLogin(user *people.UserAuth) error {
 func (a *AuthAction) getSessionByRefresh(
 	ctx context.Context,
 	payload *jwtoken.RefreshPayload,
-) (*it.AuthSession, error) {
+) (*auth.Session, error) {
 	ll := a.logger.Named("getSessionByRefresh").With("sessionID", payload.SessionID)
 
 	session, err := a.authPvd.GetSession(ctx, payload.SessionID)
@@ -70,7 +70,7 @@ func (a *AuthAction) newSession(
 	ctx context.Context,
 	user *people.UserAuth,
 	deviceID uuid.UUID,
-) (*it.AuthSession, error) {
+) (*auth.Session, error) {
 	ll := a.logger.Named("newSession")
 
 	if err := a.canLogin(user); err != nil {

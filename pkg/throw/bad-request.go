@@ -3,20 +3,11 @@ package throw
 /* BadRequestErr ошибки в результате проверок */
 
 var (
-	Err400DuplicateLogin = NewBadRequestErr("duplicate user login")
-	Err400DuplicateEmail = NewBadRequestErr("duplicate user email")
+	Err400DuplicateLogin = NewBadRequestErrf("duplicate user login")
+	Err400DuplicateEmail = NewBadRequestErrf("duplicate user email")
 
-	Err400FiredBeforeStart = NewBadRequestErr("time fired before start work")
+	Err400FiredBeforeStart = NewBadRequestErrf("time fired before start work")
 )
-
-func NewBadRequestErr(msg string) error {
-	return &badRequestErr{msg: msg}
-}
-
-func IsBadRequestErr(err error) bool {
-	_, ok := err.(*badRequestErr)
-	return ok
-}
 
 type BadRequestErr interface {
 	Error() string
@@ -29,8 +20,24 @@ type badRequestErr struct {
 	target error
 }
 
+func NewBadRequestErr(err error) error {
+	return &badRequestErr{target: err}
+}
+
+func NewBadRequestErrf(msg string) error {
+	return &badRequestErr{msg: msg}
+}
+
+func IsBadRequestErr(err error) bool {
+	_, ok := err.(*badRequestErr)
+	return ok
+}
+
 func (e badRequestErr) Error() string {
 	if e.target != nil {
+		if e.msg == "" {
+			return e.target.Error()
+		}
 		return e.target.Error() + ": " + e.msg
 	}
 

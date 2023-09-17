@@ -1,7 +1,8 @@
 package media_controller
 
 import (
-	controller2 "github.com/semenovem/portal/internal/abc/controller"
+	"github.com/semenovem/portal/internal/abc/controller"
+	"github.com/semenovem/portal/internal/abc/media"
 	"github.com/semenovem/portal/internal/abc/media/action"
 	"github.com/semenovem/portal/internal/audit"
 	"github.com/semenovem/portal/pkg"
@@ -20,24 +21,24 @@ const (
 type Controller struct {
 	logger   pkg.Logger
 	fail     *fail.Service
-	com      *controller2.Common
+	com      *controller.Common
 	mediaAct *media_action.MediaAction
 	audit    *audit.AuditProvider
-
-	maxUpload int64 // Максимальный размер загружаемого файла (кроме видео)
+	config   *media.ConfigMedia
 }
 
 func New(
-	arg *controller2.InitArgs,
+	arg *controller.InitArgs,
+	config *media.ConfigMedia,
 	mediaAct *media_action.MediaAction,
 ) *Controller {
 	return &Controller{
-		logger:    arg.Logger.Named("media-cnt"),
-		fail:      arg.FailureService,
-		audit:     arg.Audit,
-		com:       arg.Common,
-		mediaAct:  mediaAct,
-		maxUpload: 1024 * 1024 * 10, // todo вынести в конфиг
+		logger:   arg.Logger.Named("media-cnt"),
+		fail:     arg.FailureService,
+		audit:    arg.Audit,
+		com:      arg.Common,
+		config:   config,
+		mediaAct: mediaAct,
 	}
 }
 
