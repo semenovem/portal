@@ -103,10 +103,6 @@ func New(ctx context.Context, logger pkg.Logger, cfg config.API) error {
 		ll.Named("Migrate").Nested(err)
 	}
 
-	if err = conn.MigrateDev(ll, cstr, cfg.DBMigrationsDirDev); err != nil {
-		ll.Named("Migrate").Nested(err)
-	}
-
 	// Redis
 	if app.redis, err = conn.InitRedis(ctx, ll, cfg.RedisConn.ConvTo()); err != nil {
 		ll.Named("InitRedis").Nested(err)

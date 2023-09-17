@@ -7,9 +7,8 @@ type API struct {
 	DBCoreConn DatabaseCoreConn
 	RedisConn  RedisConn
 
-	DBMigrationsDir    string `env:"DB_MIGRATIONS_DIR,required"`
-	DBMigrationsDirDev string `env:"DB_MIGRATIONS_DIR_DEV,required"` // Локальные данные для разработки
-	UserPasswdSalt     string `env:"USER_PASSWD_SALT,required"`
+	DBMigrationsDir string `env:"DB_MIGRATIONS_DIR,required"`
+	UserPasswdSalt  string `env:"USER_PASSWD_SALT,required"`
 
 	JWT struct {
 		AccessTokenSecret       string `env:"JWT_ACCESS_TOKEN_SECRET,required"`

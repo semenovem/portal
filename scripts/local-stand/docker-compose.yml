@@ -64,40 +64,16 @@ services:
           memory: 100M
 
 
-  redis-gui2:
+  redis-gui:
     <<: *net
     image: patrikx3/p3x-redis-ui:2023.10.246
     ports:
-      - 7843:7843
+      - "${__DB_RAM_GUI_PORT_EXPOSE__}:7843"
     volumes:
       - ./configs/redis-gui/settings.json:/settings/settings.json
       - ./configs/redis-gui/p3xrs-conns.json.json:/settings/.p3xrs-conns.json
     deploy:
-      replicas: 0
-      resources:
-        limits:
-          cpus: '0.1'
-          memory: 50M
-    logging:
-      driver: none
-
-
-  redis-gui:
-    <<: *net
-    #    container_name: redis-cmd
-    #    hostname: redis-commander
-    command: /usr/bin/dumb-init -- /redis-commander/docker/entrypoint.sh -p ${__DB_RAM_GUI_PORT_EXPOSE__}
-    image: rediscommander/redis-commander:latest
-    restart: always
-    environment:
-      - NO_SAVE=true
-      - NO_LOG_DATA=true
-    ports:
-      - "${__DB_RAM_GUI_PORT_EXPOSE__}:${__DB_RAM_GUI_PORT_EXPOSE__}"
-    volumes:
-      - ./configs/redis-config.json:/redis-commander/config/local.json:ro
-    deploy:
-      replicas: 0
+      replicas: 1
       resources:
         limits:
           cpus: '0.1'

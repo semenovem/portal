@@ -189,10 +189,7 @@ case "$OPER" in
     -p "${__API_PORTAL_DEBUGGING_PORT_EXPOSE__}:40000" \
     -w "/debugging" \
     -v "${ROOT}/../../:/debugging:ro" \
-    -v "${ROOT}/.people.up.sql:/migrate-dev/20250525141415_people.down.sql:ro" \
-    -v "${ROOT}/.people.up.sql:/migrate-dev/20250525141415_people.up.sql:ro" \
     --env-file "${ROOT}/../../deployments/local.env" \
-    -e "DB_MIGRATIONS_DIR_DEV=/migrate-dev" \
     -e "GRPC_AUDIT_CLIENT_HOST=audit:9090" \
     \
     -e "S3_URL=${__S3_URL__}" \
