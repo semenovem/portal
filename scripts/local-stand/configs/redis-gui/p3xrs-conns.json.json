@@ -1,0 +1,16 @@
+{
+  "update": "2023-09-16T18:23:27.674Z",
+  "list": [
+    {
+      "name": "localdb",
+      "host": "db-ram",
+      "port": 6379,
+      "askAuth": false,
+      "id": "P3Xid2bfbb3f9a8101000424c874f12e866",
+      "tlsWithoutCert": false,
+      "tlsRejectUnauthorized": false,
+      "cluster": false,
+      "nodes": []
+    }
+  ]
+}
