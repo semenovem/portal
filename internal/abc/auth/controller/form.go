@@ -15,5 +15,5 @@ type entryPointForm struct {
 }
 
 type onetimeAuthForm struct {
-	UserID uint32 `json:"user_id" validate:"required"`
+	UserID uint32 `json:"user_id" param:"user_id" validate:"required"`
 }

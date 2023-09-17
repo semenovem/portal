@@ -18,7 +18,7 @@ import (
 //	@Param		payload	body		onetimeAuthForm	true	"данные для создания сессии"
 //	@Success	200		{object}	onetimeAuthResponse
 //	@Failure	400		{object}	fail.Response
-//	@Router		/auth/onetime [POST]
+//	@Router		/auth/:user_id/onetime [POST]
 //	@Tags		auth
 //	@Security	ApiKeyAuth
 func (cnt *Controller) CreateOnetimeLink(c echo.Context) error {

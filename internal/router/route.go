@@ -11,7 +11,7 @@ func (r *Router) addRoutes() {
 	unauth.POST("/auth/logout", r.authCnt.Logout)
 	unauth.POST("/auth/refresh", r.authCnt.Refresh)
 	unauth.POST("/auth/onetime/:entry_id", r.authCnt.LoginOnetimeLink)
-	auth.POST("/auth/onetime", r.authCnt.CreateOnetimeLink)
+	auth.POST("/auth/:user_id/onetime", r.authCnt.CreateOnetimeLink)
 
 	// ----------------- Store -----------------
 	auth.GET("/store/:store_path", r.storeCnt.Load)
