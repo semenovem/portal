@@ -7,6 +7,7 @@ import (
 	"github.com/semenovem/portal/internal/audit"
 	"github.com/semenovem/portal/pkg"
 	"github.com/semenovem/portal/pkg/fail"
+	"github.com/semenovem/portal/pkg/throw"
 	"mime/multipart"
 	"net/http"
 )
@@ -64,13 +65,15 @@ func readFileHeader(fh *multipart.FileHeader) ([]byte, error) {
 	return byt, err
 }
 
-func (cnt *Controller) detectFactContentType(byt []byte, declareContentType string) fail.Nested {
-	factContentType := http.DetectContentType(byt)
+func (cnt *Controller) detectRealContentType(byt []byte, declareContentType string) fail.Nested {
+	realContentType := http.DetectContentType(byt)
 
-	if factContentType != declareContentType {
+	if realContentType != declareContentType {
 		err := cnt.logger.With("declareContentType", declareContentType).
-			With("factContentType", factContentType).
+			With("realContentType", realContentType).
 			BadRequestStrRetErr("fake content type")
+
+		throw.NewBadRequestErr(throw.Err400FakeContentType)
 
 		return fail.NewNested(http.StatusBadRequest, err)
 	}

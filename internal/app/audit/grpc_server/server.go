@@ -50,7 +50,5 @@ func New(
 		}
 	}()
 
-	fmt.Println(">>>>>>>>>>>>> err = ", err)
-
 	return impl, nil
 }

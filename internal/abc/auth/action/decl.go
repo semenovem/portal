@@ -45,7 +45,7 @@ func (a *AuthAction) getSessionByRefresh(
 	ctx context.Context,
 	payload *jwtoken.RefreshPayload,
 ) (*auth.Session, error) {
-	ll := a.logger.Named("getSessionByRefresh").With("sessionID", payload.SessionID)
+	ll := a.logger.Func(ctx, "getSessionByRefresh").With("sessionID", payload.SessionID)
 
 	session, err := a.authPvd.GetSession(ctx, payload.SessionID)
 	if err != nil {
@@ -71,7 +71,7 @@ func (a *AuthAction) newSession(
 	user *people.UserAuth,
 	deviceID uuid.UUID,
 ) (*auth.Session, error) {
-	ll := a.logger.Named("newSession")
+	ll := a.logger.Func(ctx, "newSession")
 
 	if err := a.canLogin(user); err != nil {
 		ll.Named("canLogin").Nested(err)

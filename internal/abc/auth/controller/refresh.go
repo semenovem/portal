@@ -21,8 +21,8 @@ import (
 //	@Security	ApiKeyAuth
 func (cnt *Controller) Refresh(c echo.Context) error {
 	var (
-		ll  = cnt.logger.Named("Refresh")
 		ctx = c.Request().Context()
+		ll  = cnt.logger.Func(ctx, "Refresh")
 	)
 
 	payload, nested := cnt.extractRefreshToken(c)

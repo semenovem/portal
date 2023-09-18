@@ -26,9 +26,9 @@ import (
 //	@Security	ApiKeyAuth
 func (cnt *Controller) FileUpload(c echo.Context) error {
 	var (
-		thisUserID = controller.ExtractThisUserID(c)
-		ll         = cnt.logger.Named("FileUpload").With("thisUserID", thisUserID)
 		ctx        = c.Request().Context()
+		thisUserID = controller.ExtractThisUserID(c)
+		ll         = cnt.logger.Func(ctx, "FileUpload").With("thisUserID", thisUserID)
 		note       string
 		fileHeader *multipart.FileHeader
 	)

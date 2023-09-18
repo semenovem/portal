@@ -27,6 +27,7 @@ func (p *PeopleProvider) getUserAuth(
 	login, passwdHash string,
 ) (*people.UserAuth, error) {
 	var (
+		ll = p.logger.Func(ctx, "getUserAuth")
 		sq = `SELECT u.id, u.status, u.expired_at, e.worked_at, e.fired_at
 		FROM      people.users     AS u
 		LEFT JOIN people.employees AS e ON e.user_id = u.id
@@ -52,7 +53,7 @@ func (p *PeopleProvider) getUserAuth(
 			return nil, throw.Err404User
 		}
 
-		p.logger.Named("getUserAuth").DB(err)
+		ll.Named("QueryRow").DB(err)
 		return nil, err
 	}
 

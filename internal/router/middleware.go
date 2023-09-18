@@ -1,6 +1,7 @@
 package router
 
 import (
+	"context"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -13,6 +14,7 @@ import (
 	"net/http"
 	"runtime"
 	"strings"
+	"time"
 )
 
 type panicMessage struct {
@@ -66,7 +68,9 @@ func tokenMiddleware(
 
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			tokenFromHeader := c.Request().Header.Get("Authorization")
+			var (
+				tokenFromHeader = c.Request().Header.Get("Authorization")
+			)
 
 			if tokenFromHeader == "" {
 				ll.Auth(throw.ErrAuthCookieEmpty)
@@ -118,6 +122,26 @@ func tokenMiddleware(
 			}
 
 			c.Set(controller.ThisUserID, payload.UserID)
+
+			return next(c)
+		}
+	}
+}
+
+func contextMiddleware(minTimeContext time.Duration) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			ctx2, cancel := context.WithCancel(c.Request().Context())
+
+			go func() {
+				<-time.After(minTimeContext)
+				<-ctx2.Done()
+				cancel()
+			}()
+
+			ctx2 = context.WithValue(ctx2, requestIDKeyName, time.Now().Nanosecond())
+
+			c.SetRequest(c.Request().WithContext(ctx2))
 
 			return next(c)
 		}

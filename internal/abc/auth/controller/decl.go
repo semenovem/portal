@@ -14,6 +14,12 @@ import (
 	"time"
 )
 
+type Config struct {
+	JWTServedDomains          []string
+	JWTRefreshTokenLife       time.Duration
+	JWTRefreshTokenCookieName string
+}
+
 type Controller struct {
 	logger                    pkg.Logger
 	fail                      *fail.Service
@@ -79,7 +85,7 @@ func (cnt *Controller) refreshTokenCookies(refreshToken string) []*http.Cookie {
 // Получить токен и проверить срок его действия
 func (cnt *Controller) extractRefreshToken(c echo.Context) (*jwtoken.RefreshPayload, fail.Nested) {
 	var (
-		ll = cnt.logger.Named("ExtractRefreshToken")
+		ll = cnt.logger.Func(c.Request().Context(), "extractRefreshToken")
 	)
 
 	refreshCookie, err := c.Cookie(cnt.jwtRefreshTokenCookieName)

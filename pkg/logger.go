@@ -1,6 +1,9 @@
 package pkg
 
+import "context"
+
 type Logger interface {
+	Func(context.Context, string) Logger
 	Named(string) Logger
 	With(key string, val interface{}) Logger // Не создает новый объект, мутирует текущий
 	Error(msg string)

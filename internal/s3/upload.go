@@ -60,7 +60,7 @@ func (s *Service) uploadFile(
 		minio.PutObjectOptions{},
 	)
 	if err != nil {
-		s.logger.Named("UploadFile").With("objectPath", object).Error(err.Error())
+		s.logger.Func(ctx, "UploadFile").With("objectPath", object).Error(err.Error())
 		return err
 	}
 

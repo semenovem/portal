@@ -21,7 +21,7 @@ func (p *AuthProvider) GetSession(ctx context.Context, sessionID uint32) (*auth.
 			return nil, throw.Err404AuthSession
 		}
 
-		p.logger.Named("GetSession").With("sessionID", sessionID).DB(err)
+		p.logger.Func(ctx, "GetSession").With("sessionID", sessionID).DB(err)
 		return nil, err
 	}
 

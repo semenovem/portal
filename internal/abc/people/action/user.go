@@ -10,7 +10,7 @@ func (a *PeopleAction) CheckLoginName(
 	thisUserID uint32,
 	loginName string,
 ) (loginNameIsFree bool, err error) {
-	ll := a.logger.Named("CheckLoginName")
+	ll := a.logger.Func(ctx, "CheckLoginName")
 
 	// TODO Должна быть проверка на право проверки свободного логина пользователя
 	// Требуется право создания нового пользователя
@@ -34,7 +34,7 @@ func (a *PeopleAction) DeleteUser(
 	ctx context.Context,
 	thisUserID, userID uint32,
 ) error {
-	ll := a.logger.Named("DeleteUser")
+	ll := a.logger.Func(ctx, "DeleteUser")
 
 	// TODO Должна быть проверка на право удаления пользователя
 
@@ -50,7 +50,7 @@ func (a *PeopleAction) UndeleteUser(
 	ctx context.Context,
 	thisUserID, userID uint32,
 ) error {
-	ll := a.logger.Named("UndeleteUser")
+	ll := a.logger.Func(ctx, "UndeleteUser")
 
 	// TODO Должна быть проверка на право восстановления пользователя
 

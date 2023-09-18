@@ -10,7 +10,7 @@ import (
 
 // CreateOnetimeEntry создание одноразовой точки авторизации
 func (a *AuthAction) CreateOnetimeEntry(ctx context.Context, userID uint32) (uuid.UUID, error) {
-	ll := a.logger.Named("CreateOnetimeEntry")
+	ll := a.logger.Func(ctx, "CreateOnetimeEntry")
 
 	userAuth, err := a.peoplePvd.GetUserAuth(ctx, userID)
 	if err != nil {
@@ -33,7 +33,7 @@ func (a *AuthAction) CreateOnetimeEntry(ctx context.Context, userID uint32) (uui
 
 // LoginByOnetimeEntryID логин по одноразовой точке входа
 func (a *AuthAction) LoginByOnetimeEntryID(ctx context.Context, entryID uuid.UUID) (*auth.Session, error) {
-	ll := a.logger.Named("LoginByOnetimeEntryID")
+	ll := a.logger.Func(ctx, "LoginByOnetimeEntryID")
 
 	userID, err := a.authPvd.GetDelOnetimeEntry(ctx, entryID)
 	if err != nil {

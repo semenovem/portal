@@ -21,7 +21,7 @@ func New(logger pkg.Logger, storePvd *store_provider.StoreProvider) *StoreAction
 }
 
 func (a *StoreAction) Load(ctx context.Context, thisUserID uint32, path string) (string, error) {
-	ll := a.logger.Named("Load").With("path", path)
+	ll := a.logger.Func(ctx, "Load").With("path", path)
 
 	payload, err := a.storePvd.LoadArbitraryData(ctx, thisUserID, path)
 	if err != nil {
@@ -38,7 +38,7 @@ func (a *StoreAction) Load(ctx context.Context, thisUserID uint32, path string) 
 }
 
 func (a *StoreAction) Store(ctx context.Context, thisUserID uint32, path, payload string) error {
-	ll := a.logger.Named("Load").With("path", path)
+	ll := a.logger.Func(ctx, "Load").With("path", path)
 
 	err := a.storePvd.StoreArbitraryData(ctx, thisUserID, path, payload)
 	if err != nil {
@@ -49,11 +49,11 @@ func (a *StoreAction) Store(ctx context.Context, thisUserID uint32, path, payloa
 }
 
 func (a *StoreAction) Delete(ctx context.Context, thisUserID uint32, path string) error {
-	ll := a.logger.Named("Load").With("path", path)
+	ll := a.logger.Func(ctx, "Load").With("path", path)
 
 	err := a.storePvd.DeleteArbitraryData(ctx, thisUserID, path)
 	if err != nil {
-		ll.Named("DeleteArbitraryData").Nested(err)
+		ll.Named("storePvd.DeleteArbitraryData").Nested(err)
 
 		if provider.IsNoRec(err) {
 			return throw.Err404

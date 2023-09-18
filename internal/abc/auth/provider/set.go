@@ -22,7 +22,7 @@ func (p *AuthProvider) CreateSession(
 	)
 
 	if err := p.db.QueryRow(ctx, sq, userID, deviceID, refreshID).Scan(&sessionID); err != nil {
-		p.logger.Named("CreateSession.QueryRow").With("userID", userID).DB(err)
+		p.logger.Func(ctx, "CreateSession.QueryRow").With("userID", userID).DB(err)
 		return nil, err
 	}
 
@@ -36,7 +36,7 @@ func (p *AuthProvider) CreateSession(
 
 func (p *AuthProvider) LogoutSession(ctx context.Context, sessionID uint32) error {
 	var (
-		ll = p.logger.Named("LogoutSession").With("sessionID", sessionID)
+		ll = p.logger.Func(ctx, "LogoutSession").With("sessionID", sessionID)
 		sq = `UPDATE auth.sessions SET logouted = true WHERE logouted = false AND id = $1`
 	)
 
@@ -67,7 +67,7 @@ func (p *AuthProvider) UpdateRefreshSession(
 
 	result, err := p.db.Exec(ctx, sq, sessionID, refreshOldID, refreshNewID)
 	if err != nil {
-		p.logger.Named("UpdateRefreshSession").
+		p.logger.Func(ctx, "UpdateRefreshSession").
 			With("sessionID", sessionID).
 			With("refreshOldID", refreshOldID).
 			With("refreshNewID", refreshNewID).DB(err)
@@ -90,7 +90,7 @@ func (p *AuthProvider) NewOnetimeEntry(
 
 	err = p.redis.Set(ctx, getOnetimeEntryKeyName(entryID), userID, p.config.OnetimeEntryLifetime).Err()
 	if err != nil {
-		p.logger.Named("NewOnetimeEntry").With("onetimeEntryID", entryID).Error(err.Error())
+		p.logger.Func(ctx, "NewOnetimeEntry").With("onetimeEntryID", entryID).Error(err.Error())
 	}
 
 	return entryID, err
@@ -102,7 +102,7 @@ func (p *AuthProvider) GetDelOnetimeEntry(
 ) (userID uint32, err error) {
 	v, err := p.redis.GetDel(ctx, getOnetimeEntryKeyName(entryID)).Uint64()
 	if err != nil {
-		ll := p.logger.Named("GetDelOnetimeEntry").With("onetimeEntryID", entryID)
+		ll := p.logger.Func(ctx, "GetDelOnetimeEntry").With("onetimeEntryID", entryID)
 
 		if provider.IsNoRec(err) {
 			ll.Debug(provider.MsgErrNoRecordRedis)

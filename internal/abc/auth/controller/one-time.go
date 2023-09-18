@@ -23,9 +23,9 @@ import (
 //	@Security	ApiKeyAuth
 func (cnt *Controller) CreateOnetimeLink(c echo.Context) error {
 	var (
-		ll         = cnt.logger.Named("LoginOnetimeLink")
-		form       = new(onetimeAuthForm)
 		ctx        = c.Request().Context()
+		ll         = cnt.logger.Func(ctx, "LoginOnetimeLink")
+		form       = new(onetimeAuthForm)
 		thisUserID = controller.ExtractThisUserID(c)
 	)
 
@@ -65,9 +65,9 @@ func (cnt *Controller) CreateOnetimeLink(c echo.Context) error {
 //	@Security	ApiKeyAuth
 func (cnt *Controller) LoginOnetimeLink(c echo.Context) error {
 	var (
-		ll   = cnt.logger.Named("LoginOnetimeLink")
-		form = new(entryPointForm)
 		ctx  = c.Request().Context()
+		ll   = cnt.logger.Func(ctx, "LoginOnetimeLink")
+		form = new(entryPointForm)
 	)
 
 	if err := cnt.com.ExtractForm(c, ll, form); err != nil {

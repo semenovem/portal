@@ -6,6 +6,7 @@ import (
 	"github.com/caarlos0/env/v9"
 	"github.com/semenovem/portal/config"
 	apiApp "github.com/semenovem/portal/internal/app/api"
+	"github.com/semenovem/portal/internal/router"
 	"github.com/semenovem/portal/pkg/logger"
 	"os"
 	"os/signal"
@@ -63,6 +64,7 @@ func main() {
 	setter.SetCli(true)
 	setter.SetShowTime(true)
 	setter.SetLevel(cfg.Base.LogLevel)
+	setter.SetRequestIDExtractor(router.ExtractRequestID)
 
 	if err := apiApp.New(ctx, ll, &cfg); err != nil {
 		_ = ll.NestedWith(err, "can't start app")

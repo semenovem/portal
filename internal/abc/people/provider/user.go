@@ -8,6 +8,7 @@ import (
 
 func (p *PeopleProvider) GetUserModel(ctx context.Context, userID uint32) (*UserModel, error) {
 	var (
+		ll = p.logger.Func(ctx, "GetUserModel")
 		sq = `SELECT id,
 				firstname,
 				surname,
@@ -41,7 +42,7 @@ func (p *PeopleProvider) GetUserModel(ctx context.Context, userID uint32) (*User
 		if provider.IsNoRow(err) {
 			return nil, throw.Err404User
 		}
-		p.logger.Named("GetUserProfile").DB(err)
+		ll.Named("QueryRow").DB(err)
 
 		return nil, err
 	}
@@ -51,6 +52,7 @@ func (p *PeopleProvider) GetUserModel(ctx context.Context, userID uint32) (*User
 
 func (p *PeopleProvider) GetEmployeeModel(ctx context.Context, userID uint32) (*EmployeeModel, error) {
 	var (
+		ll = p.logger.Func(ctx, "GetEmployeeModel")
 		sq = `SELECT u.id,
 					u.firstname,
 					u.surname,
@@ -94,7 +96,7 @@ func (p *PeopleProvider) GetEmployeeModel(ctx context.Context, userID uint32) (*
 		if provider.IsNoRow(err) {
 			return nil, throw.Err404User
 		}
-		p.logger.Named("GetUserProfile").DB(err)
+		ll.Named("QueryRow").DB(err)
 
 		return nil, err
 	}
@@ -114,7 +116,7 @@ func (p *PeopleProvider) DeleteUser(ctx context.Context, userID uint32) error {
 
 	result, err := p.db.Exec(ctx, sq, userID)
 	if err != nil {
-		p.logger.Named("DeleteUser").DB(err)
+		p.logger.Func(ctx, "DeleteUser").DB(err)
 		return err
 	}
 
@@ -130,7 +132,7 @@ func (p *PeopleProvider) UndeleteUser(ctx context.Context, userID uint32) error 
 
 	result, err := p.db.Exec(ctx, sq, userID)
 	if err != nil {
-		p.logger.Named("UndeleteUser").DB(err)
+		p.logger.Func(ctx, "UndeleteUser").DB(err)
 		return err
 	}
 

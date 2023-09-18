@@ -1,20 +1,20 @@
 package media
 
-import "errors"
+import (
+	"github.com/semenovem/portal/pkg/throw"
+)
 
 const (
-	MediaObjectPNG  MediaObjectType = "png"
-	MediaObjectJPEG MediaObjectType = "jpeg"
-	MediaObjectPDF  MediaObjectType = "pdf"
+	ObjectPNG  ObjectType = "png"
+	ObjectJPEG ObjectType = "jpeg"
+	ObjectPDF  ObjectType = "pdf"
 )
 
 var (
-	ErrUnknownContentType = errors.New("unknown content type")
-
-	mediaContentTypes = map[string]MediaObjectType{
-		"image/png":       MediaObjectPNG,
-		"image/jpeg":      MediaObjectJPEG,
-		"application/pdf": MediaObjectPDF,
+	mediaContentTypes = map[string]ObjectType{
+		"image/png":       ObjectPNG,
+		"image/jpeg":      ObjectJPEG,
+		"application/pdf": ObjectPDF,
 	}
 )
 
@@ -25,13 +25,13 @@ type ConfigMedia struct {
 	DocMaxBytes    uint32 // Максимальный размер файла документа в байтах
 }
 
-type MediaObjectType string
-type MediaContentType string
+type ObjectType string
+type ContentType string
 
-func MediaObjectByContentType(s string) (MediaObjectType, error) {
+func ObjectByContentType(s string) (ObjectType, error) {
 	if o, ok := mediaContentTypes[s]; ok {
 		return o, nil
 	}
 
-	return "", ErrUnknownContentType
+	return "", throw.ErrUnknownContentType
 }

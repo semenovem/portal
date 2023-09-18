@@ -11,7 +11,7 @@ func (a *PeopleAction) EmployeeHandbook(
 	opts *people_provider.EmployeesSearchOpts,
 ) (*EmployeesSearchResult, error) {
 	var (
-		ll = a.logger.Named("EmployeeHandbook")
+		ll = a.logger.Func(ctx, "EmployeeHandbook")
 		//bossIDs     = make([]uint32, 0)
 		positionIDMap = make(map[uint16]struct{}, 0)
 		deptIDMap     = make(map[uint16]struct{}, 0)

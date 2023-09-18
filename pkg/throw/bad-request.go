@@ -7,6 +7,7 @@ var (
 	Err400DuplicateEmail = NewBadRequestErrf("duplicate user email")
 
 	Err400FiredBeforeStart = NewBadRequestErrf("time fired before start work")
+	Err400FakeContentType  = NewBadRequestErrf("fake content type")
 )
 
 type BadRequestErr interface {

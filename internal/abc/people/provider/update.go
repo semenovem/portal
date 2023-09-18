@@ -14,15 +14,17 @@ func (p *PeopleProvider) UpdateEmployee(
 	userID uint32,
 	dto *EmployeeCreateModel,
 ) error {
+	ll := p.logger.Func(ctx, "UpdateEmployee")
+
 	tx, err := p.db.Begin(ctx)
 	if err != nil {
-		p.logger.Named("UpdateEmployee.Begin").DB(err)
+		ll.Named("Begin").DB(err)
 		return err
 	}
 
 	defer func() {
 		if err1 := tx.Rollback(ctx); err1 != nil && !errors.Is(err1, pgx.ErrTxClosed) {
-			p.logger.Named("Rollback").DB(err1)
+			ll.Named("Rollback").DB(err1)
 		}
 	}()
 
@@ -35,7 +37,7 @@ func (p *PeopleProvider) UpdateEmployee(
 	}
 
 	if err = tx.Commit(ctx); err != nil {
-		p.logger.Named("Commit").DB(err)
+		ll.Named("Commit").DB(err)
 		return err
 	}
 
@@ -49,6 +51,7 @@ func (p *PeopleProvider) updateUserTx(
 	dto *UserCreateModel,
 ) error {
 	var (
+		ll    = p.logger.Func(ctx, "updateUserTx")
 		sq    = `UPDATE people.users SET updated_at = now()` + ", "
 		where = " WHERE id = @user_id AND deleted = false"
 		set   = make([]string, 0)
@@ -106,7 +109,7 @@ func (p *PeopleProvider) updateUserTx(
 			return constraintErr(n, err)
 		}
 
-		p.logger.Named("UpdateUserTx").DB(err)
+		ll.Named("Exec").DB(err)
 		return err
 	}
 
@@ -124,6 +127,7 @@ func (p *PeopleProvider) updateEmployeeTx(
 	dto *EmployeeCreateModel,
 ) error {
 	var (
+		ll    = p.logger.Func(ctx, "updateEmployeeTx")
 		sq    = `UPDATE people.employees SET`
 		where = ` WHERE user_id = @user_id AND (select deleted from people.users where id = @user_id) = false`
 		set   = make([]string, 0)
@@ -161,7 +165,7 @@ func (p *PeopleProvider) updateEmployeeTx(
 			return constraintErr(n, err)
 		}
 
-		p.logger.Named("UpdateUserTx").DB(err)
+		ll.Named("UpdateUserTx").DB(err)
 		return err
 	}
 

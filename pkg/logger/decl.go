@@ -32,7 +32,6 @@ const (
 	authTag       = "AUTH"
 	badRequestTag = "BAD_REQUEST"
 	notFound      = "NOT_FOUND"
-	clientTag     = "CLIENT"
 	denyTag       = "DENY"
 )
 

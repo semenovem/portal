@@ -10,7 +10,7 @@ import (
 
 // Logout разлогин авторизованной сессии пользователя
 func (a *AuthAction) Logout(ctx context.Context, payload *jwtoken.RefreshPayload) (uint32, error) {
-	ll := a.logger.Named("Logout").With("sessionID", payload.SessionID)
+	ll := a.logger.Func(ctx, "Logout").With("sessionID", payload.SessionID)
 
 	session, err := a.getSessionByRefresh(ctx, payload)
 	if err != nil {
@@ -23,8 +23,6 @@ func (a *AuthAction) Logout(ctx context.Context, payload *jwtoken.RefreshPayload
 		return 0, err
 	}
 
-	ll.With("userID", session.UserID).AuthDebugStr("user is logouted")
-
 	return session.UserID, nil
 }
 
@@ -33,7 +31,7 @@ func (a *AuthAction) Refresh(
 	ctx context.Context,
 	payload *jwtoken.RefreshPayload,
 ) (*auth.Session, error) {
-	ll := a.logger.Named("Refresh").With("sessionID", payload.SessionID)
+	ll := a.logger.Func(ctx, "Refresh").With("sessionID", payload.SessionID)
 
 	sessionOld, err := a.getSessionByRefresh(ctx, payload)
 	if err != nil {

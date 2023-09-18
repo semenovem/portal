@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -9,29 +10,50 @@ import (
 	"os"
 )
 
+type base struct {
+	requestIDExtractor func(ctx context.Context) string
+	cli                bool
+	hideTime           bool
+	level              int8
+	outErr             io.Writer
+	outInf             io.Writer
+	outDeb             io.Writer
+}
+
 type pen struct {
+	base     *base
 	names    []string
 	params   []string
-	level    int8
 	isNested bool
-	hideTime bool
-	cli      bool
-	outErr   io.Writer
-	outInf   io.Writer
-	outDeb   io.Writer
 	tags     []string
+	ctx      context.Context
 }
 
 func New() (pkg.Logger, *Setter) {
 	st := Setter{
 		logger: &pen{
-			outErr: os.Stdout,
-			outInf: os.Stdout,
-			outDeb: os.Stdout,
+			base: &base{
+				outErr: os.Stdout,
+				outInf: os.Stdout,
+				outDeb: os.Stdout,
+			},
 		},
 	}
 
 	return st.logger, &st
+}
+
+func (p *pen) Func(ctx context.Context, n string) pkg.Logger {
+	a := p.copy()
+	a.ctx = ctx
+
+	if a.names == nil {
+		a.names = make([]string, 0)
+	}
+
+	a.names = append(a.names, n)
+
+	return a
 }
 
 func (p *pen) Named(n string) pkg.Logger {

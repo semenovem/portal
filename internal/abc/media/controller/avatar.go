@@ -25,9 +25,9 @@ import (
 //	@Security	ApiKeyAuth
 func (cnt *Controller) UploadAvatar(c echo.Context) error {
 	var (
-		thisUserID = controller.ExtractThisUserID(c)
-		ll         = cnt.logger.Named("UploadAvatar").With("thisUserID", thisUserID)
 		ctx        = c.Request().Context()
+		thisUserID = controller.ExtractThisUserID(c)
+		ll         = cnt.logger.Func(ctx, "UploadAvatar").With("thisUserID", thisUserID)
 		note       string
 		fileHeader *multipart.FileHeader
 	)
@@ -83,9 +83,9 @@ func (cnt *Controller) UploadAvatar(c echo.Context) error {
 ////	@Security	ApiKeyAuth
 //func (cnt *Controller) Load(c echo.Context) error {
 //	var (
+//		ctx  = c.Request().Context()
 //		ll   = cnt.logger.Named("Store")
 //		form = new(storePathForm)
-//		ctx  = c.Request().Context()
 //	)
 //
 //	thisUserID, nested := cnt.com.ExtractUserAndForm(c, form)

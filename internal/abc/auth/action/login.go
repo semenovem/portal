@@ -13,7 +13,7 @@ func (a *AuthAction) NewLogin(
 	login, passwdHash string,
 	deviceID uuid.UUID,
 ) (*auth.Session, error) {
-	ll := a.logger.Named("NewLogin").With("login", login).With("deviceID", deviceID)
+	ll := a.logger.Func(ctx, "NewLogin").With("login", login).With("deviceID", deviceID)
 
 	userAuth, err := a.peoplePvd.GetUserByLogin(ctx, login, passwdHash)
 	if err != nil {
@@ -35,9 +35,6 @@ func (a *AuthAction) NewLogin(
 		ll.Nested(err)
 		return nil, err
 	}
-
-	ll.With("sessionID", session.ID).With("refreshID", session.RefreshID).
-		AuthDebugStr("user is logged")
 
 	return session, nil
 }

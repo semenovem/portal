@@ -34,7 +34,7 @@ func (p *PeopleProvider) GetPositionModel(ctx context.Context, positionID uint16
 		&pos.title,
 		&pos.description,
 	); err != nil {
-		p.logger.Named("GetPositionModel").With("positionID", positionID).DB(err)
+		p.logger.Func(ctx, "GetPositionModel").With("positionID", positionID).DB(err)
 		return nil, err
 	}
 
@@ -60,13 +60,14 @@ func (p *PeopleProvider) GetPositionMap(
 
 func (p *PeopleProvider) GetPositions(ctx context.Context, positionIDs []uint16) ([]*PositionModel, error) {
 	var (
+		ll = p.logger.Func(ctx, "GetPositions")
 		sq = `SELECT id, title, description FROM people.positions WHERE id = ANY ($1)`
 		ls = make([]*PositionModel, 0)
 	)
 
 	rows, err := p.db.Query(ctx, sq, pq.Array(positionIDs))
 	if err != nil {
-		p.logger.Named("GetPositions").DB(err)
+		ll.Named("Query").DB(err)
 		return nil, err
 	}
 
@@ -80,7 +81,7 @@ func (p *PeopleProvider) GetPositions(ctx context.Context, positionIDs []uint16)
 			&m.title,
 			&m.description,
 		); err != nil {
-			p.logger.Named("GetPositions.Scan").DB(err)
+			ll.Named("Scan").DB(err)
 			return nil, err
 		}
 

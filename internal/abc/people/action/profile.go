@@ -11,7 +11,7 @@ func (a *PeopleAction) GetUserModel(
 	ctx context.Context,
 	thisUserID, userID uint32,
 ) (*people_provider.UserModel, error) {
-	ll := a.logger.Named("getUserProfile")
+	ll := a.logger.Func(ctx, "getUserProfile")
 
 	// TODO проверка права на просмотр данных пользователя
 
@@ -25,7 +25,7 @@ func (a *PeopleAction) GetUserModel(
 }
 
 func (a *PeopleAction) GetEmployeeModel(ctx context.Context, userID uint32) (*people_provider.EmployeeModel, error) {
-	ll := a.logger.Named("getUserProfile")
+	ll := a.logger.Func(ctx, "GetEmployeeModel")
 
 	profile, err := a.peoplePvd.GetEmployeeModel(ctx, userID)
 	if err != nil {

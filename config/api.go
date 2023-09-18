@@ -33,6 +33,10 @@ type API struct {
 	Upload FileUpload
 
 	S3Conn S3Conn
+
+	Controller struct {
+		MinTimeContextMs uint32 `env:"CONTROLLER_MIN_CONTEXT_MS,required"`
+	}
 }
 
 func (c *API) GetGRPCAuditConfig() *GrpcClient {

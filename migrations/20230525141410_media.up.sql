@@ -5,6 +5,12 @@
 -- типы файлов
 CREATE TYPE media.file_kind AS ENUM ('jpg', 'png', 'webp', 'pdf', 'video');
 
+-- аватарки пользователей
+CREATE TABLE IF NOT EXISTS media.avatars
+(
+  id      varchar(15) PRIMARY KEY
+);
+
 -- предварительно загруженные файлы
 CREATE TABLE IF NOT EXISTS media.upload_files
 (

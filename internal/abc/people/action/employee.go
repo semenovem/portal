@@ -10,7 +10,7 @@ func (a *PeopleAction) CreateEmployee(
 	thisUserID uint32,
 	dto *people_provider.EmployeeCreateModel,
 ) (userID uint32, err error) {
-	ll := a.logger.Named("CreateUser")
+	ll := a.logger.Func(ctx, "CreateUser")
 
 	// TODO Должна быть проверка на право создания пользователя
 	// ----
@@ -32,7 +32,7 @@ func (a *PeopleAction) UpdateEmployee(
 	dto *people_provider.EmployeeCreateModel,
 ) error {
 	var (
-		ll = a.logger.Named("UpdateEmployee").With("userID", userID)
+		ll = a.logger.Func(ctx, "UpdateEmployee").With("userID", userID)
 	)
 
 	// TODO проверка права редактирования пользователя

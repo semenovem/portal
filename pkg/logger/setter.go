@@ -1,5 +1,7 @@
 package logger
 
+import "context"
+
 type Setter struct {
 	logger *pen
 }
@@ -9,11 +11,11 @@ func (s *Setter) SetLevel(level int8) {
 }
 
 func (p *pen) setLevel(lev int8) {
-	p.level = lev
+	p.base.level = lev
 }
 
 func (s *Setter) SetCli(on bool) {
-	s.logger.cli = on
+	s.logger.base.cli = on
 
 	prefixBytesErr = []byte("\033[0;31m" + prefixErr + "\033[0m")
 	prefixBytesInfo = []byte("\033[0;32m" + prefixInfo + "\033[0m")
@@ -23,5 +25,9 @@ func (s *Setter) SetCli(on bool) {
 }
 
 func (s *Setter) SetShowTime(on bool) {
-	s.logger.hideTime = on
+	s.logger.base.hideTime = on
+}
+
+func (s *Setter) SetRequestIDExtractor(extractor func(ctx context.Context) string) {
+	s.logger.base.requestIDExtractor = extractor
 }

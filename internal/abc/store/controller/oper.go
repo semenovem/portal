@@ -25,10 +25,10 @@ import (
 //	@Security	ApiKeyAuth
 func (cnt *Controller) Store(c echo.Context) error {
 	var (
-		thisUserID = controller.ExtractThisUserID(c)
-		ll         = cnt.logger.Named("Store").With("thisUserID", thisUserID)
-		form       = new(storeForm)
 		ctx        = c.Request().Context()
+		thisUserID = controller.ExtractThisUserID(c)
+		ll         = cnt.logger.Func(ctx, "Store").With("thisUserID", thisUserID)
+		form       = new(storeForm)
 	)
 
 	if err := cnt.com.ExtractForm(c, ll, form); err != nil {
@@ -60,10 +60,10 @@ func (cnt *Controller) Store(c echo.Context) error {
 //	@Security	ApiKeyAuth
 func (cnt *Controller) Load(c echo.Context) error {
 	var (
-		thisUserID = controller.ExtractThisUserID(c)
-		ll         = cnt.logger.Named("Load").With("thisUserID", thisUserID)
-		form       = new(storePathForm)
 		ctx        = c.Request().Context()
+		thisUserID = controller.ExtractThisUserID(c)
+		ll         = cnt.logger.Func(ctx, "Load").With("thisUserID", thisUserID)
+		form       = new(storePathForm)
 	)
 
 	if err := cnt.com.ExtractForm(c, ll, form); err != nil {
@@ -101,10 +101,10 @@ func (cnt *Controller) Load(c echo.Context) error {
 //	@Security	ApiKeyAuth
 func (cnt *Controller) Delete(c echo.Context) error {
 	var (
-		thisUserID = controller.ExtractThisUserID(c)
-		ll         = cnt.logger.Named("Delete").With("thisUserID", thisUserID)
-		form       = new(storePathForm)
 		ctx        = c.Request().Context()
+		thisUserID = controller.ExtractThisUserID(c)
+		ll         = cnt.logger.Func(ctx, "Delete").With("thisUserID", thisUserID)
+		form       = new(storePathForm)
 	)
 
 	if err := cnt.com.ExtractForm(c, ll, form); err != nil {

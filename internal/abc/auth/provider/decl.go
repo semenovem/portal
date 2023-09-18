@@ -43,7 +43,7 @@ func (p *AuthProvider) Now(ctx context.Context) (time.Time, error) {
 	)
 
 	if err != nil {
-		p.logger.Named("Now").DB(err)
+		p.logger.Func(ctx, "Now").DB(err)
 	}
 
 	return t, err

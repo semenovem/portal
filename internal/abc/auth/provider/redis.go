@@ -9,7 +9,7 @@ import (
 func (p *AuthProvider) IsSessionCanceled(ctx context.Context, sessionID uint32) (bool, error) {
 	i, err := p.redis.Exists(ctx, p.getSessionCancelKeyName(sessionID)).Result()
 	if err != nil {
-		p.logger.Named("IsSessionCanceled").Redis(err)
+		p.logger.Func(ctx, "IsSessionCanceled").Redis(err)
 		return false, err
 	}
 
@@ -20,7 +20,7 @@ func (p *AuthProvider) IsSessionCanceled(ctx context.Context, sessionID uint32) 
 func (p *AuthProvider) sessionCanceled(ctx context.Context, sessionID uint32) error {
 	err := p.redis.Set(ctx, p.getSessionCancelKeyName(sessionID), "", p.config.JWTAccessTokenLifetime).Err()
 	if err != nil {
-		p.logger.Named("sessionCanceled").Redis(err)
+		p.logger.Func(ctx, "sessionCanceled").Redis(err)
 		return err
 	}
 

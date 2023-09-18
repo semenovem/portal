@@ -22,9 +22,9 @@ import (
 //	@Security	ApiKeyAuth
 func (cnt *Controller) UserProfile(c echo.Context) error {
 	var (
-		thisUserID = controller.ExtractThisUserID(c)
-		ll         = cnt.logger.Named("UserPublicProfile").With("thisUserID", thisUserID)
 		ctx        = c.Request().Context()
+		thisUserID = controller.ExtractThisUserID(c)
+		ll         = cnt.logger.Func(ctx, "UserPublicProfile").With("thisUserID", thisUserID)
 		form       = new(userPathForm)
 	)
 
@@ -37,6 +37,8 @@ func (cnt *Controller) UserProfile(c echo.Context) error {
 		ll = ll.Named("GetUserProfile").With("user", form.UserID)
 		return cnt.com.Response(c, ll, err)
 	}
+
+	ll.Debug("received")
 
 	return c.JSON(http.StatusOK, newUserProfileView(profile))
 }
@@ -54,9 +56,9 @@ func (cnt *Controller) UserProfile(c echo.Context) error {
 //	@Security	ApiKeyAuth
 func (cnt *Controller) UserPublicProfile(c echo.Context) error {
 	var (
-		thisUserID = controller.ExtractThisUserID(c)
-		ll         = cnt.logger.Named("UserPublicProfile").With("thisUserID", thisUserID)
 		ctx        = c.Request().Context()
+		thisUserID = controller.ExtractThisUserID(c)
+		ll         = cnt.logger.Func(ctx, "UserPublicProfile").With("thisUserID", thisUserID)
 		form       = new(userPathForm)
 	)
 
@@ -69,6 +71,8 @@ func (cnt *Controller) UserPublicProfile(c echo.Context) error {
 		ll = ll.Named("GetUserProfile")
 		return cnt.com.Response(c, ll, err)
 	}
+
+	ll.Debug("received")
 
 	return c.JSON(http.StatusOK, newUserPublicProfileView(profile))
 }

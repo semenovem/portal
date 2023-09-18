@@ -11,15 +11,17 @@ func (p *PeopleProvider) CreateEmployee(
 	ctx context.Context,
 	dto *EmployeeCreateModel,
 ) (userID uint32, err error) {
+	ll := p.logger.Func(ctx, "CreateEmployee")
+
 	tx, err := p.db.Begin(ctx)
 	if err != nil {
-		p.logger.Named("CreateEmployee.Begin").DB(err)
+		ll.Named("Begin").DB(err)
 		return 0, err
 	}
 
 	defer func() {
 		if err1 := tx.Rollback(ctx); err1 != nil && !errors.Is(err1, pgx.ErrTxClosed) {
-			p.logger.Named("Rollback").DB(err1)
+			ll.Named("Rollback").DB(err1)
 		}
 	}()
 
@@ -33,7 +35,7 @@ func (p *PeopleProvider) CreateEmployee(
 	}
 
 	if err = tx.Commit(ctx); err != nil {
-		p.logger.Named("Commit").DB(err)
+		ll.Named("Commit").DB(err)
 		return 0, err
 	}
 
@@ -72,7 +74,7 @@ func (p *PeopleProvider) createUserTx(
 			return 0, constraintErr(n, err)
 		}
 
-		p.logger.Named("CreateUser").DB(err)
+		p.logger.Func(ctx, "createUserTx").DB(err)
 	}
 
 	return userID, nil
@@ -108,7 +110,7 @@ func (p *PeopleProvider) createEmployeeTx(
 			return constraintErr(n, err)
 		}
 
-		p.logger.Named("createEmployeeTx").DB(err)
+		p.logger.Func(ctx, "createEmployeeTx").DB(err)
 	}
 
 	return nil
@@ -154,7 +156,7 @@ func (p *PeopleProvider) SearchEmployees(
 			&o.workedAt,
 			&o.firedAt,
 		); err != nil {
-			p.logger.Named("SearchEmployees.scan").DB(err)
+			p.logger.Func(ctx, "SearchEmployees").DB(err)
 			return nil, 0, err
 		}
 

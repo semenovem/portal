@@ -22,8 +22,8 @@ import (
 //	@Tags		people
 func (cnt *Controller) EmployeeHandbook(c echo.Context) error {
 	var (
-		ll  = cnt.logger.Named("EmployeeHandbook")
 		ctx = c.Request().Context()
+		ll  = cnt.logger.Func(ctx, "EmployeeHandbook")
 	)
 
 	opts := &people_provider.EmployeesSearchOpts{
@@ -40,12 +40,12 @@ func (cnt *Controller) EmployeeHandbook(c echo.Context) error {
 	// TODO добавить руководителя для УЗ
 	employeeViews := newEmployeeProfileViews(result.Employees, result.DeptMap, result.PositionMap)
 
-	ll.Debug("success")
-
 	response := employeeHandbookResponse{
 		Total:     result.Total,
 		Employees: employeeViews,
 	}
+
+	ll.Debug("received")
 
 	return c.JSON(http.StatusOK, response)
 }
@@ -65,9 +65,9 @@ func (cnt *Controller) EmployeeHandbook(c echo.Context) error {
 //	@Security	ApiKeyAuth
 func (cnt *Controller) CreateEmployee(c echo.Context) error {
 	var (
-		thisUserID = controller.ExtractThisUserID(c)
-		ll         = cnt.logger.Named("CreateEmployee").With("thisUserID", thisUserID)
 		ctx        = c.Request().Context()
+		thisUserID = controller.ExtractThisUserID(c)
+		ll         = cnt.logger.Func(ctx, "CreateEmployee").With("thisUserID", thisUserID)
 		form       = new(employeeCreateForm)
 	)
 
@@ -106,7 +106,7 @@ func (cnt *Controller) CreateEmployee(c echo.Context) error {
 		"userID": userID,
 	})
 
-	ll.With("userID", userID).Debug("user created")
+	ll.With("userID", userID).Info("user created")
 
 	return c.JSON(http.StatusOK, userCreateResponse{UserID: userID})
 }
@@ -129,9 +129,9 @@ func (cnt *Controller) CreateEmployee(c echo.Context) error {
 //	@Security	ApiKeyAuth
 func (cnt *Controller) UpdateEmployee(c echo.Context) error {
 	var (
-		thisUserID = controller.ExtractThisUserID(c)
-		ll         = cnt.logger.Named("UpdateEmployee").With("thisUserID", thisUserID)
 		ctx        = c.Request().Context()
+		thisUserID = controller.ExtractThisUserID(c)
+		ll         = cnt.logger.Func(ctx, "UpdateEmployee").With("thisUserID", thisUserID)
 		form       = new(employeeUpdateForm)
 	)
 
@@ -169,7 +169,7 @@ func (cnt *Controller) UpdateEmployee(c echo.Context) error {
 		"form": form,
 	})
 
-	ll.Debug("user updated")
+	ll.Info("user updated")
 
 	return c.NoContent(http.StatusOK)
 }

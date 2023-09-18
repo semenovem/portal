@@ -47,6 +47,7 @@ func (p *PeopleProvider) GetDeptMap(ctx context.Context, deptIDs []uint16) (map[
 
 func (p *PeopleProvider) GetDepts(ctx context.Context, deptIDs []uint16) ([]*DeptModel, error) {
 	var (
+		ll = p.logger.Func(ctx, "GetDepts")
 		sq = `SELECT id, title, description, parent_id
 		FROM people.departments
 		WHERE id = ANY ($1)`
@@ -56,7 +57,7 @@ func (p *PeopleProvider) GetDepts(ctx context.Context, deptIDs []uint16) ([]*Dep
 
 	rows, err := p.db.Query(ctx, sq, pq.Array(deptIDs))
 	if err != nil {
-		p.logger.Named("GetDepts.Query").DB(err)
+		ll.Named("Query").DB(err)
 		return nil, err
 	}
 
@@ -71,7 +72,7 @@ func (p *PeopleProvider) GetDepts(ctx context.Context, deptIDs []uint16) ([]*Dep
 			&m.description,
 			&m.parentID,
 		); err != nil {
-			p.logger.Named("GetDepts.Scan").DB(err)
+			ll.Named("Scan").DB(err)
 			return nil, err
 		}
 

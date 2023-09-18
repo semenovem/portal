@@ -43,7 +43,7 @@ func (p *StoreProvider) StoreArbitraryData(ctx context.Context, userID uint32, p
 
 	err := p.redis.Set(ctx, key, payload, p.draftStoreDefaultLifetime).Err()
 	if err != nil {
-		p.logger.Named("Set").Redis(err)
+		p.logger.Func(ctx, "Set").Redis(err)
 	}
 
 	return err
@@ -55,7 +55,7 @@ func (p *StoreProvider) LoadArbitraryData(ctx context.Context, userID uint32, pa
 	payload, err := p.redis.Get(ctx, key).Result()
 	if err != nil {
 		if !provider.IsNoRec(err) {
-			p.logger.Named("Get").Redis(err)
+			p.logger.Func(ctx, "Get").Redis(err)
 		}
 
 		return "", err
@@ -69,7 +69,7 @@ func (p *StoreProvider) DeleteArbitraryData(ctx context.Context, userID uint32, 
 
 	res, err := p.redis.Del(ctx, key).Result()
 	if err != nil {
-		p.logger.Named("Del").Redis(err)
+		p.logger.Func(ctx, "DeleteArbitraryData").Redis(err)
 		return err
 	}
 

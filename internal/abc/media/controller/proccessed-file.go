@@ -16,7 +16,7 @@ func (cnt *Controller) processUploadingFile(
 	note string,
 ) (uint32, fail.Nested) {
 	var (
-		ll = cnt.logger.Named("FileUpload")
+		ll = cnt.logger.Func(ctx, "processUploadingFile")
 	)
 
 	if uint32(fh.Size) > cnt.config.ImageMaxBytes {
@@ -42,14 +42,14 @@ func (cnt *Controller) processUploadingFile(
 		return 0, fail.NewNested(http.StatusInternalServerError, err)
 	}
 
-	if nested := cnt.detectFactContentType(binary, contentType); nested != nil {
-		ll.Named("detectFactContentType").Nestedf(nested.Message())
+	if nested := cnt.detectRealContentType(binary, contentType); nested != nil {
+		ll.Named("detectRealContentType").Nestedf(nested.Message())
 		return 0, nested
 	}
 
-	objType, err := media.MediaObjectByContentType(contentType)
+	objType, err := media.ObjectByContentType(contentType)
 	if err != nil {
-		ll.Named("MediaObjectByContentType").BadRequest(err)
+		ll.Named("ObjectByContentType").BadRequest(err)
 		return 0, fail.NewNested(http.StatusBadRequest, err)
 	}
 

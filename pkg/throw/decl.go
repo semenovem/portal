@@ -10,10 +10,11 @@ var (
 
 	ErrOverNote           = e("more than one note value passed")
 	ErrNoFile             = e("file not sent")
-	ErrOverFile           = e("more than one file sent")
+	ErrOverFile           = e("received more than one file")
 	ErrFileTooBig         = e("file too big")
 	ErrFileEmpty          = e("file empty")
 	ErrUnsupportedContent = e("unsupported content type")
+	ErrUnknownContentType = e("unknown content type")
 )
 
 func NewWithTargetErr(target, err error) error {

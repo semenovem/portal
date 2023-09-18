@@ -21,9 +21,9 @@ import (
 //	@Security	ApiKeyAuth
 func (cnt *Controller) SelfProfile(c echo.Context) error {
 	var (
-		thisUserID = controller.ExtractThisUserID(c)
-		ll         = cnt.logger.Named("SelfProfile").With("thisUserID", thisUserID)
 		ctx        = c.Request().Context()
+		thisUserID = controller.ExtractThisUserID(c)
+		ll         = cnt.logger.Func(ctx, "SelfProfile").With("thisUserID", thisUserID)
 	)
 
 	profile, err := cnt.peopleAct.GetUserModel(ctx, thisUserID, thisUserID)
@@ -31,6 +31,8 @@ func (cnt *Controller) SelfProfile(c echo.Context) error {
 		ll = ll.Named("GetUserProfile")
 		return cnt.com.Response(c, ll, err)
 	}
+
+	ll.Debug("received")
 
 	return c.JSON(http.StatusOK, newUserProfileView(profile))
 }
@@ -48,9 +50,9 @@ func (cnt *Controller) SelfProfile(c echo.Context) error {
 //	@Security	ApiKeyAuth
 func (cnt *Controller) CheckLogin(c echo.Context) error {
 	var (
-		thisUserID = controller.ExtractThisUserID(c)
-		ll         = cnt.logger.Named("CheckLogin").With("thisUserID", thisUserID)
 		ctx        = c.Request().Context()
+		thisUserID = controller.ExtractThisUserID(c)
+		ll         = cnt.logger.Func(ctx, "CheckLogin").With("thisUserID", thisUserID)
 		form       = new(freeLoginNameForm)
 	)
 
@@ -90,9 +92,9 @@ func (cnt *Controller) CheckLogin(c echo.Context) error {
 //	@Security	ApiKeyAuth
 func (cnt *Controller) DeleteUser(c echo.Context) error {
 	var (
-		thisUserID = controller.ExtractThisUserID(c)
-		ll         = cnt.logger.Named("DeleteUser").With("thisUserID", thisUserID)
 		ctx        = c.Request().Context()
+		thisUserID = controller.ExtractThisUserID(c)
+		ll         = cnt.logger.Func(ctx, "DeleteUser").With("thisUserID", thisUserID)
 		form       = new(userPathForm)
 	)
 
@@ -111,7 +113,7 @@ func (cnt *Controller) DeleteUser(c echo.Context) error {
 		"userID": form.UserID,
 	})
 
-	ll.With("userID", 0).Debug("user is deleted")
+	ll.With("userID", form.UserID).Info("user is deleted")
 
 	return c.NoContent(http.StatusNoContent)
 }
@@ -129,9 +131,9 @@ func (cnt *Controller) DeleteUser(c echo.Context) error {
 //	@Security	ApiKeyAuth
 func (cnt *Controller) UndeleteUser(c echo.Context) error {
 	var (
-		thisUserID = controller.ExtractThisUserID(c)
-		ll         = cnt.logger.Named("UndeleteUser").With("thisUserID", thisUserID)
 		ctx        = c.Request().Context()
+		thisUserID = controller.ExtractThisUserID(c)
+		ll         = cnt.logger.Func(ctx, "UndeleteUser").With("thisUserID", thisUserID)
 		form       = new(userPathForm)
 	)
 
@@ -150,7 +152,7 @@ func (cnt *Controller) UndeleteUser(c echo.Context) error {
 		"userID": form.UserID,
 	})
 
-	ll.With("userID", 0).Debug("user is undeleted")
+	ll.With("userID", form.UserID).Info("user is undeleted")
 
 	return c.NoContent(http.StatusNoContent)
 }

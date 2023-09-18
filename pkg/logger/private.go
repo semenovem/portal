@@ -11,10 +11,16 @@ import (
 func (p *pen) save(level Level, format string, v ...any) {
 	var out = make([]byte, prefixLen)
 
-	if !p.hideTime {
+	if !p.base.hideTime {
 		out = append(out, []byte(fmt.Sprintf(" [%s]", time.Now().Format(time.RFC3339)))...)
 	}
 
+	if p.ctx != nil {
+		s := " [req_id:" + p.base.requestIDExtractor(p.ctx) + "]"
+		out = append(out, []byte(s)...)
+	}
+
+	// ------------------------------------------------------
 	// Оформление caller
 	_, path, line, _ := runtime.Caller(2)
 	ps := strings.Split(path, "/")
@@ -57,13 +63,13 @@ func (p *pen) save(level Level, format string, v ...any) {
 	switch level {
 	case Error:
 		prefix = prefixBytesErr
-		writer = p.outErr
+		writer = p.base.outErr
 	case Info:
 		prefix = prefixBytesInfo
-		writer = p.outInf
+		writer = p.base.outInf
 	case Debug:
 		prefix = prefixBytesDebug
-		writer = p.outDeb
+		writer = p.base.outDeb
 	}
 
 	_ = copy(out[0:prefixLen], prefix)
@@ -75,13 +81,10 @@ func (p *pen) save(level Level, format string, v ...any) {
 
 func (p *pen) copy() *pen {
 	a := pen{
-		level:    p.level,
+		base:     p.base,
 		isNested: p.isNested,
-		hideTime: p.hideTime,
-		cli:      p.cli,
-		outErr:   p.outErr,
-		outInf:   p.outInf,
-		outDeb:   p.outDeb,
+		ctx:      p.ctx,
+		// TODO нужно скопировать оставшиеся поля
 	}
 
 	if p.names != nil {

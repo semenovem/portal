@@ -23,9 +23,9 @@ import (
 //	@Security	ApiKeyAuth
 func (cnt *Controller) Login(c echo.Context) error {
 	var (
-		ll   = cnt.logger.Named("Login")
 		form = new(loginForm)
 		ctx  = c.Request().Context()
+		ll   = cnt.logger.Func(ctx, "Login")
 	)
 
 	if err := cnt.com.ExtractForm(c, ll, form); err != nil {
@@ -62,6 +62,9 @@ func (cnt *Controller) Login(c echo.Context) error {
 		"sessionID":  session.ID,
 	})
 
+	ll.With("sessionID", session.ID).With("refreshID", session.RefreshID).
+		AuthDebugStr("user is logged")
+
 	for _, cookie := range cnt.refreshTokenCookies(pair.Refresh) {
 		c.SetCookie(cookie)
 	}
@@ -88,8 +91,8 @@ func (cnt *Controller) Login(c echo.Context) error {
 //	@Security	ApiKeyAuth
 func (cnt *Controller) Logout(c echo.Context) error {
 	var (
-		ll  = cnt.logger.Named("Logout")
 		ctx = c.Request().Context()
+		ll  = cnt.logger.Func(ctx, "Logout")
 	)
 
 	for _, cookie := range cnt.refreshTokenCookies("") {
@@ -120,6 +123,8 @@ func (cnt *Controller) Logout(c echo.Context) error {
 		"user-agent": c.Request().UserAgent(),
 		"sessionID":  payload.SessionID,
 	})
+
+	ll.Info("user is logouted")
 
 	return c.NoContent(http.StatusNoContent)
 }

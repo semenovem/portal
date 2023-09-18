@@ -11,12 +11,12 @@ import (
 func (a *MediaAction) Upload(
 	ctx context.Context,
 	thisUserID uint32,
-	mediaObj media.MediaObjectType,
+	mediaObj media.ObjectType,
 	binary []byte,
 	note string,
 ) (uint32, error) {
 	var (
-		ll = a.logger.Named("Upload")
+		ll = a.logger.Func(ctx, "Upload")
 	)
 
 	// TODO Проверить, может ли пользователь загружать файлы
