@@ -19,7 +19,7 @@ func (cnt *Controller) processUploadingFile(
 		ll = cnt.logger.Func(ctx, "processUploadingFile")
 	)
 
-	if uint32(fh.Size) > cnt.config.ImageMaxBytes {
+	if uint32(fh.Size) > cnt.mainConfig.Media.Image.MaxSize.Bytes {
 		ll.With("size", fh.Size).BadRequest(throw.ErrFileTooBig)
 		return 0, fail.NewNested(http.StatusBadRequest, throw.ErrFileTooBig)
 	}

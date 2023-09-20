@@ -1,6 +1,7 @@
 package people_controller
 
 import (
+	"github.com/semenovem/portal/config"
 	"github.com/semenovem/portal/internal/abc/controller"
 	"github.com/semenovem/portal/internal/abc/people/action"
 	"github.com/semenovem/portal/internal/audit"
@@ -11,6 +12,7 @@ import (
 
 type Controller struct {
 	logger         pkg.Logger
+	mainConfig     *config.Main
 	fail           *fail.Service
 	com            *controller.Common
 	audit          *audit.AuditProvider
@@ -25,6 +27,7 @@ func New(
 ) *Controller {
 	return &Controller{
 		logger:         arg.Logger.Named("people-cnt"),
+		mainConfig:     arg.MainConfig,
 		fail:           arg.FailureService,
 		com:            arg.Common,
 		audit:          arg.Audit,

@@ -6,6 +6,7 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/semenovem/portal/config"
 	"github.com/semenovem/portal/pkg"
 	"time"
 )
@@ -14,19 +15,14 @@ type AuthProvider struct {
 	logger pkg.Logger
 	db     *pgxpool.Pool
 	redis  *redis.Client
-	config *ConfigAuth
-}
-
-type ConfigAuth struct {
-	JWTAccessTokenLifetime time.Duration
-	OnetimeEntryLifetime   time.Duration
+	config *config.Main
 }
 
 func New(
 	logger pkg.Logger,
 	db *pgxpool.Pool,
 	redisClient *redis.Client,
-	config *ConfigAuth,
+	config *config.Main,
 ) *AuthProvider {
 	return &AuthProvider{
 		logger: logger.Named("AuthProvider"),

@@ -2,6 +2,7 @@ package auth_controller
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/semenovem/portal/config"
 	"github.com/semenovem/portal/internal/abc/auth"
 	"github.com/semenovem/portal/internal/abc/auth/action"
 	"github.com/semenovem/portal/internal/abc/controller"
@@ -21,16 +22,14 @@ type Config struct {
 }
 
 type Controller struct {
-	logger                    pkg.Logger
-	fail                      *fail.Service
-	jwt                       *jwtoken.Service
-	loginPasswdAuth           it.LoginPasswdAuthenticator
-	com                       *controller.Common
-	authAct                   *auth_action.AuthAction
-	audit                     *audit.AuditProvider
-	jwtServedDomains          []string
-	jwtRefreshTokenLife       time.Duration
-	jwtRefreshTokenCookieName string
+	logger          pkg.Logger
+	mainConfig      *config.Main
+	fail            *fail.Service
+	jwt             *jwtoken.Service
+	loginPasswdAuth it.LoginPasswdAuthenticator
+	com             *controller.Common
+	authAct         *auth_action.AuthAction
+	audit           *audit.AuditProvider
 }
 
 func New(
@@ -38,30 +37,25 @@ func New(
 	jwt *jwtoken.Service,
 	loginPasswdAuth it.LoginPasswdAuthenticator,
 	authAct *auth_action.AuthAction,
-	jwtServedDomains []string,
-	jwtRefreshTokenLife time.Duration,
-	jwtRefreshTokenCookieName string,
 ) *Controller {
 	return &Controller{
-		logger:                    arg.Logger.Named("auth-cnt"),
-		fail:                      arg.FailureService,
-		loginPasswdAuth:           loginPasswdAuth,
-		com:                       arg.Common,
-		authAct:                   authAct,
-		audit:                     arg.Audit,
-		jwt:                       jwt,
-		jwtServedDomains:          jwtServedDomains,
-		jwtRefreshTokenLife:       jwtRefreshTokenLife,
-		jwtRefreshTokenCookieName: jwtRefreshTokenCookieName,
+		logger:          arg.Logger.Named("auth-cnt"),
+		mainConfig:      arg.MainConfig,
+		fail:            arg.FailureService,
+		loginPasswdAuth: loginPasswdAuth,
+		com:             arg.Common,
+		authAct:         authAct,
+		audit:           arg.Audit,
+		jwt:             jwt,
 	}
 }
 
 func (cnt *Controller) refreshTokenCookies(refreshToken string) []*http.Cookie {
-	cookies := make([]*http.Cookie, 0, len(cnt.jwtServedDomains))
+	cookies := make([]*http.Cookie, 0, len(cnt.mainConfig.Auth.JWT.ServedDomains.Val))
 
-	for _, domain := range cnt.jwtServedDomains {
+	for _, domain := range cnt.mainConfig.Auth.JWT.ServedDomains.Val {
 		cookie := &http.Cookie{
-			Name:   cnt.jwtRefreshTokenCookieName,
+			Name:   cnt.mainConfig.Auth.JWT.RefreshTokenCookieName,
 			Path:   "/",
 			Domain: domain,
 			//Secure:   true,
@@ -73,7 +67,7 @@ func (cnt *Controller) refreshTokenCookies(refreshToken string) []*http.Cookie {
 			cookie.Expires = time.Now().Add(-666 * time.Second)
 		} else {
 			cookie.Value = refreshToken
-			cookie.Expires = time.Now().Add(cnt.jwtRefreshTokenLife * time.Second)
+			cookie.Expires = time.Now().Add(cnt.mainConfig.Auth.JWT.RefreshTokenLifetime.Val)
 		}
 
 		cookies = append(cookies, cookie)
@@ -88,7 +82,7 @@ func (cnt *Controller) extractRefreshToken(c echo.Context) (*jwtoken.RefreshPayl
 		ll = cnt.logger.Func(c.Request().Context(), "extractRefreshToken")
 	)
 
-	refreshCookie, err := c.Cookie(cnt.jwtRefreshTokenCookieName)
+	refreshCookie, err := c.Cookie(cnt.mainConfig.Auth.JWT.RefreshTokenCookieName)
 	if err != nil {
 		ll.Named("Cookie").Auth(err)
 		return nil, fail.NewNested(http.StatusUnauthorized, err)

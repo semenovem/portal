@@ -1,6 +1,7 @@
 package media
 
 import (
+	"errors"
 	"github.com/semenovem/portal/pkg/throw"
 )
 
@@ -18,12 +19,9 @@ var (
 	}
 )
 
-type ConfigMedia struct {
-	AvatarMaxBytes uint32 // Максимальный размер файла аватарки в байтах
-	ImageMaxBytes  uint32 // Максимальный размер файла фото в байтах
-	VideoMaxBytes  uint32 // Максимальный размер файла видео в байтах
-	DocMaxBytes    uint32 // Максимальный размер файла документа в байтах
-}
+var (
+	ErrContentObjectForbidden = errors.New("content object type forbidden")
+)
 
 type ObjectType string
 type ContentType string

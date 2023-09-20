@@ -236,7 +236,6 @@ case "$OPER" in
     down
   ;;
 
-\
   "curl")
   HAS=$(docker images --filter=reference="$__DOCKER_CURL_IMAGE__" -q) || exit 1
   if [ -z "$HAS" ]; then

@@ -2,9 +2,9 @@ package media_controller
 
 import "github.com/semenovem/portal/pkg/it"
 
-type avatarUpload struct {
-	AvatarID uint32 `json:"avatar_id"`
-	URL      string `json:"url"`
+type avatarUploadResponse struct {
+	AvatarID             uint32 `json:"avatar_id"`
+	PreviewContentBase64 string `json:"preview_content_base64"`
 }
 
 type loadResponse struct {

@@ -1,6 +1,7 @@
 package store_controller
 
 import (
+	"github.com/semenovem/portal/config"
 	controller2 "github.com/semenovem/portal/internal/abc/controller"
 	"github.com/semenovem/portal/internal/abc/store/action"
 	"github.com/semenovem/portal/internal/audit"
@@ -9,11 +10,12 @@ import (
 )
 
 type Controller struct {
-	logger   pkg.Logger
-	fail     *fail.Service
-	com      *controller2.Common
-	storeAct *store_action.StoreAction
-	audit    *audit.AuditProvider
+	logger     pkg.Logger
+	mainConfig *config.Main
+	fail       *fail.Service
+	com        *controller2.Common
+	storeAct   *store_action.StoreAction
+	audit      *audit.AuditProvider
 }
 
 func New(
@@ -21,10 +23,11 @@ func New(
 	storeAct *store_action.StoreAction,
 ) *Controller {
 	return &Controller{
-		logger:   arg.Logger.Named("auth-cnt"),
-		fail:     arg.FailureService,
-		com:      arg.Common,
-		storeAct: storeAct,
-		audit:    arg.Audit,
+		logger:     arg.Logger.Named("auth-cnt"),
+		mainConfig: arg.MainConfig,
+		fail:       arg.FailureService,
+		com:        arg.Common,
+		storeAct:   storeAct,
+		audit:      arg.Audit,
 	}
 }

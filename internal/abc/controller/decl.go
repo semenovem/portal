@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"github.com/semenovem/portal/config"
 	"github.com/semenovem/portal/internal/audit"
 	"github.com/semenovem/portal/internal/util"
 	"github.com/semenovem/portal/pkg"
@@ -31,6 +32,7 @@ type This struct {
 type InitArgs struct {
 	Logger         pkg.Logger
 	FailureService *fail.Service
+	MainConfig     *config.Main
 	Audit          *audit.AuditProvider
 	Common         *Common
 }

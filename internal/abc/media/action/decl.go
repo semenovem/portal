@@ -7,9 +7,10 @@ import (
 )
 
 type MediaAction struct {
-	logger   pkg.Logger
-	s3       *s3.Service
-	mediaPvd *media_provider.MediaProvider
+	logger            pkg.Logger
+	s3                *s3.Service
+	mediaPvd          *media_provider.MediaProvider
+	avatarMaxSizeByte uint32
 }
 
 func New(

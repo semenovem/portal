@@ -3,7 +3,6 @@ package media_controller
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/semenovem/portal/internal/abc/controller"
-	"github.com/semenovem/portal/pkg/it"
 	"github.com/semenovem/portal/pkg/throw"
 	"mime/multipart"
 	"net/http"
@@ -28,7 +27,6 @@ func (cnt *Controller) UploadAvatar(c echo.Context) error {
 		ctx        = c.Request().Context()
 		thisUserID = controller.ExtractThisUserID(c)
 		ll         = cnt.logger.Func(ctx, "UploadAvatar").With("thisUserID", thisUserID)
-		note       string
 		fileHeader *multipart.FileHeader
 	)
 
@@ -38,6 +36,7 @@ func (cnt *Controller) UploadAvatar(c echo.Context) error {
 		return cnt.fail.Send(c, "", http.StatusBadRequest, err)
 	}
 
+	// проверка наличия файла в запросе
 	if files := form.File[fileUploadKey]; len(files) == 0 {
 		err = throw.NewBadRequestErr(throw.ErrNoFile)
 	} else if len(files) > 1 {
@@ -50,22 +49,35 @@ func (cnt *Controller) UploadAvatar(c echo.Context) error {
 		return cnt.com.Response(c, ll, err)
 	}
 
-	mediaObjectID, nested := cnt.processUploadingFile(ctx, thisUserID, fileHeader, note)
+	// проверка размера
+	if uint32(fileHeader.Size) > cnt.mainConfig.Media.Avatar.MaxSizeMB.Bytes {
+		ll.With("size", fileHeader.Size).BadRequest(throw.ErrFileTooBig)
+		return cnt.com.Response(c, ll, throw.ErrFileTooBig)
+	}
+	if fileHeader.Size == 0 {
+		ll.BadRequest(throw.ErrFileEmpty)
+		return cnt.com.Response(c, ll, throw.ErrFileEmpty)
+	}
+
+	objType, reader, nested := cnt.processingUploading(ctx, fileHeader, allowedAvatarContentTypes)
 	if nested != nil {
-		ll.Named("processUploadingFile").Nestedf(nested.Message())
+		ll.Named("processingUploading").Nestedf(nested.Message())
 		return cnt.fail.SendNested(c, "", nested)
 	}
 
 	// TODO сообщение в аудит о загрузке файла
 
-	ll.With("id", mediaObjectID).Debug("file uploaded")
+	avatarID, preview, err := cnt.mediaAct.UploadAvatar(ctx, thisUserID, objType, reader)
+	if err != nil {
+		return cnt.com.Response(c, ll.Named("mediaAct.UploadAvatar"), err)
+	}
 
-	return c.JSON(http.StatusOK, newFileUploadResponse(&it.MediaUploadFile{
-		ID:          mediaObjectID,
-		Typ:         "",
-		PreviewLink: "",
-		Note:        "",
-	}))
+	ll.With("id", avatarID).Info("avatar uploaded")
+
+	return c.JSON(http.StatusOK, &avatarUploadResponse{
+		AvatarID:             avatarID,
+		PreviewContentBase64: preview,
+	})
 }
 
 //func (cnt *Controller)

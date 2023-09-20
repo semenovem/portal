@@ -88,7 +88,12 @@ func (p *AuthProvider) NewOnetimeEntry(
 ) (entryID uuid.UUID, err error) {
 	entryID = uuid.New()
 
-	err = p.redis.Set(ctx, getOnetimeEntryKeyName(entryID), userID, p.config.OnetimeEntryLifetime).Err()
+	err = p.redis.Set(
+		ctx,
+		getOnetimeEntryKeyName(entryID),
+		userID,
+		p.config.Auth.OnetimeEntryLifetime.Val,
+	).Err()
 	if err != nil {
 		p.logger.Func(ctx, "NewOnetimeEntry").With("onetimeEntryID", entryID).Error(err.Error())
 	}

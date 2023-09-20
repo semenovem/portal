@@ -10,7 +10,6 @@ import (
 	"github.com/semenovem/portal/internal/abc"
 	"github.com/semenovem/portal/internal/abc/auth/controller"
 	"github.com/semenovem/portal/internal/abc/controller"
-	"github.com/semenovem/portal/internal/abc/media"
 	"github.com/semenovem/portal/internal/abc/media/controller"
 	"github.com/semenovem/portal/internal/abc/people/controller"
 	"github.com/semenovem/portal/internal/abc/store/controller"
@@ -22,14 +21,13 @@ import (
 	"github.com/semenovem/portal/pkg/jwtoken"
 	"github.com/semenovem/portal/pkg/txt"
 	"net/http"
-	"strings"
 	"time"
 )
 
 func New(
 	ctx context.Context,
 	logger pkg.Logger,
-	config *config.API,
+	mainConfig *config.Main,
 	auditService *audit.AuditProvider,
 	jwtService *jwtoken.Service,
 	loginPasswdAuth it.LoginPasswdAuthenticator,
@@ -52,7 +50,7 @@ func New(
 
 	e.Use(
 		echoprometheus.NewMiddleware("myapp"),
-		contextMiddleware(time.Millisecond*time.Duration(config.Controller.MinTimeContextMs)),
+		contextMiddleware(time.Millisecond*time.Duration(mainConfig.Controller.MinTimeContextMs)),
 	)
 
 	e.GET("/metrics", echoprometheus.NewHandler())
@@ -84,7 +82,7 @@ func New(
 
 	e.Use(
 		//middleware.Logger(),
-		panicRecover(ll, config.Base.CliMode),
+		panicRecover(ll, mainConfig.Base.CliMode),
 		middleware.CORSWithConfig(corsConfig),
 	)
 
@@ -94,7 +92,7 @@ func New(
 	}
 
 	failService := fail.New(&fail.Config{
-		IsDevMode:             config.IsDev(),
+		IsDevMode:             mainConfig.IsDev(),
 		Logger:                logger,
 		Messages:              txt.GetMessages(),
 		ValidationMessageMap:  validators,
@@ -106,6 +104,7 @@ func New(
 	controllerInitArgs := &controller.InitArgs{
 		Logger:         logger,
 		FailureService: failService,
+		MainConfig:     mainConfig,
 		Audit:          auditService,
 		Common: controller.NewAction(
 			logger,
@@ -119,7 +118,7 @@ func New(
 		ctx:    ctx,
 		logger: logger.Named("router"),
 		server: e,
-		addr:   fmt.Sprintf(":%d", config.Rest.Port),
+		addr:   fmt.Sprintf(":%d", mainConfig.Rest.Port),
 
 		vehicleCnt: vehicle_controller.New(controllerInitArgs),
 
@@ -128,19 +127,11 @@ func New(
 			jwtService,
 			loginPasswdAuth,
 			actions.Auth,
-			strings.Split(config.JWT.ServedDomains, ","),
-			time.Hour*24*time.Duration(config.JWT.RefreshTokenLifetimeDay),
-			config.JWT.RefreshTokenCookieName,
 		),
 
 		peopleCnt: people_controller.New(controllerInitArgs, loginPasswdAuth, actions.People),
 		storeCnt:  store_controller.New(controllerInitArgs, actions.Store),
-		mediaCnt: media_controller.New(controllerInitArgs, &media.ConfigMedia{
-			AvatarMaxBytes: uint32(config.Upload.AvatarMaxMB) * 1024 * 1024,
-			ImageMaxBytes:  uint32(config.Upload.ImageMaxMB) * 1024 * 1024,
-			VideoMaxBytes:  uint32(config.Upload.VideoMaxMB) * 1024 * 1024,
-			DocMaxBytes:    uint32(config.Upload.DocMaxMB) * 1024 * 1024,
-		}, actions.Media),
+		mediaCnt:  media_controller.New(controllerInitArgs, actions.Media),
 	}
 
 	r.unauth = e.Group("")

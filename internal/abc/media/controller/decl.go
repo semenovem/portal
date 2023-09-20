@@ -1,6 +1,7 @@
 package media_controller
 
 import (
+	"github.com/semenovem/portal/config"
 	"github.com/semenovem/portal/internal/abc/controller"
 	"github.com/semenovem/portal/internal/abc/media"
 	"github.com/semenovem/portal/internal/abc/media/action"
@@ -20,30 +21,39 @@ const (
 )
 
 type Controller struct {
-	logger   pkg.Logger
-	fail     *fail.Service
-	com      *controller.Common
-	mediaAct *media_action.MediaAction
-	audit    *audit.AuditProvider
-	config   *media.ConfigMedia
+	logger     pkg.Logger
+	mainConfig *config.Main
+	fail       *fail.Service
+	com        *controller.Common
+	mediaAct   *media_action.MediaAction
+	audit      *audit.AuditProvider
 }
 
 func New(
 	arg *controller.InitArgs,
-	config *media.ConfigMedia,
 	mediaAct *media_action.MediaAction,
 ) *Controller {
 	return &Controller{
-		logger:   arg.Logger.Named("media-cnt"),
-		fail:     arg.FailureService,
-		audit:    arg.Audit,
-		com:      arg.Common,
-		config:   config,
-		mediaAct: mediaAct,
+		logger:     arg.Logger.Named("media-cnt"),
+		mainConfig: arg.MainConfig,
+		fail:       arg.FailureService,
+		audit:      arg.Audit,
+		com:        arg.Common,
+		mediaAct:   mediaAct,
 	}
 }
 
 var (
+	allowedAvatarContentTypes = map[media.ObjectType]struct{}{
+		media.ObjectPNG:  {},
+		media.ObjectJPEG: {},
+	}
+	allowedDocContentTypes = map[media.ObjectType]struct{}{
+		media.ObjectPNG:  {},
+		media.ObjectJPEG: {},
+		media.ObjectPDF:  {},
+	}
+
 	allowedContentTypes = map[string]struct{}{
 		"image/png":       {},
 		"image/jpeg":      {},

@@ -59,10 +59,7 @@ func (app *appAPI) initDomains() error {
 		app.logger,
 		app.db,
 		app.redis,
-		&auth_provider.ConfigAuth{
-			JWTAccessTokenLifetime: time.Minute * time.Duration(app.config.JWT.AccessTokenLifetimeMin),
-			OnetimeEntryLifetime:   time.Minute * time.Duration(app.config.Auth.OnetimeEntryLifetimeMin),
-		},
+		app.config,
 	)
 
 	app.actions.Auth = auth_action.New(

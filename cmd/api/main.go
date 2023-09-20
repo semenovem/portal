@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/caarlos0/env/v9"
 	"github.com/semenovem/portal/config"
 	apiApp "github.com/semenovem/portal/internal/app/api"
 	"github.com/semenovem/portal/internal/router"
@@ -38,7 +37,6 @@ func main() {
 		ctx, cancel = context.WithCancel(context.Background())
 		sig         = make(chan os.Signal)
 		ll, setter  = logger.New()
-		cfg         config.API
 	)
 
 	defer func() {
@@ -55,7 +53,8 @@ func main() {
 		cancel()
 	}()
 
-	if err := env.Parse(&cfg); err != nil {
+	cfg, err := config.ParseAPI()
+	if err != nil {
 		ll.Named("env.Parse").Errorf("can't parse env: ", err)
 		cancel()
 		return
@@ -66,7 +65,7 @@ func main() {
 	setter.SetLevel(cfg.Base.LogLevel)
 	setter.SetRequestIDExtractor(router.ExtractRequestID)
 
-	if err := apiApp.New(ctx, ll, &cfg); err != nil {
+	if err = apiApp.New(ctx, ll, cfg); err != nil {
 		_ = ll.NestedWith(err, "can't start app")
 		//cancel()
 	}

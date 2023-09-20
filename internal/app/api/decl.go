@@ -27,7 +27,7 @@ type appAPI struct {
 	redis           *redis.Client
 	s3              *s3.Service
 	router          *router.Router
-	config          *config.API
+	config          *config.Main
 	auditService    *audit.AuditProvider
 	failService     *fail.Service
 	jwtService      *jwtoken.Service
@@ -37,7 +37,7 @@ type appAPI struct {
 	actions   abc.Actions
 }
 
-func New(ctx context.Context, logger pkg.Logger, cfg *config.API) error {
+func New(ctx context.Context, logger pkg.Logger, cfg *config.Main) error {
 	var (
 		ll  = logger.Named("appAPI.New")
 		app = appAPI{
@@ -101,10 +101,10 @@ func New(ctx context.Context, logger pkg.Logger, cfg *config.API) error {
 	}
 
 	app.jwtService = jwtoken.New(&jwtoken.Config{
-		AccessTokenSecret:    cfg.JWT.AccessTokenSecret,
-		RefreshTokenSecret:   cfg.JWT.RefreshTokenSecret,
-		AccessTokenLifetime:  time.Minute * time.Duration(cfg.JWT.AccessTokenLifetimeMin),
-		RefreshTokenLifetime: time.Hour * 24 * time.Duration(cfg.JWT.RefreshTokenLifetimeDay),
+		AccessTokenSecret:    cfg.Auth.JWT.AccessTokenSecret,
+		RefreshTokenSecret:   cfg.Auth.JWT.RefreshTokenSecret,
+		AccessTokenLifetime:  cfg.Auth.JWT.AccessTokenLifetime.Val,
+		RefreshTokenLifetime: cfg.Auth.JWT.RefreshTokenLifetime.Val,
 	})
 
 	app.auditService = audit.New(ctx, app.db, logger, cfg.GetGRPCAuditConfig())
