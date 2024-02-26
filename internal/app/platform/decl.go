@@ -1,4 +1,4 @@
-package apiapp
+package app_platform
 
 import (
 	"context"
@@ -20,14 +20,14 @@ import (
 	"time"
 )
 
-type appAPI struct {
+type platformApp struct {
 	ctx             context.Context
 	logger          pkg.Logger
 	db              *pgxpool.Pool
 	redis           *redis.Client
 	s3              *s3.Service
 	router          *router.Router
-	config          *config.Main
+	config          *config.Platform
 	auditService    *audit.AuditProvider
 	failService     *fail.Service
 	jwtService      *jwtoken.Service
@@ -37,10 +37,10 @@ type appAPI struct {
 	actions   abc.Actions
 }
 
-func New(ctx context.Context, logger pkg.Logger, cfg *config.Main) error {
+func New(ctx context.Context, logger pkg.Logger, cfg *config.Platform) error {
 	var (
-		ll  = logger.Named("appAPI.New")
-		app = appAPI{
+		ll  = logger.Named("platformApp.New")
+		app = platformApp{
 			ctx:             ctx,
 			logger:          logger,
 			config:          cfg,

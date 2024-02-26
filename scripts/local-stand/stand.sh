@@ -24,7 +24,11 @@ help() {
   info "    up [-clear]        - start docker compose (DB/redis etc. Look in the docker-compose.yml)"
   info "    down               - stop docker compose"
   info ""
-  info "    papi | api-portal  - run api-portal"
+  info "    db port expose - ${__DB_PORT_EXPOSE__}"
+  info "    redis port expose - ${__REDIS_PORT_EXPOSE__}"
+  info ""
+  info "    p | platform   - run (rest:${__PLATFORM_REST_PORT_EXPOSE__}" \
+    "grpc:${__PLATFORM_GRPC_PORT_EXPOSE__} debug:${__PLATFORM_DEBUGGING_PORT_EXPOSE__})"
   info "    audit              - run audit"
   info ""
   info "    ps                 - docker compose ps"
@@ -80,7 +84,7 @@ for p in "$@"; do
   "elk-down") OPER="elk-down" ;;
 
     # service operations
-  "papi" | "api-portal") OPER="api-portal" ;;
+  "platform" | "p") OPER="platform" ;;
   "audit") OPER="audit" ;;
   "curl") OPER="curl" ;;
 
@@ -144,7 +148,10 @@ case "$STAND_OPER" in
     func_stand_down && sleep 1 && func_clear || exit 1
   fi
 
-  func_create_network && func_build_if_not_exist_s3_mc_image && func_build_if_not_exist_tabix_gui_image || exit 1
+  func_create_network &&
+    func_build_if_not_exist_s3_mc_image &&
+    func_build_if_not_exist_sshd_image &&
+    func_build_if_not_exist_tabix_gui_image || exit 1
 
   OPTS="$([ -n "$ARG_STAND_CLEAR" ] && echo "--force-recreate" || echo "--no-recreate")"
   if [ -z "$LOGS" ] || [ -n "$OPER" ]; then
@@ -176,17 +183,17 @@ if [ -n "$OPER" ]; then
 fi
 
 case "$OPER" in
-"api-portal")
+"platform")
   CMD="dlv debug /debugging/cmd/api/main.go --headless --listen=:40000 --api-version=2 --accept-multiclient --output /tmp/__debug_bin"
   [ -z "$__ARG_MODE_DEBUG__" ] && CMD="$(func_run_cmd "go run /debugging/cmd/api/main.go")"
 
   docker run -it --rm \
-    --name "api-portal" \
-    --hostname "api-portal" \
+    --name "platform" \
+    --hostname "platform-service" \
     --network "$__NET__" \
-    -p "${__API_PORTAL_REST_PORT_EXPOSE__}:8080" \
-    -p "${__API_PORTAL_GRPC_PORT_EXPOSE__}:9090" \
-    -p "${__API_PORTAL_DEBUGGING_PORT_EXPOSE__}:40000" \
+    -p "${__PLATFORM_REST_PORT_EXPOSE__}:8080" \
+    -p "${__PLATFORM_GRPC_PORT_EXPOSE__}:9090" \
+    -p "${__PLATFORM_DEBUGGING_PORT_EXPOSE__}:40000" \
     -w "/debugging" \
     -v "${ROOT}/../../:/debugging:ro" \
     --env-file "${ROOT}/../../deployments/local.env" \
@@ -236,7 +243,7 @@ case "$OPER" in
     down
   ;;
 
-  "curl")
+"curl")
   HAS=$(docker images --filter=reference="$__DOCKER_CURL_IMAGE__" -q) || exit 1
   if [ -z "$HAS" ]; then
     docker build -f "${ROOT}/docker-files/curl.dockerfile" -t "$__DOCKER_CURL_IMAGE__" "$ROOT" || exit 1

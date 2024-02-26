@@ -23,7 +23,7 @@ type Config struct {
 
 type Controller struct {
 	logger          pkg.Logger
-	mainConfig      *config.Main
+	mainConfig      *config.Platform
 	fail            *fail.Service
 	jwt             *jwtoken.Service
 	loginPasswdAuth it.LoginPasswdAuthenticator

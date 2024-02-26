@@ -1,4 +1,4 @@
-package apiapp
+package app_platform
 
 import (
 	auth_action "github.com/semenovem/portal/internal/abc/auth/action"
@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func (app *appAPI) initDomains() error {
+func (app *platformApp) initDomains() error {
 	ll := app.logger.Named("initDomains")
 
 	// --------------------- store ---------------------

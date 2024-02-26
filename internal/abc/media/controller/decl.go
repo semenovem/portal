@@ -22,7 +22,7 @@ const (
 
 type Controller struct {
 	logger     pkg.Logger
-	mainConfig *config.Main
+	mainConfig *config.Platform
 	fail       *fail.Service
 	com        *controller.Common
 	mediaAct   *media_action.MediaAction

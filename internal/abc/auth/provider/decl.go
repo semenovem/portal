@@ -15,14 +15,14 @@ type AuthProvider struct {
 	logger pkg.Logger
 	db     *pgxpool.Pool
 	redis  *redis.Client
-	config *config.Main
+	config *config.Platform
 }
 
 func New(
 	logger pkg.Logger,
 	db *pgxpool.Pool,
 	redisClient *redis.Client,
-	config *config.Main,
+	config *config.Platform,
 ) *AuthProvider {
 	return &AuthProvider{
 		logger: logger.Named("AuthProvider"),

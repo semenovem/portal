@@ -32,7 +32,7 @@ type This struct {
 type InitArgs struct {
 	Logger         pkg.Logger
 	FailureService *fail.Service
-	MainConfig     *config.Main
+	MainConfig     *config.Platform
 	Audit          *audit.AuditProvider
 	Common         *Common
 }

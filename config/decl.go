@@ -31,18 +31,18 @@ func (c *RedisConn) ConvTo() *conn.RedisProps {
 }
 
 type DatabaseCoreConn struct {
-	Host               string `env:"DB_CORE_HOST,required"`
-	Port               uint16 `env:"DB_CORE_PORT,required"`
-	Name               string `env:"DB_CORE_NAME,required"`
-	User               string `env:"DB_CORE_USER,required"`
-	Password           string `env:"DB_CORE_PASSWORD,required"`
-	SSLMode            string `env:"DB_CORE_SSL_MODE,required"`
-	MaxIdleConns       uint16 `env:"DB_CORE_MAX_IDLE_CONNS,required"`
-	MaxOpenConns       uint16 `env:"DB_CORE_MAX_OPEN_CONNS,required"`
-	MaxLifetimeSec     uint16 `env:"DB_CORE_MAX_LIFETIME_SEC,required"`
-	MaxIdleLifetimeSec uint16 `env:"DB_CORE_MAX_IDLE_LIFETIME_SEC,required"`
-	Schema             string `env:"DB_CORE_SCHEMA,required"`
-	AppName            string `env:"DB_CORE_APPLICATION_NAME,required"`
+	Host               string `env:"DB_HOST,required"`
+	Port               uint16 `env:"DB_PORT,required"`
+	Name               string `env:"DB_PLATFORM_NAME,required"`
+	User               string `env:"DB_PLATFORM_USER,required"`
+	Password           string `env:"DB_PLATFORM_PASSWORD,required"`
+	SSLMode            string `env:"DB_PLATFORM_SSL_MODE,required"`
+	MaxIdleConns       uint16 `env:"DB_PLATFORM_MAX_IDLE_CONNS,required"`
+	MaxOpenConns       uint16 `env:"DB_PLATFORM_MAX_OPEN_CONNS,required"`
+	MaxLifetimeSec     uint16 `env:"DB_PLATFORM_MAX_LIFETIME_SEC,required"`
+	MaxIdleLifetimeSec uint16 `env:"DB_PLATFORM_MAX_IDLE_LIFETIME_SEC,required"`
+	Schema             string `env:"DB_PLATFORM_SCHEMA,required"`
+	AppName            string `env:"DB_PLATFORM_APPLICATION_NAME,required"`
 }
 
 func (c *DatabaseCoreConn) ConvTo() *conn.DBPGProps {

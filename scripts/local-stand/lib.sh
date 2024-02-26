@@ -90,6 +90,12 @@ func_build_if_not_exist_dlv_image() {
   docker build -f "${ROOT}/docker-files/dlv.dockerfile" -t "$__DOCKER_DLV_IMAGE__" "$ROOT" || return 1
 }
 
+func_build_if_not_exist_sshd_image() {
+  has=$(docker image ls --filter=reference="$__DOCKER_SSHD_IMAGE__" -q) || return 1
+  [ -n "$has" ] && return 0
+  docker build -f "${ROOT}/docker-files/sshd.dockerfile" -t "$__DOCKER_SSHD_IMAGE__" "$ROOT" || return 1
+}
+
 func_build_if_not_exist_s3_mc_image() {
   has=$(docker image ls --filter=reference="$__DOCKER_S3_GUI_MC_IMAGE__" -q) || return 1
   [ -n "$has" ] && return 0

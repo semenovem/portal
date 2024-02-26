@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type Main struct {
+type Platform struct {
 	Base
 
 	Rest       Rest
@@ -84,8 +84,8 @@ type Main struct {
 	}
 }
 
-func ParseAPI() (*Main, error) {
-	var cfg Main
+func ParseAPI() (*Platform, error) {
+	var cfg Platform
 
 	if err := env.Parse(&cfg); err != nil {
 		return nil, err
@@ -102,7 +102,7 @@ func ParseAPI() (*Main, error) {
 	return &cfg, nil
 }
 
-func (c *Main) GetGRPCAuditConfig() *GrpcClient {
+func (c *Platform) GetGRPCAuditConfig() *GrpcClient {
 	return &GrpcClient{
 		Host: c.GrpcAuditClient.Host,
 	}

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/semenovem/portal/config"
-	apiApp "github.com/semenovem/portal/internal/app/api"
+	apiApp "github.com/semenovem/portal/internal/app/platform"
 	"github.com/semenovem/portal/internal/router"
 	"github.com/semenovem/portal/pkg/logger"
 	"os"
@@ -71,4 +71,5 @@ func main() {
 	}
 
 	<-ctx.Done()
+
 }

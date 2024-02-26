@@ -27,7 +27,7 @@ import (
 func New(
 	ctx context.Context,
 	logger pkg.Logger,
-	mainConfig *config.Main,
+	mainConfig *config.Platform,
 	auditService *audit.AuditProvider,
 	jwtService *jwtoken.Service,
 	loginPasswdAuth it.LoginPasswdAuthenticator,

@@ -19,25 +19,23 @@ volumes:
 services:
   postgres:
     <<: *net
-    # собрать в dockers
-    image: postgres:15.3
-    #    image: postgres:15.3.ru
+    image: postgres:16.2
     hostname: db-core
     command: -p 5432
     volumes:
       - postgres:/var/lib/postgresql/data:rw
       - ./configs/pg-initdb:/docker-entrypoint-initdb.d:ro
     environment:
-      POSTGRES_DB: ${__DB_CORE_NAME__}
-      POSTGRES_USER: ${__DB_CORE_USER__}
-      POSTGRES_PASSWORD: ${__DB_CORE_PASSWORD__}
+      POSTGRES_DB: platform
+      POSTGRES_USER: ${__DB_PLATFORM_USER__}
+      POSTGRES_PASSWORD: ${__DB_PLATFORM_PASSWORD__}
       #      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums --locale=ru_RU.UTF-8"
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
       POSTGRES_HOST_AUTH_METHOD: trust
       #      TZ: Europe/Volgograd
       TZ: UTC
     ports:
-      - ${__DB_CORE_PORT_EXPOSE__}:5432
+      - ${__DB_PORT_EXPOSE__}:5432
     deploy:
       resources:
         limits:
@@ -47,11 +45,11 @@ services:
 
   redis:
     <<: *net
-    image: redis:7.0.12
+    image: redis:7.2.4
     hostname: db-ram
     command: --port 6379
     ports:
-      - ${__DB_RAM_PORT_EXPOSE__}:6379
+      - ${__REDIS_PORT_EXPOSE__}:6379
     volumes:
       - redis:/data:rw
     environment:
@@ -73,7 +71,7 @@ services:
       - ./configs/redis-gui/settings.json:/settings/settings.json
       - ./configs/redis-gui/p3xrs-conns.json.json:/settings/.p3xrs-conns.json
     deploy:
-      replicas: 1
+      replicas: 0
       resources:
         limits:
           cpus: '0.1'
@@ -243,6 +241,21 @@ services:
           cpus: '0.3'
           memory: 250M
       replicas: 0
+
+
+  sshd:
+    <<: *net
+    image: ${__DOCKER_SSHD_IMAGE__}
+    container_name: sshd
+    restart: unless-stopped
+    ports:
+      - "5222:22"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 50M
+      replicas: 1
 
 
 

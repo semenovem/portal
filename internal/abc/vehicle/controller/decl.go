@@ -9,7 +9,7 @@ import (
 
 type Controller struct {
 	logger     pkg.Logger
-	mainConfig *config.Main
+	mainConfig *config.Platform
 	fail       *fail.Service
 	act        *controller2.Common
 }
