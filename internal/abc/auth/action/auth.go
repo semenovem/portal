@@ -31,6 +31,7 @@ func (a *AuthAction) Refresh(
 	ctx context.Context,
 	payload *jwtoken.RefreshPayload,
 ) (*auth.Session, error) {
+	const label = "AuthAction.Refresh"
 	ll := a.logger.Func(ctx, "Refresh").With("sessionID", payload.SessionID)
 
 	sessionOld, err := a.getSessionByRefresh(ctx, payload)
@@ -55,20 +56,13 @@ func (a *AuthAction) Refresh(
 
 	err = a.authPvd.UpdateRefreshSession(ctx, payload.SessionID, payload.RefreshID, refreshID)
 	if err != nil {
-		ll = ll.Named("UpdateRefreshSession")
-
-		if throw.IsNotFoundErr(err) {
-			err = throw.NewAuthErr("no auth session with the specified refresh token - could not be updated")
-
-			ll.With("refreshID_old", payload.RefreshID).
-				With("refreshID_new", refreshID).
-				Auth(err)
-
-			return nil, err
+		if throw.IsNotFound(err) {
+			err = throw.NewAuth("no auth session with the specified refresh token - could not be updated")
 		}
 
-		ll.Nested(err)
-		return nil, err
+		return nil, throw.Trace(err, label, map[string]any{
+			"payload": payload,
+		})
 	}
 
 	return sessionOld.Reissue(refreshID), nil

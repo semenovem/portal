@@ -16,15 +16,19 @@ import (
 	"github.com/semenovem/portal/pkg/fail"
 	"github.com/semenovem/portal/pkg/it"
 	"github.com/semenovem/portal/pkg/jwtoken"
+	"github.com/semenovem/portal/pkg/mq"
 	"math"
+	"sync"
 	"time"
 )
 
 type platformApp struct {
 	ctx             context.Context
+	gracefulExit    sync.WaitGroup
 	logger          pkg.Logger
 	db              *pgxpool.Pool
 	redis           *redis.Client
+	mq              *mq.MQ
 	s3              *s3.Service
 	router          *router.Router
 	config          *config.Platform
@@ -37,7 +41,7 @@ type platformApp struct {
 	actions   abc.Actions
 }
 
-func New(ctx context.Context, logger pkg.Logger, cfg *config.Platform) error {
+func New(ctx context.Context, logger pkg.Logger, cfg *config.Platform) (chan struct{}, error) {
 	var (
 		ll  = logger.Named("platformApp.New")
 		app = platformApp{
@@ -53,7 +57,7 @@ func New(ctx context.Context, logger pkg.Logger, cfg *config.Platform) error {
 
 	if app.db, err = conn.ConnectDBPostgres(ctx, dbc); err != nil {
 		ll.Named("ConnectDBPostgres").Error(err.Error())
-		return err
+		return nil, err
 	}
 
 	cstr := fmt.Sprintf(
@@ -88,7 +92,34 @@ func New(ctx context.Context, logger pkg.Logger, cfg *config.Platform) error {
 	// Redis
 	if app.redis, err = conn.InitRedis(ctx, ll, cfg.RedisConn.ConvTo()); err != nil {
 		ll.Named("InitRedis").Nested(err)
-		return err
+		return nil, err
+	}
+
+	{ // MQ
+		app.gracefulExit.Add(1)
+		errCh := make(chan error)
+		go func() {
+			for e := range errCh {
+				logger.Named("mq").ErrorE(e)
+			}
+		}()
+
+		conf := &mq.Conf{
+			Tag:     "platform",
+			Address: "db-ram:6379",
+			DBNum:   0,
+			GracefulExit: func() {
+				app.gracefulExit.Done()
+			},
+			ErrChan: errCh,
+		}
+
+		mqConn, err := mq.New(app.ctx, conf, app.logger)
+		if err != nil {
+			return nil, err
+		}
+
+		app.mq = mqConn
 	}
 
 	// S3
@@ -97,7 +128,7 @@ func New(ctx context.Context, logger pkg.Logger, cfg *config.Platform) error {
 		Logger: app.logger,
 		S3Conn: &app.config.S3Conn,
 	}); err != nil {
-		return ll.Named("s3").NestedWith(err, "can't create new S3 service")
+		return nil, ll.Named("s3").NestedWith(err, "can't create new S3 service")
 	}
 
 	app.jwtService = jwtoken.New(&jwtoken.Config{
@@ -112,7 +143,7 @@ func New(ctx context.Context, logger pkg.Logger, cfg *config.Platform) error {
 	// Инициализация доменных областей
 	if err = app.initDomains(); err != nil {
 		ll.Named("initDomains").ErrorE(err)
-		return err
+		return nil, err
 	}
 
 	// Router
@@ -128,7 +159,7 @@ func New(ctx context.Context, logger pkg.Logger, cfg *config.Platform) error {
 		&app.actions,
 	); err != nil {
 		ll.Named("router").Nested(err)
-		return err
+		return nil, err
 	}
 
 	go app.router.Start()
@@ -137,14 +168,20 @@ func New(ctx context.Context, logger pkg.Logger, cfg *config.Platform) error {
 	t, err := app.providers.Auth.Now(ctx)
 	if err != nil {
 		ll.Named("authPvd.Now").Nested(err)
-		return err
+		return nil, err
 	}
 
 	if math.Abs(float64(t.Unix()-time.Now().Unix())) > 60 {
 		err = errors.New("the time in the database differs by more than a minute")
 		ll.Error(err.Error())
-		return err
+		return nil, err
 	}
 
-	return nil
+	chExit := make(chan struct{})
+	go func() {
+		app.gracefulExit.Wait()
+		close(chExit)
+	}()
+
+	return chExit, nil
 }

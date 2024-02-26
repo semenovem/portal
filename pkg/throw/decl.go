@@ -2,53 +2,155 @@ package throw
 
 import (
 	"errors"
-	"fmt"
+	"github.com/semenovem/portal/pkg/throw/throwtrace"
+	"regexp"
 )
+
+type Kind int
+
+const (
+	Unknown    = iota
+	Deny       // Нет прав у пользователя
+	Duplicate  // Ограничение уникальности (например в БД)
+	NotFound   // Сущность не найдена
+	BadRequest // Не корректный запрос
+	Auth       // Ошибка авторизации
+)
+
+const (
+	reasonNameLenMax        = 63
+	reasonMetadataKeyLenMax = 64
+	regStrReasonName        = "^[A-Z][A-Z0-9_]+[A-Z0-9]$"
+	regStrReasonMetadataKey = "^[a-zA-Z0-9-_]+$"
+)
+
+var _ = func() struct{} {
+	throwtrace.XDoNotUse{}.SetExtractTraceData(func(err error) ([]*throwtrace.Point, map[string]any) {
+		return Cast(err).traceData()
+	})
+	throwtrace.XDoNotUse{}.SetExtractDesc(func(err error) (string, []any) { return Cast(err).getDesc() })
+	throwtrace.XDoNotUse{}.SetExtractReasons(func(err error) []*throwtrace.Reason { return Cast(err).getReasons() })
+
+	return struct{}{}
+}()
 
 var (
-	e = errors.New
-
-	ErrOverNote           = e("more than one note value passed")
-	ErrNoFile             = e("file not sent")
-	ErrOverFile           = e("received more than one file")
-	ErrFileTooBig         = e("file too big")
-	ErrFileEmpty          = e("file empty")
-	ErrUnsupportedContent = e("unsupported content type")
-	ErrUnknownContentType = e("unknown content type")
+	reasonNameReg        = regexp.MustCompile(regStrReasonName)
+	reasonMetadataKeyReg = regexp.MustCompile(regStrReasonMetadataKey)
 )
 
-func NewWithTargetErr(target, err error) error {
-	return NewWithTargetErrf(target, err.Error())
+// New Создает ошибку
+func New(msgOrErr any) *Throw {
+	return newThrow(Unknown, msgOrErr)
 }
 
-func NewWithTargetErrf(target error, msg string, v ...any) error {
-	if len(v) != 0 {
-		msg = fmt.Sprintf(msg, v...)
+// NewDeny Создает ошибку прав доступа
+func NewDeny(msgOrErr any) *Throw {
+	return newThrow(Deny, msgOrErr)
+}
+
+// NewDuplicate Создает ошибку ограничения уникальности
+func NewDuplicate(msgOrErr any) *Throw {
+	return newThrow(Duplicate, msgOrErr)
+}
+
+// NewNotFound Создает ошибку не найденной сущности
+func NewNotFound(msgOrErr any) *Throw {
+	return newThrow(NotFound, msgOrErr)
+}
+
+// NewBadRequest Создает ошибку на корректного запроса
+func NewBadRequest(msgOrErr any) *Throw {
+	return newThrow(BadRequest, msgOrErr)
+}
+
+// NewAuth Создает ошибку авторизации
+func NewAuth(msgOrErr any) *Throw {
+	return newThrow(Auth, msgOrErr)
+}
+
+// Is проверяет что ошибка является типом Throw
+func Is(err error) bool {
+	return err != nil && Cast(err).kind != Unknown
+}
+
+// Cast приводит объект к типу Throw
+func Cast(err error) *Throw {
+	if err == nil {
+		return &Throw{}
 	}
 
-	switch t := target.(type) {
-	case accessErr, *accessErr:
-		return &accessErr{
-			msg:    msg,
-			target: t,
-		}
-	case authErr, *authErr:
-		return &authErr{
-			msg:    msg,
-			target: t,
-		}
-	case badRequestErr, *badRequestErr:
-		return &badRequestErr{
-			msg:    msg,
-			target: t,
-		}
-
-	case invalidErr, *invalidErr:
-		return &invalidErr{
-			msg:    msg,
-			target: t,
-		}
+	var e *Throw
+	if errors.As(err, &e) {
+		return e
 	}
 
-	return fmt.Errorf("%s: %s", target.Error(), msg)
+	return &Throw{
+		msg: err.Error(),
+	}
+}
+
+func Trace(err error, name string, with map[string]any) *Throw {
+	th := Cast(err)
+	th.addTrace(name, with)
+	return th
+}
+
+func With(err error, key string, val any) *Throw {
+	th := Cast(err)
+	th.addWith(key, val)
+	return th
+}
+
+func IsDuplicate(err error) bool {
+	return err != nil && Cast(err).kind == Duplicate
+}
+
+func IsNotFound(err error) bool {
+	return err != nil && Cast(err).kind == NotFound
+}
+
+func IsDeny(err error) bool {
+	return err != nil && Cast(err).kind == Deny
+}
+
+func IsAuth(err error) bool {
+	return err != nil && Cast(err).kind == Auth
+}
+
+func IsBadRequest(err error) bool {
+	return err != nil && Cast(err).kind == BadRequest
+}
+
+func validateReasonName(n string) string {
+	if n == "" {
+		return "empty reason name"
+	}
+
+	if len(n) > reasonNameLenMax {
+		return "reason name exceeds maximum length"
+	}
+
+	if !reasonNameReg.MatchString(n) {
+		return "reason name contains prohibited characters [" + regStrReasonName + "]"
+	}
+
+	return ""
+}
+
+func validateReasonMetadataKey(n string) string {
+	if n == "" {
+		return "empty metadata key"
+	}
+
+	if len(n) > reasonMetadataKeyLenMax {
+		return "metadata key exceeds maximum length"
+	}
+
+	if !reasonMetadataKeyReg.MatchString(n) {
+		return "metadata key contains prohibited characters: allow[" +
+			regStrReasonMetadataKey + "], passed:[" + n + "]"
+	}
+
+	return ""
 }

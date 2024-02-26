@@ -5,6 +5,7 @@ import (
 	"github.com/semenovem/portal/internal/abc/people"
 	"github.com/semenovem/portal/internal/abc/provider"
 	"github.com/semenovem/portal/pkg/throw"
+	"github.com/semenovem/portal/pkg/txt"
 )
 
 // GetUserAuth данные пользователя для авторизации по userID
@@ -26,8 +27,8 @@ func (p *PeopleProvider) getUserAuth(
 	userID uint32,
 	login, passwdHash string,
 ) (*people.UserAuth, error) {
+	const label = "PeopleProvider.getUserAuth"
 	var (
-		ll = p.logger.Func(ctx, "getUserAuth")
 		sq = `SELECT u.id, u.status, u.expired_at, e.worked_at, e.fired_at
 		FROM      people.users     AS u
 		LEFT JOIN people.employees AS e ON e.user_id = u.id
@@ -50,11 +51,12 @@ func (p *PeopleProvider) getUserAuth(
 	)
 	if err != nil {
 		if provider.IsNoRow(err) {
-			return nil, throw.Err404User
+			err = throw.NewNotFound(txt.NotFoundUser)
 		}
 
-		ll.Named("QueryRow").DB(err)
-		return nil, err
+		return nil, throw.Trace(err, label, map[string]any{
+			"userID": userID,
+		})
 	}
 
 	return &u, nil

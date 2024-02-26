@@ -65,11 +65,20 @@ func main() {
 	setter.SetLevel(cfg.Base.LogLevel)
 	setter.SetRequestIDExtractor(router.ExtractRequestID)
 
-	if err = apiApp.New(ctx, ll, cfg); err != nil {
+	chExit, err := apiApp.New(ctx, ll, cfg)
+	if err != nil {
 		_ = ll.NestedWith(err, "can't start app")
 		//cancel()
 	}
 
 	<-ctx.Done()
 
+	if chExit == nil {
+		chExit = make(chan struct{})
+	}
+
+	select {
+	case <-time.After(time.Millisecond * 500):
+	case <-chExit:
+	}
 }

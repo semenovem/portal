@@ -27,9 +27,9 @@ help() {
   info "    db port expose - ${__DB_PORT_EXPOSE__}"
   info "    redis port expose - ${__REDIS_PORT_EXPOSE__}"
   info ""
-  info "    p | platform   - run (rest:${__PLATFORM_REST_PORT_EXPOSE__}" \
+  info "    app | platform   - run (rest:${__PLATFORM_REST_PORT_EXPOSE__}" \
     "grpc:${__PLATFORM_GRPC_PORT_EXPOSE__} debug:${__PLATFORM_DEBUGGING_PORT_EXPOSE__})"
-  info "    audit              - run audit"
+  info "    audit            - run audit"
   info ""
   info "    ps                 - docker compose ps"
   info "    ports              - show exposed ports"
@@ -84,7 +84,7 @@ for p in "$@"; do
   "elk-down") OPER="elk-down" ;;
 
     # service operations
-  "platform" | "p") OPER="platform" ;;
+  "platform" | "app" | "p") OPER="platform" ;;
   "audit") OPER="audit" ;;
   "curl") OPER="curl" ;;
 
