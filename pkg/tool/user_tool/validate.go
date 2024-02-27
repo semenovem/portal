@@ -22,6 +22,7 @@ const (
 var (
 	regValidateUserLogin = regexp.MustCompile(`(?i)^[a-zа-яйё]+[\wа-яйё_-]*[^_-]$`)
 	regValidateUserName  = regexp.MustCompile(`^[a-zа-яёй0-9_-]*$`)
+	regValidatePassword  = regexp.MustCompile(`^[a-zA-Zа-яёйА-ЯЁЙ0-9_!@#$%^&*()=+"№:,\[\]\\{}-]*$`)
 )
 
 func ValidateStatus(status string) error {
@@ -79,19 +80,20 @@ func ValidateUserLogin(login string) error {
 }
 
 // ValidateUserPassword одна цифра, заглавная, строчная буква, специальный символ и нет пробелов
-func ValidateUserPassword(password string) error {
-	if interValidator.Var(password, "ascii") != nil {
-		return throw.ErrInvalidIllegalChar
+func ValidateUserPassword(password string) []error {
+	if !regValidatePassword.MatchString(password) {
+		return []error{user_err.PasswdContainsIllegalChars.Err()}
 	}
 
 	var (
 		hasNum, hasLower, hasUpper, hasSpecial bool
+		errs                                   []error
 	)
 
 	if l := utf8.RuneCountInString(password); l < minUserPasswordLen {
-		return throw.ErrInvalidShort
+		errs = append(errs, user_err.PasswdTooShort.Err())
 	} else if l > maxUserPasswordLen {
-		return throw.ErrInvalidLong
+		errs = append(errs, user_err.PasswdTooLong.Err())
 	}
 
 	for _, char := range password {
@@ -104,14 +106,23 @@ func ValidateUserPassword(password string) error {
 			hasLower = true
 		case unicode.IsSymbol(char) || unicode.IsPunct(char):
 			hasSpecial = true
-		case unicode.IsSpace(char):
-			return throw.ErrInvalidIllegalChar
 		}
 	}
 
-	v := hasNum && hasLower && hasUpper && hasSpecial
-	if !v {
-		return throw.ErrInvalidPasswdWeak
+	if !hasNum {
+		errs = append(errs, user_err.PasswdNotContainDigit.Err())
+	}
+
+	if !hasLower {
+		errs = append(errs, user_err.PasswdNotContainLower.Err())
+	}
+
+	if !hasUpper {
+		errs = append(errs, user_err.PasswdNotContainUpper.Err())
+	}
+
+	if !hasSpecial {
+		errs = append(errs, user_err.PasswdNotContainSpecialSymbol.Err())
 	}
 
 	return nil

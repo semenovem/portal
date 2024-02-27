@@ -38,9 +38,25 @@ const (
 	LoginContainsIllegalChars Err = "USER_LOGIN_CONTAINS_ILLEGAL_CHARS"
 	LoginTooLong              Err = "USER_LOGIN_TOO_LONG"
 	LoginTooShort             Err = "USER_LOGIN_TOO_SHORT"
+
+	PasswdContainsIllegalChars    Err = "PASSWD_CONTAINS_ILLEGAL_CHARS"
+	PasswdTooLong                 Err = "PASSWD_TOO_LONG"
+	PasswdTooShort                Err = "PASSWD_TOO_SHORT"
+	PasswdNotContainDigit         Err = "PASSWD_NOT_CONTAIN_DIGIT"
+	PasswdNotContainUpper         Err = "PASSWD_NOT_CONTAIN_UPPER"
+	PasswdNotContainLower         Err = "PASSWD_NOT_CONTAIN_LOWER"
+	PasswdNotContainSpecialSymbol Err = "PASSWD_NOT_CONTAIN_SPECIAL_SYMBOL"
 )
 
 var g = map[Err]string{
+	PasswdNotContainSpecialSymbol: "password not contains special symbol",
+	PasswdNotContainLower:         "password not contains lower char",
+	PasswdNotContainUpper:         "password not contains upper char",
+	PasswdNotContainDigit:         "password not contains digit",
+	PasswdTooShort:                "password too short",
+	PasswdTooLong:                 "password too long",
+	PasswdContainsIllegalChars:    "password contains illegal chars",
+
 	LoginTooShort:             "user login too short",
 	LoginTooLong:              "user login too long",
 	LoginContainsIllegalChars: "user login contains illegal chars",
